@@ -1,0 +1,104 @@
+set(src_modules
+  atom.f90
+  autopilot.f90
+  berry_phase.f90
+  bfgs_module.f90
+  cell_base.f90
+  check_stop.f90
+  clocks.f90
+  constants.f90
+  constraints_module.f90
+  control_flags.f90
+  descriptors.f90
+  dspev_drv.f90
+  electrons_base.f90
+  energies.f90
+  error_handler.f90
+  exc_t.f90
+  fft_base.f90
+  fft_parallel.f90
+  fft_scalar.f90
+  fft_types.f90
+  functionals.f90
+  griddim.f90
+  input_parameters.f90
+  io_files.f90
+  io_global.f90
+  ions_base.f90
+  ions_nose.f90
+  kind.f90
+  metagga.f90
+  metadyn_base.f90
+  metadyn_io.f90
+  metadyn_vars.f90
+  mm_dispersion.f90
+  mp.f90
+  mp_base.f90
+  mp_global.f90
+  mp_wave.f90
+  path_base.f90
+  path_formats.f90
+  path_io_routines.f90
+  path_opt_routines.f90
+  path_reparametrisation.f90
+  path_variables.f90
+  parallel_include.f90
+  parallel_types.f90
+  parameters.f90
+  parser.f90
+  paw_variables.f90
+  pseudo_types.f90
+  printout_base.f90
+  ptoolkit.f90
+  radial_grids.f90
+  random_numbers.f90
+  read_namelists.f90
+  read_ncpp.f90
+  read_upf_v1.f90
+  read_upf_v2.f90
+  read_uspp.f90
+  recvec.f90
+  shmem_include.f90
+  sic.f90
+  smallbox.f90
+  splinelib.f90
+  stick_base.f90
+  task_groups.f90
+  timestep.f90
+  twin_types.f90
+  version.f90
+  upf.f90
+  upf_to_internal.f90
+  uspp.f90
+  vxc_t.f90
+  vxcgc.f90
+  wave_base.f90
+  wavefunctions.f90
+  wannier.f90
+  write_upf_v2.f90
+  xml_input.f90
+  xml_io_base.f90
+  zhpev_drv.f90
+  wannier_new.f90
+  wrappers.f90
+  read_cards.f90
+  read_oddalpha_file.f90
+  compute_dipole.f90)
+
+qe_add_library(qe_modules ${src_modules})
+
+if(TARGET gitrev)
+   add_dependencies(qe_modules gitrev)
+   target_compile_definitions(qe_modules PRIVATE HAVE_GITREV)
+   target_include_directories(qe_modules PRIVATE ${qe_BINARY_DIR})
+endif()
+
+target_link_libraries(qe_modules
+    PRIVATE
+        qe_flib
+        qe_clib
+        qe_openmp_fortran
+        qe_mpi_fortran)
+
+###########################################################
+qe_install_targets(qe_modules)

@@ -1,0 +1,124 @@
+set(src_kcp
+  atoms_type.f90
+  bessel.f90
+  berryion.f90
+  bforceion.f90
+  centers_and_spreads.f90
+  cg.f90
+  cg_sub.f90
+  cglib.f90
+  chargedensity.f90
+  chargemix.f90
+  chi2.f90
+  compute_fes_grads.f90
+  compute_scf.f90
+  cp_autopilot.f90
+  cp_emass.f90
+  cp_fpmd.f90
+  cp_interfaces.f90
+  cp_restart.f90
+  cplib.f90
+  cpr_mod.f90
+  cpr.f90
+  cprsub.f90
+  dealloc.f90
+  dforceb.f90
+  eelib.f90
+  efermi.f90
+  efield.f90
+  eigs0.f90
+  electrons.f90
+  emptystates.f90
+  ensemble_dft.f90
+  environment.f90
+  exch_corr.f90
+  exx_divergence.f90
+  fft.f90
+  forces.f90
+  fromscra.f90
+  gradrho.f90
+  gtable.f90
+  init.f90
+  init_run.f90
+  inner_loop.f90
+  inner_loop_cold.f90
+  inner_loop_smear.f90
+  input.f90
+  io_pot_sic_xml.f90
+  ions_positions.f90
+  ksstates.f90
+  main.f90
+  mainvar.f90
+  main_loops.f90
+  cplib_meta.f90
+  metaxc.f90
+  modules.f90
+  move_electrons.f90
+  nksiclib.f90
+  hflib.f90
+  nl_base.f90
+  nlcc.f90
+  ortho_base.f90
+  ortho.f90
+  ortho_check.f90
+  para.f90
+  path_routines.f90
+  phasefactor.f90
+  polarization.f90
+  potentials.f90
+  pres_ai_mod.f90
+  print_out.f90
+  problem_size.f90
+  pseudo_base.f90
+  pseudopot.f90
+  pseudopot_sub.f90
+  qmatrixd.f90
+  qqberry.f90
+  read_pseudo.f90
+  restart.f90
+  restart_sub.f90
+  runcp.f90
+  spharmonic.f90
+  spline.f90
+  stop_run.f90
+  stress.f90
+  symm_wannier.f90
+  turbo.f90
+  util.f90
+  vanderwaals.f90
+  vol_clu.f90
+  cp_version.f90
+  wannier_base.f90
+  wannier.f90
+  waveinit.f90
+  wave.f90
+  wave_types.f90
+  wf.f90
+  write_hamiltonian.f90
+  writetofile.f90
+  gram_swap.f90
+  odd_alpha.f90
+  cg_empty_sub.f90
+  wave_init_wannier.f90
+  inner_loop_generalize.f90
+  makov_payne.f90
+  pc3nc_fixed.f90
+  empty_koopmans_pp.f90
+  perturbing_pot.f90)
+
+qe_add_library(qe_kcp ${src_kcp})
+
+qe_install_targets(qe_kcp)
+
+###########################################################
+# kcp.x
+###########################################################
+set(src_kcp_x cprstart.f90)
+qe_add_executable(qe_kcp_exe ${src_kcp_x})
+set_target_properties(qe_kcp_exe
+    PROPERTIES
+        OUTPUT_NAME kcp.x)
+target_link_libraries(qe_kcp_exe
+    PRIVATE
+        qe_kcp
+        qe_modules)# Makefile for CP/FPMD
