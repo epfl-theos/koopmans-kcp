@@ -1,7 +1,12 @@
+PREFIX ?= /usr/local
+
+.PHONY: install
+
 default :
 	@echo 'to install, type at the shell prompt:'
 	@echo '  ./configure'
 	@echo '  make kcp'
+	@echo '  make install'
 
 kcp : bindir mods libs libiotk afclib
 	if test -d CPV ; then \
@@ -80,4 +85,11 @@ links : bindir
 depend:
 	@echo 'Checking dependencies...'
 	- ( if test -x ./makedeps.sh ; then ./makedeps.sh ; fi)
+
+install:
+	mkdir -p $(PREFIX)/bin ; \
+	for x in `find -name *.x -type f` ; do \
+	cp -v $$x $(PREFIX)/bin/ ; done
+	@echo -e '\nQuantum ESPRESSO binaries are installed in $(PREFIX)/bin\n'
+
 # DO NOT DELETE
