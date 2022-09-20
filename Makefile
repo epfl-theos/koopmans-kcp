@@ -90,6 +90,6 @@ install:
 	mkdir -p $(PREFIX)/bin ; \
 	for x in `find -name *.x -type f` ; do \
 	cp -v $$x $(PREFIX)/bin/ ; done
-	@echo -e '\nQuantum ESPRESSO binaries are installed in $(PREFIX)/bin\n'
+	@echo -e '\nkoopmans-kcp binaries are installed in $(PREFIX)/bin\n'
 
 # DO NOT DELETE
