@@ -40,7 +40,7 @@ gridsetup.o \
 localdim.o \
 localindex.o
 
-all: blas.a flib.a lapack_atlas.a lapack.a ptools.a
+all: flib.a ptools.a
 
 flib.a : $(OBJS)
 	$(AR) $(ARFLAGS) $@ $?
