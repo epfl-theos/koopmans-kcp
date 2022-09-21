@@ -44,11 +44,9 @@ MODULE control_flags
             draw_pot, pot_number,                                            & !added:linh draw vsic potentials   
             iprint_spreads, iprint_manifold_overlap, innerloop_until,        &
             hartree_only_sic           !added:giovanni print spreads and manifold overlaps, and hartree-only sic
-!$$
   PUBLIC :: do_innerloop, do_innerloop_empty, do_innerloop_cg, innerloop_dd_nstep,&
             innerloop_cg_nsd, innerloop_cg_nreset, innerloop_nmax, &
             innerloop_init_n, innerloop_cg_ratio, innerloop_atleast, l_comp_cmplxfctn_index
-!$$
   !
   PUBLIC :: fix_dependencies, check_flags
   PUBLIC :: tksw, evc_restart, trhor, thdyn, iprsta, trhow
@@ -96,10 +94,8 @@ MODULE control_flags
   LOGICAL :: force_pairing = .FALSE. ! Force pairing
   LOGICAL :: tchi2         = .FALSE. ! Compute Chi^2
   LOGICAL :: do_ee         = .FALSE. ! Compute periodi-image correction
-!$$ 
   LOGICAL :: draw_pot      = .FALSE. ! added:linh draw vsic potentials  
   INTEGER :: pot_number    =  1      ! added:linh draw vsic potentials
-!$$
   INTEGER :: iprint_spreads=-1
   INTEGER :: iprint_manifold_overlap=-1
   LOGICAL :: hartree_only_sic=.false.
@@ -117,7 +113,6 @@ MODULE control_flags
   INTEGER :: innerloop_init_n = 10000 ! Innerloop iterations with fixed threshold
   INTEGER :: innerloop_atleast = 0 ! Minimum number of innerloop iterations performed
   REAL(DP) :: innerloop_cg_ratio = 1.d-3 ! Innerloop ratio between the CG outerloop step and the innerloop threshold
-!$$
   !
   TYPE (convergence_criteria) :: tconvthrs
                               !  thresholds used to check GS convergence
@@ -198,9 +193,7 @@ MODULE control_flags
   REAL(DP), PUBLIC :: &
        ekin_conv_thr = 0.0_DP, &!  conv. threshold for fictitious e. kinetic energy
        etot_conv_thr = 0.0_DP, &!  conv. threshold for DFT energy
-!$$
        esic_conv_thr = 0.0_DP, &!  conv. threshold for SIC energy
-!$$
        forc_conv_thr = 0.0_DP   !  conv. threshold for atomic forces
   INTEGER, PUBLIC :: &
        ekin_maxiter = 100,   &!  max number of iter. for ekin convergence
