@@ -88,7 +88,7 @@ depend:
 
 install:
 	mkdir -p $(PREFIX)/bin ; \
-	for x in `find -name *.x -type f` ; do \
+	for x in `find . -name *.x -type f` ; do \
 	cp -v $$x $(PREFIX)/bin/ ; done
 	@echo -e '\nkoopmans-kcp binaries are installed in $(PREFIX)/bin\n'
 
