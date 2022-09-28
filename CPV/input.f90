@@ -263,9 +263,7 @@ CONTAINS
                                tbeg_ => tbeg
       USE control_flags, ONLY: ekin_conv_thr_ => ekin_conv_thr, &
                                etot_conv_thr_ => etot_conv_thr, &
-                               !$$
                                esic_conv_thr_ => esic_conv_thr, &
-                               !$$
                                forc_conv_thr_ => forc_conv_thr, &
                                ekin_maxiter_ => ekin_maxiter
       USE control_flags, ONLY: force_pairing_ => force_pairing
@@ -298,9 +296,7 @@ CONTAINS
       USE input_parameters, ONLY: &
          electron_dynamics, electron_damping, electron_temperature, &
          ion_dynamics, ekin_conv_thr, etot_conv_thr, forc_conv_thr, &
-         !$$
          esic_conv_thr, &
-         !$$
          electron_maxstep, ion_damping, ion_temperature, ion_velocities, tranp, &
          amprp, ion_nstepe, cell_nstepe, cell_dynamics, cell_damping, &
          cell_parameters, cell_velocities, cell_temperature, force_pairing, &
@@ -336,9 +332,7 @@ CONTAINS
       tchi2_ = tchi2_inp
       ekin_conv_thr_ = ekin_conv_thr
       etot_conv_thr_ = etot_conv_thr
-!$$
       esic_conv_thr_ = esic_conv_thr
-!$$
       hartree_only_sic_ = hartree_only_sic
       iprint_manifold_overlap_ = iprint_manifold_overlap !added:giovanni spreads and manifold overlap
       iprint_spreads_ = iprint_spreads

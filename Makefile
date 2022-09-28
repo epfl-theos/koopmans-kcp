@@ -57,8 +57,6 @@ distclean veryclean : clean
 		      config.log configure.msg config.status autom4te.cache \
 		      espresso.tar.gz CPV/version.h ChangeLog* \
 		      intel.pcl */intel.pcl
-	- cd examples ; ./make_clean
-	- cd atomic_doc ; ./make_clean
 	- if test -d GUI ; then \
 	( cd GUI ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= veryclean ; \
 		else $(MAKE) $(MFLAGS) TLDEPS= veryclean ; fi ) \
@@ -88,7 +86,7 @@ depend:
 
 install:
 	mkdir -p $(PREFIX)/bin ; \
-	for x in `find -name *.x -type f` ; do \
+	for x in `find . -name *.x -type f` ; do \
 	cp -v $$x $(PREFIX)/bin/ ; done
 	@echo -e '\nkoopmans-kcp binaries are installed in $(PREFIX)/bin\n'
 

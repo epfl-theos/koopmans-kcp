@@ -2963,9 +2963,6 @@ ar=$AR                   # ar (shouldn't be needed)
 arflags=$ARFLAGS         # Flags for ar (as above)
 extlib_flags=$EXTLIB_FLAGS # Flags for internal copies of lapack and blas
 
-
-
-
 # configure for current directory by default
 if test "$topdir" = "" ; then topdir="`pwd`" ; fi
 
@@ -7009,8 +7006,16 @@ fi
 fi
 
 if test "$have_blas" -eq 0  ; then
+    echo 
+    echo "ERROR: BLAS library not found in standard location. Try to" 
+    echo "       EITHER 1) specify a list of directories to search and retry, as follows:"
+    echo "                ./configure LIBDIRS=\"list of directories, separated by spaces\" "
+    echo "       OR     2) Install the library on your machine and configure again" 
+    echo "                 E.g. sudo apt-get install libblas-dev liblapack-dev (for Ubuntu machine)"  
+    echo
+    exit 0
     # No blas library found: use internal one (in lapack)
-    blas_libs="\$(TOPDIR)/LAPACK/libblas.a"
+    # blas_libs="\$(TOPDIR)/LAPACK/libblas.a"
 else
     echo setting BLAS_LIBS... $blas_libs
 fi
@@ -7200,9 +7205,17 @@ fi
 # No lapack library found: use internal lapack
 
 if test "$have_lapack" -eq 0  ; then
-    lapack_libs="\$(TOPDIR)/LAPACK/liblapack.a"
-    echo setting LAPACK to internal library ...  $lapack_libs
-    lapack_libs_switch="internal"
+    echo 
+    echo "ERROR: LAPACK library not found in standard location. Try to" 
+    echo "       EITHER 1) specify a list of directories to search and retry, as follows: "
+    echo "                 ./configure LIBDIRS=\"list of directories, separated by spaces\" " 
+    echo "       OR     2) Install the library on your machine and configure again" 
+    echo "                 E.g. sudo apt-get install libblas-dev liblapack-dev (for Ubuntu machine)"  
+    echo
+    exit 0
+    #lapack_libs="\$(TOPDIR)/LAPACK/liblapack.a"
+    #echo setting LAPACK to internal library ...  $lapack_libs
+    #lapack_libs_switch="internal"
 else
     lapack_libs_switch="external"
 fi
@@ -7639,8 +7652,16 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
    # if no valid FFT library was found, use the local copy
    if test "$have_fft" -eq 0
    then
-      echo "using internal copy of FFTW"
-      try_dflags="$try_dflags -D__FFTW"
+    echo 
+    echo "ERROR: FFT library not found in standard location. Try to either" 
+    echo "       EITHER 1) specify a list of directories to search and retry, as follows: "
+    echo "                 ./configure LIBDIRS=\"list of directories, separated by spaces\" " 
+    echo "       OR     2) Install the library on your machine and configure again" 
+    echo "                 E.g. sudo apt-get install fftw3-dev (for Ubuntu machine)"  
+    echo
+    exit 0
+    #  echo "using internal copy of FFTW"
+    #  try_dflags="$try_dflags -D__FFTW"
    fi
 
 else
