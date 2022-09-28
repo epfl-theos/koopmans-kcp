@@ -1,5 +1,5 @@
 [user]
-benchmark = git
+benchmark = 0.1
 date_fmt = %d%m%y
 diff = vimdiff
 
@@ -8,10 +8,10 @@ exe = /home/elinscott/code/koopmans-kcp/tests/..//tests/run-kcp.sh
 extract_program = /home/elinscott/code/koopmans-kcp/tests/..//tests/extract-kcp.sh
 inputs_args = ('*.in', '')
 run_cmd_template = tc.program tc.input tc.output tc.error
-tolerance = ( (8.0e-4, 1.0e-4, 'e1'),
-              (8.0e+0, 1.0e+1, 'n1'),
-              (1.0e-3, None,   'f1'),
-              (2.0e+0, None,   'p1'),
+tolerance = ( (8.0e-4, 1.0e-4, 'tot_energy'),
+              (8.0e-4, 1.0e-4, 'odd_energy'),
+              (1.0e-3, None,   'homo_energy'),
+              (1.0e-3, None,   'lumo_energy'),
               (8.0e-2, 2.0e-2, 'ef1'),
               (1.0e-2, 1.0e-2, 'eh1'),
               (1.0e-2, 2.0e-2, 'ehl1'),
