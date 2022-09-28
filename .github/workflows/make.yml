@@ -31,4 +31,11 @@ jobs:
          - name: Test
            run: |
               make check
+         - name: Upload
+           if: success() || failure()
+           uses: actions/upload-artifact@v3
+           with:
+             name: test-data
+             path: |
+               tests/*/test.out.*
 
