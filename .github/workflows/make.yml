@@ -28,4 +28,7 @@ jobs:
          - name: Build
            run: |
               make kcp
+         - name: Test
+           run: |
+              make check
 
