@@ -5,8 +5,10 @@ PREFIX ?= /usr/local
 default :
 	@echo 'to install, type at the shell prompt:'
 	@echo '  ./configure'
-	@echo '  make kcp'
+	@echo '  make all'
 	@echo '  make install'
+
+all : kcp pp
 
 kcp : bindir mods libs libiotk afclib
 	if test -d CPV ; then \
