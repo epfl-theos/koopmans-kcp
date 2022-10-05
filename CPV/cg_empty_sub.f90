@@ -64,7 +64,8 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
    use uspp_param, only: nhm
    use descriptors, only: descla_siz_
    use input_parameters, only: odd_nkscalfact_empty, wo_odd_in_empty_run, odd_nkscalfact, &
-                               do_outerloop_empty, reortho
+                               do_outerloop_empty, reortho, print_real_space_density 
+   use print_real_space_orbital_density,       only: print_orbr 
    !
    implicit none
    !

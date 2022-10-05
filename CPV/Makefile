@@ -109,6 +109,7 @@ makov_payne.o \
 pc3nc_fixed.o \
 empty_koopmans_pp.o \
 perturbing_pot.o \
+print_real_space_orbital_density.o
 
 # dgradcorr.o 
 # setup_gga.o
