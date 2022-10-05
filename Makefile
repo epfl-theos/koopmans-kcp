@@ -13,6 +13,11 @@ kcp : bindir mods libs libiotk afclib
 	( cd CPV ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= kcp ; \
 	else $(MAKE) $(MFLAGS) TLDEPS= kcp ; fi ) ; fi
 
+pp : bindir
+	if test -d PP ; then \
+	( cd PP ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= all ; \
+	else $(MAKE) $(MFLAGS) TLDEPS= all ; fi ) ; fi
+
 libiotk :
 	if test -d iotk ; then \
 	( cd iotk ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= lib+util ; \
@@ -40,7 +45,7 @@ bindir :
 clean :
 	touch make.sys 
 	for dir in \
-		CPV Modules clib flib iotk AFC90 \
+		CPV PP Modules clib flib iotk AFC90 \
 	; do \
 	    if test -d $$dir ; then \
 		( cd $$dir ; \
