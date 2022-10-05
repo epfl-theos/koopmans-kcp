@@ -1,4 +1,4 @@
-# Makefile for Koopmans utils
+# Makefile for post-processing utilities
 
 include	../make.sys
 
