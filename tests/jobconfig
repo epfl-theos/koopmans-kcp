@@ -2,7 +2,7 @@
 # there is no need to have for each set of tests a field below
 [kcp_ozone/]
 program = KCP
-inputs_args = ('ozone.dft.in'), ('ozone.ki.in')
+inputs_args = ('ozone.dft.in'), ('ozone.pz.in'), ('ozone.ki.in')
 
 [categories]
 kcp_all = kcp_*??
