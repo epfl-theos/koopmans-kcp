@@ -1,0 +1,5 @@
+__pycache__
+test.out.*
+test.err.*
+tmp
+userconfig

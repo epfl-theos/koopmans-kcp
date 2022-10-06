@@ -97,4 +97,7 @@ install:
 	cp -v $$x $(PREFIX)/bin/ ; done
 	@echo -e '\nkoopmans-kcp binaries are installed in $(PREFIX)/bin\n'
 
+check:
+	( cd tests/ ; make run-tests )
+
 # DO NOT DELETE
