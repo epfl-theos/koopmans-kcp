@@ -27,7 +27,7 @@ jobs:
               ./configure MPIF90=mpif90
          - name: Build
            run: |
-              make kcp
+              make all
          - name: Test
            run: |
               make check
