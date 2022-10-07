@@ -1,6 +1,6 @@
 epsilon.o : ../Modules/cell_base.o
 epsilon.o : ../Modules/constants.o
-epsilon.o : ../Modules/environment.o
+epsilon.o : environment.o
 epsilon.o : ../Modules/io_files.o
 epsilon.o : ../Modules/io_global.o
 epsilon.o : ../Modules/kind.o
