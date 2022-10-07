@@ -16,7 +16,6 @@ MODULES = \
 ../Modules/dspev_drv.o \
 ../Modules/electrons_base.o \
 ../Modules/energies.o \
-../Modules/environment.o \
 ../Modules/error_handler.o \
 ../Modules/fft_base.o \
 ../Modules/fft_parallel.o \
@@ -35,11 +34,7 @@ MODULES = \
 ../Modules/mp.o \
 ../Modules/mp_base.o \
 ../Modules/metagga.o \
-../Modules/metadyn_base.o \
-../Modules/metadyn_io.o \
-../Modules/metadyn_vars.o \
 ../Modules/parallel_types.o \
-../Modules/path_base.o \
 ../Modules/path_formats.o \
 ../Modules/path_variables.o \
 ../Modules/path_opt_routines.o \
@@ -64,7 +59,6 @@ MODULES = \
 ../Modules/smallbox.o \
 ../Modules/splinelib.o \
 ../Modules/stick_base.o \
-../Modules/stop_run.o \
 ../Modules/task_groups.o \
 ../Modules/timestep.o \
 ../Modules/twin_types.o \
