@@ -3,3 +3,4 @@ test.out.*
 test.err.*
 tmp
 userconfig
+testcode_data

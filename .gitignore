@@ -13,3 +13,4 @@ make.sys
 *.mod
 *.a
 bin/
+.vscode
