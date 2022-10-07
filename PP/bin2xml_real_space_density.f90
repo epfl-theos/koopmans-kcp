@@ -72,8 +72,10 @@ program bin2xml_real_space_density
             occpuation_identifier = 'emp'
         end if
 
-        source_filename =  TRIM(source_dir)//'/real_space_orb_density.' // TRIM(occpuation_identifier) // '.' // TRIM(spin_identifier) // '.' //TRIM(orbital_identifier)//'.dat'
-        dest_filename   =  TRIM(dest_dir)  //'/orbital.'                // TRIM(occpuation_identifier) // '.' // TRIM(spin_identifier) // '.' //TRIM(orbital_identifier)//'.xml'
+        source_filename =  TRIM(source_dir)//'/real_space_orb_density.' // TRIM(occpuation_identifier) // '.' &
+                // TRIM(spin_identifier) // '.' //TRIM(orbital_identifier)//'.dat'
+        dest_filename   =  TRIM(dest_dir)  //'/orbital.'                // TRIM(occpuation_identifier) // '.' &
+                // TRIM(spin_identifier) // '.' //TRIM(orbital_identifier)//'.xml'
 
 
         !     source_filename =  TRIM(source_dir)//'/real_space_orb_density.occ.' // TRIM(spin_identifier) // '.' //TRIM(orbital_identifier)//'.dat'

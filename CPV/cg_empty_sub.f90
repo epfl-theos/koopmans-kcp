@@ -1110,6 +1110,11 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
    WRITE (stdout, '(/,3X,"writing empty state KC  Hamiltonian file: ",A)') TRIM(fname)
    CALL write_ham_emp_xml(nspin, nudx_emp, lambda_emp, desc_emp, fname)
    !
+   if (print_real_space_density) then
+      call print_orbr(bec, n_emps, ispin_emp, lgam, .True., c0_emp) 
+   end if 
+
+
    call do_deallocation()
    !
    return
