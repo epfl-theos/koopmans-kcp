@@ -35,7 +35,7 @@
           USE io_global, ONLY: stdout, meta_ionode
           USE mp_global, ONLY: mpime, nproc, me_image, &
                my_image_id, root_image
-          USE cp_version
+          USE global_version
 
           LOGICAL           :: texst
           INTEGER           :: nchar

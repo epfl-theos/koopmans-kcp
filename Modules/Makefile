@@ -32,15 +32,11 @@ ions_base.o \
 ions_nose.o \
 kind.o \
 metagga.o \
-metadyn_base.o \
-metadyn_io.o \
-metadyn_vars.o \
 mm_dispersion.o \
 mp.o \
 mp_base.o \
 mp_global.o \
 mp_wave.o \
-path_base.o \
 path_formats.o \
 path_io_routines.o  \
 path_opt_routines.o \
@@ -91,8 +87,13 @@ compute_dipole.o #added by giovanni, from trunk version July 2012
 
 all : $(MODULES)
 
-
 clean :
 	- /bin/rm -f *.o *.d *.i *~ *.F90 *.mod *.L
+
+version.o : version.h
+
+version.h :
+	echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
+		> version.h
 
 include make.depend
