@@ -41,7 +41,7 @@ program bin2xml_real_space_density
     call get_command_argument(2, dest_dir)
     call get_command_argument(3, nbsp_occ_char)
 
-    read(nbsp_occ_char,'(i)') nbsp_occ
+    read(nbsp_occ_char,'(i5)') nbsp_occ
     
     
     open(unit=1, file=TRIM(dest_dir)//'/bands_to_solve.txt', status='old', action='read')
