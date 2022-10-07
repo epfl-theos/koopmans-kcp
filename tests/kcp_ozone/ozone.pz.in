@@ -7,8 +7,8 @@
    prefix           = 'kc'
    disk_io          = 'high'
    pseudo_dir       = '../pseudos/'
-   ndr              = 51
-   ndw              = 52
+   ndr              = 50
+   ndw              = 51
    write_hr         = .false.
 /
 &SYSTEM
@@ -31,7 +31,7 @@
    nat              = 3
 /
 &ELECTRONS
-   conv_thr         = 1.8000000000000002e-08
+   conv_thr         = 1.8e-04
    ortho_para       = 1
    electron_dynamics = 'cg'
    passop           = 2.0
@@ -52,11 +52,11 @@
    which_compensation = 'tcc'
 /
 &NKSIC
-   do_innerloop     = .false.
+   do_innerloop     = .true.
    nkscalfact       = 0.6
    odd_nkscalfact   = .false.
    odd_nkscalfact_empty = .false.
-   which_orbdep     = 'nki'
+   which_orbdep     = 'pz'
    innerloop_cg_nreset = 20
    innerloop_cg_nsd = 2
    innerloop_init_n = 3
