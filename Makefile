@@ -62,7 +62,7 @@ clean :
 distclean veryclean : clean
 	- /bin/rm -rf make.sys \
 		      config.log configure.msg config.status autom4te.cache \
-		      espresso.tar.gz Moduesl/version.h ChangeLog* \
+		      espresso.tar.gz Modules/version.h ChangeLog* \
 		      intel.pcl */intel.pcl
 	- if test -d GUI ; then \
 	( cd GUI ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= veryclean ; \
