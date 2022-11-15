@@ -28,22 +28,29 @@ prolog :
 
 run-tests : run-tests-serial
 
-run-tests-serial : run-tests-kcp-serial
+run-tests-serial : run-tests-kcp-serial run-tests-bin2xml-serial
 
-run-tests-parallel : run-tests-kcp-parallel
+run-tests-parallel : run-tests-kcp-parallel run-tests-bin2xml-serial
 
 run-tests-kcp-serial : prolog
 	@if ! test -d $(ESPRESSO_TMPDIR); then mkdir $(ESPRESSO_TMPDIR); fi
-	env QE_USE_MPI=0 ${TESTCODE_DIR}/bin/testcode.py --verbose
+	env QE_USE_MPI=0 ${TESTCODE_DIR}/bin/testcode.py --verbose --category=kcp_all
 
 run-tests-kcp-parallel : prolog
 	@if ! test -d $(ESPRESSO_TMPDIR); then mkdir $(ESPRESSO_TMPDIR); fi
-	env QE_USE_MPI=1 ${TESTCODE_DIR}/bin/testcode.py --verbose
+	env QE_USE_MPI=1 ${TESTCODE_DIR}/bin/testcode.py --verbose --category=kcp_all
 
-compare : compare-kcp
+run-tests-bin2xml-serial : prolog
+	@if ! test -d $(ESPRESSO_TMPDIR); then mkdir $(ESPRESSO_TMPDIR); fi
+	${TESTCODE_DIR}/bin/testcode.py --verbose --category=bin2xml_all
+
+compare : compare-kcp compare-bin2xml
+
+compare-bin2xml : prolog
+	${TESTCODE_DIR}/bin/testcode.py --verbose compare 2>&1 --category=bin2xml_all | tee out.BIN2XML.`date +%Y%m%d_%H%M%S`
 
 compare-kcp : prolog
-	${TESTCODE_DIR}/bin/testcode.py --verbose compare 2>&1 | tee out.KCP.`date +%Y%m%d_%H%M%S`
+	${TESTCODE_DIR}/bin/testcode.py --verbose compare 2>&1 --category=kcp_all | tee out.KCP.`date +%Y%m%d_%H%M%S`
 
 benchmarks : prolog
 	${TESTCODE_DIR}/bin/testcode.py --verbose make-benchmarks

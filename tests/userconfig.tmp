@@ -12,3 +12,7 @@ tolerance = ( (8.0e-4, 1.0e-4, 'tot_energy'),
               (8.0e-4, 1.0e-4, 'odd_energy'),
               (1.0e-3, None,   'homo_energy'),
               (1.0e-3, None,   'lumo_energy') )
+
+[BIN2XML]
+exe = XXXXXX/tests/run-bin2xml.sh
+extract_program = XXXXXX/tests/extract-bin2xml.sh

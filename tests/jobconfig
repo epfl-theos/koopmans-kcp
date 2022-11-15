@@ -4,5 +4,10 @@
 program = KCP
 inputs_args = ('ozone.dft.in'), ('ozone.pz.in'), ('ozone.ki.in')
 
+[bin2xml/]
+program = BIN2XML
+input_args = ('.'), ('.'), ('1')
+
 [categories]
 kcp_all = kcp_*??
+bin2xml_all = bin2xml*
