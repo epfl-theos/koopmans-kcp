@@ -1,4 +1,4 @@
-module bin2xml_mod
+module bin2xml_module
     use iotk_module
     contains 
     subroutine write_bin2xml(source, dest)
@@ -14,10 +14,10 @@ module bin2xml_mod
         call iotk_close_write(61)
         call iotk_close_read(60)
     end subroutine write_bin2xml
-end module bin2xml_mod
+end module bin2xml_module
 
 program bin2xml
-    use bin2xml_mod, only: write_bin2xml
+    use bin2xml_module, only: write_bin2xml
     character(len=256) :: source_filename
     character(len=256) :: dest_filename
 
