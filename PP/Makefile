@@ -77,11 +77,11 @@ MODULES = \
 ../Modules/wrappers.o \
 ../Modules/compute_dipole.o
 
-all: merge_evc.x bin2xml_real_space_density.x
+all: merge_evc.x bin2xml.x
 
-bin2xml_real_space_density.x: bin2xml_real_space_density.o
-	$(LD) $(LDFLAGS) -o $@ bin2xml_real_space_density.o $(MODULES) $(LIBOBJS) $(LIBS)
-		- ( cd ../bin ; ln -fs ../src/$@ . )
+bin2xml.x: bin2xml.o
+	$(LD) $(LDFLAGS) -o $@ bin2xml.o $(MODULES) $(LIBOBJS) $(LIBS)
+		- ( cd ../bin ; ln -fs ../PP/$@ . )
 
 merge_evc.x: merge_evc.o
 	$(LD) $(LDFLAGS) -o $@ merge_evc.o

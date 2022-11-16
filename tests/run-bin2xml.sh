@@ -1,9 +1,11 @@
 #!/bin/bash
+set -e
 
 echo "Running BIN2XML ..."
-echo "${ESPRESSO_ROOT}/bin/bin2xml_real_space_density.x $1 $2 $3"
-ls
-echo "Contents of total density"
-cat 'charge-density.xml'
-echo "Contents of orbital density"
-cat 'orbital.occ.0.00001.xml'
+echo "${ESPRESSO_ROOT}/bin/bin2xml.x $1 tmp.xml > $2 2> $3"
+${ESPRESSO_ROOT}/bin/bin2xml.x $1 tmp.xml > $2 2> $3
+if [[ -e tmp.xml ]]
+then
+    cat tmp.xml >> $2
+    rm tmp.xml
+fi

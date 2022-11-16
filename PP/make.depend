@@ -1,4 +1,4 @@
-bin2xml_real_space_density.o : ../iotk/src/iotk_module.o
+bin2xml.o : ../iotk/src/iotk_module.o
 epsilon.o : environment.o
 epsilon.o : ../Modules/cell_base.o
 epsilon.o : ../Modules/constants.o

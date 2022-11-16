@@ -6,6 +6,7 @@ inputs_args = ('ozone.dft.in'), ('ozone.pz.in'), ('ozone.ki.in')
 
 [bin2xml/]
 program = BIN2XML
+input_args = ('charge-density.dat'), ('real_space_orb_density.occ.0.00001.dat')
 
 [categories]
 kcp_all = kcp_*??
