@@ -55,6 +55,9 @@ main.o \
 mainvar.o \
 main_loops.o \
 cplib_meta.o \
+metadyn_base.o \
+metadyn_io.o \
+metadyn_vars.o \
 metaxc.o \
 modules.o \
 move_electrons.o \
@@ -66,6 +69,7 @@ ortho_base.o \
 ortho.o \
 ortho_check.o \
 para.o \
+path_base.o \
 path_routines.o \
 phasefactor.o \
 polarization.o \
@@ -84,14 +88,13 @@ restart_sub.o \
 runcp.o \
 spharmonic.o \
 spline.o \
-stop_run.o \
 stress.o \
+stop_run.o \
 symm_wannier.o \
 turbo.o \
 util.o \
 vanderwaals.o \
 vol_clu.o \
-cp_version.o \
 wannier_base.o \
 wannier.o \
 waveinit.o \
@@ -109,6 +112,7 @@ makov_payne.o \
 pc3nc_fixed.o \
 empty_koopmans_pp.o \
 perturbing_pot.o \
+print_real_space_orbital_density.o
 
 # dgradcorr.o 
 # setup_gga.o
@@ -153,11 +157,7 @@ MODULES = \
 ../Modules/mp.o \
 ../Modules/mp_base.o \
 ../Modules/metagga.o \
-../Modules/metadyn_base.o \
-../Modules/metadyn_io.o \
-../Modules/metadyn_vars.o \
 ../Modules/parallel_types.o \
-../Modules/path_base.o \
 ../Modules/path_formats.o \
 ../Modules/path_variables.o \
 ../Modules/path_opt_routines.o \
@@ -230,12 +230,6 @@ cp_bad_sd.x : cprstart.o libcp.a $(LIBOBJS)
 libcp.a : $(FOBJS) $(WAN90) $(LOBJS) 
 	 $(AR) $(ARFLAGS) $@ $?
 	 $(RANLIB) $@
-
-cp_version.o : cpver.h
-
-cpver.h :
-	echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
-		> cpver.h
 
 PPOBJS = \
 ../Modules/xml_io_base.o \

@@ -72,7 +72,9 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                             printout_base_close
    use control_flags, only: iprint_manifold_overlap, iprint_spreads
    use input_parameters, only: fixed_state, fixed_band, odd_nkscalfact, do_outerloop, &
-                               finite_field_introduced, finite_field_for_empty_state
+                               finite_field_introduced, finite_field_for_empty_state, &
+                               print_real_space_density 
+   use print_real_space_orbital_density, only: print_orbr
    !
    implicit none
    !
@@ -1437,6 +1439,10 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    !
    if (tefield .and. (evalue .ne. 0.d0)) then
       call bforceion(fion, tfor .or. tprnfor, ipolp, qmat, bec, becdr, gqq, evalue)
+   end if
+   !
+   if (print_real_space_density) then
+      call print_orbr(bec, nbsp, ispin, lgam, .False., c0) 
    end if
    !
    call do_deallocation()

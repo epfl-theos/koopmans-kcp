@@ -1,6 +1,7 @@
+bin2xml.o : ../iotk/src/iotk_module.o
+epsilon.o : environment.o
 epsilon.o : ../Modules/cell_base.o
 epsilon.o : ../Modules/constants.o
-epsilon.o : ../Modules/environment.o
 epsilon.o : ../Modules/io_files.o
 epsilon.o : ../Modules/io_global.o
 epsilon.o : ../Modules/kind.o
@@ -10,7 +11,7 @@ epsilon.o : ../Modules/mp_images.o
 epsilon.o : ../Modules/mp_pools.o
 epsilon.o : ../Modules/recvec.o
 epsilon.o : ../Modules/wavefunctions.o
-epsilon.o : ../PW/src/pw_restart_new.o
 epsilon.o : ../PW/src/pwcom.o
+epsilon.o : ../PW/src/pw_restart_new.o
 epsilon.o : ../UtilXlib/mp.o
 epsilon.o : ../upflib/uspp.o

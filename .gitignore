@@ -1,5 +1,4 @@
-CPV/cpver.h
-Modules/cpver.h
+Modules/version.h
 include/iotk_config.h
 include/configure.h
 include/c_defs.h
@@ -14,3 +13,4 @@ make.sys
 *.mod
 *.a
 bin/
+.vscode

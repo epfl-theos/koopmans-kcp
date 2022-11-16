@@ -15,7 +15,7 @@ kcp : bindir mods libs libiotk afclib
 	( cd CPV ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= kcp ; \
 	else $(MAKE) $(MFLAGS) TLDEPS= kcp ; fi ) ; fi
 
-pp : bindir
+pp : bindir mods libs libiotk
 	if test -d PP ; then \
 	( cd PP ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= all ; \
 	else $(MAKE) $(MFLAGS) TLDEPS= all ; fi ) ; fi
@@ -62,7 +62,7 @@ clean :
 distclean veryclean : clean
 	- /bin/rm -rf make.sys \
 		      config.log configure.msg config.status autom4te.cache \
-		      espresso.tar.gz CPV/version.h ChangeLog* \
+		      espresso.tar.gz Modules/version.h ChangeLog* \
 		      intel.pcl */intel.pcl
 	- if test -d GUI ; then \
 	( cd GUI ; if test "$(MAKE)" = "" ; then make $(MFLAGS) TLDEPS= veryclean ; \

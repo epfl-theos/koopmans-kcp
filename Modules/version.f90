@@ -13,5 +13,6 @@ MODULE global_version
   SAVE
   !
   CHARACTER (LEN=6) :: version_number = '4.1'
+  INCLUDE 'version.h'
   !
 END MODULE global_version

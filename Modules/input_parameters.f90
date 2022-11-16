@@ -260,13 +260,16 @@ MODULE input_parameters
           ! if true, print out the occupied and empty hamiltonians
           ! in the representation of variational orbitals
 
+        LOGICAL :: print_real_space_density = .false.
+          ! if true, print out the real space orbital density
+
         NAMELIST / control / title, calculation, verbosity, restart_mode,  &
           nstep, iprint, isave, tstress, tprnfor, dt, ndr, ndw, outdir,    &
           prefix, wfcdir, max_seconds, ekin_conv_thr, etot_conv_thr,       &
           forc_conv_thr, pseudo_dir, disk_io, tefield, dipfield, lberry,   &
           gdir, nppstr, wf_collect, printwfc, lelfield, nberrycyc, refg,   &
           tefield2, saverho, tabps, lkpoint_dir, use_wannier, evc_restart, &
-          write_hr
+          write_hr, print_real_space_density
 
 !
 !=----------------------------------------------------------------------------=!
