@@ -343,6 +343,7 @@ module nksic
   real(dp) :: etxc_sic
   !
   real(dp),    allocatable :: fsic(:)
+  complex(dp), allocatable :: vsic_reciprocal(:,:)
   real(dp),    allocatable :: vsic(:,:)
   real(dp),    allocatable :: fion_sic(:,:)
   real(dp),    allocatable :: deeq_sic(:,:,:,:)
@@ -424,7 +425,7 @@ contains
   
   end subroutine allocate_nksic_empty
   
-  subroutine allocate_nksic( nnrx, ngw, nspin, nx, nat)
+  subroutine allocate_nksic( nnrx, ngw, ngm, nspin, nx, nat)
       !
       use funct,          only : dft_is_gradient
       use uspp_param,     only : nhm
@@ -433,11 +434,13 @@ contains
       implicit none
       integer, intent(in):: nx, nspin
       integer, intent(in):: nat
+      integer, intent(in):: ngm
       integer, intent(in):: ngw
       integer, intent(in):: nnrx
       !
       allocate( fsic(nx) )
       allocate( vsic(nnrx,nx) )
+      allocate( vsic_reciprocal(ngm,nx) )
       allocate( fion_sic(3,nat) )
       !
       allocate( pink(nx) )
@@ -510,6 +513,7 @@ contains
       cost = 0.0_dp
       if ( allocated(fsic) )       cost = cost + real( size(fsic) )       *  8.0_dp 
       if ( allocated(vsic) )       cost = cost + real( size(vsic) )       *  8.0_dp 
+      if ( allocated(vsic_reciprocal) ) cost = cost + real( size(vsic) )       * 16.0_dp 
       if ( allocated(fion_sic) )   cost = cost + real( size(fion_sic) )   *  8.0_dp 
       if ( allocated(deeq_sic) )   cost = cost + real( size(deeq_sic) )   *  8.0_dp 
       if ( allocated(pink) )       cost = cost + real( size(pink) )       *  8.0_dp 
@@ -531,6 +535,7 @@ contains
       !
       use input_parameters, only: odd_nkscalfact
       if(allocated(vsic))        deallocate(vsic)
+      if(allocated(vsic_reciprocal)) deallocate(vsic_reciprocal)
       if(allocated(fion_sic))    deallocate(fion_sic)
       if(allocated(deeq_sic))    deallocate(deeq_sic)
       if(allocated(pink))        deallocate(pink)

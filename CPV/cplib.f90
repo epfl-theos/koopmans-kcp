@@ -4616,6 +4616,7 @@ subroutine nksic_init
    USE io_global, ONLY: meta_ionode, stdout
    use electrons_base, ONLY: nspin, nbspx
    use gvecw, ONLY: ngw
+   use gvecp, only: ngm
    use grid_dimensions, ONLY: nnrx
    USE ions_base, ONLY: nat
    !
@@ -4744,7 +4745,7 @@ subroutine nksic_init
    !
    ! call readfile_refalpha()
    !
-   if (do_orbdep .and. .not. do_hybrid) call allocate_nksic(nnrx, ngw, nspin, nbspx, nat)
+   if (do_orbdep .and. .not. do_hybrid) call allocate_nksic(nnrx, ngw, ngm, nspin, nbspx, nat)
    !
    if (do_orbdep) odd_alpha(:) = 1.d0
    !

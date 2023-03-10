@@ -31,6 +31,7 @@
                                   max_emp, ethr_emp, etot_emp, eodd_emp, &
                                   nudx_emp, nbsp_emp, nbspx_emp
       USE ions_base, ONLY: nat, nsp
+      USE gvecp, ONLY: ngm
       USE gvecw, ONLY: ngw
       USE orthogonalize_base, ONLY: calphi, updatc
       USE reciprocal_vectors, ONLY: gzero, gstart
@@ -93,6 +94,7 @@
       INTEGER, ALLOCATABLE :: ispin_emp(:)
       REAL(DP), ALLOCATABLE :: fsic_emp(:)
       REAL(DP), ALLOCATABLE :: vsic_emp(:, :)
+      complex(DP), ALLOCATABLE :: vsic_reciprocal_emp(:, :)
       REAL(DP), ALLOCATABLE :: wxd_emp(:, :)
       REAL(DP), ALLOCATABLE :: deeq_sic_emp(:, :, :, :)
       COMPLEX(DP), ALLOCATABLE :: vxxpsi_emp(:, :)
@@ -231,6 +233,7 @@
          ALLOCATE (fsic_emp(nbspx_emp))
          ! n_empx_odd=n_empx
          ALLOCATE (vsic_emp(nnrx, nbspx_emp))
+         ALLOCATE (vsic_reciprocal_emp(ngm, nbspx_emp))
          ALLOCATE (wxd_emp(nnrx, 2))
          ALLOCATE (deeq_sic_emp(nhm, nhm, nat, nbspx_emp))
          ALLOCATE (becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
@@ -239,12 +242,14 @@
          !
          fsic_emp = 0.0d0
          vsic_emp = 0.0d0
+         vsic_reciprocal_emp = 0.0d0
          wxd_emp = 0.0d0
          !
       ELSE
          !
          ALLOCATE (fsic_emp(nbspx_emp))
          ! n_empx_odd=1
+         ALLOCATE (vsic_reciprocal_emp(1, nbspx_emp))
          ALLOCATE (vsic_emp(1, nbspx_emp))
          ALLOCATE (wxd_emp(1, 2))
          ALLOCATE (deeq_sic_emp(nhm, nhm, nat, nbspx_emp))
@@ -479,7 +484,7 @@
          !
          call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, nbspx_emp, &
                              nbsp_emp, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-                             max_emp, wxd_emp, vsic_emp, sizvsic_emp, pink_emp, becsum_emp, &
+                             max_emp, wxd_emp, vsic_emp, vsic_reciprocal_emp, sizvsic_emp, pink_emp, becsum_emp, &
                              deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, v, &
                              nfi, .true., eigr, bec, irb, eigrb, &
                              rhor, rhoc, ema0bg, desc_emp)     !!! Added rhoc NICOLA
@@ -532,7 +537,7 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !
@@ -590,7 +595,7 @@
                      !
                   END IF
                   !
-                  CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
+                  CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp, vsic_reciprocal_emp, deeq_sic_emp, bec_emp, ngw, &
                                     c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, lgam)
                   !
                   c2(:) = c2(:) - vsicpsi(:, 1)*f_aux(i)
@@ -866,6 +871,7 @@
       DEALLOCATE (fsic_emp)
       !
       DEALLOCATE (vsic_emp)
+      DEALLOCATE (vsic_reciprocal_emp)
       DEALLOCATE (wxd_emp)
       DEALLOCATE (deeq_sic_emp)
       DEALLOCATE (becsum_emp)

@@ -11,7 +11,7 @@
 !=======================================================================
 subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
                           n_emps, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-                          maxiter_emp, wxd_emp, vsic_emp, sizvsic_emp, pink_emp, rhovan_emp, &
+                          maxiter_emp, wxd_emp, vsic_emp, vsic_reciprocal_emp, sizvsic_emp, pink_emp, rhovan_emp, &
                           deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, &
                           filledstates_potential, nfi, tfirst, eigr, bec, irb, eigrb, &
                           rhor, rhoc, ema0bg, desc_emp)
@@ -87,6 +87,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
                   pink_emp(n_empx), rhovan_emp(nhm*(nhm + 1)/2, nat, nspin), &
                   deeq_sic_emp(nhm, nhm, nat, n_empx), eodd_emp, etot_emp, &
                   filledstates_potential(nnrsx, nspin)
+   complex(dp) :: vsic_reciprocal_emp(ngm, n_empx)
    complex(dp) :: c0_emp(ngw, n_empx), cm_emp(ngw, n_empx), phi_emp(ngw, n_empx)
    integer, intent(in)    :: desc_emp(descla_siz_, 2)
    !
@@ -277,7 +278,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
             call nksic_potential(n_emps, n_empx, c0_emp, fsic_emp, &
                                  bec_emp, rhovan_emp, deeq_sic_emp, &
                                  ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                 wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                                 wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                  wfc_centers_emp, wfc_spreads_emp, &
                                  icompute_spread, .true.)
             !
@@ -668,7 +669,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -737,7 +738,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                              wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -808,7 +809,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                              wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -961,7 +962,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -1056,7 +1057,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
          !
          ! faux takes into account spin multiplicity.
          !
-         call nksic_eforce(i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, &
+         call nksic_eforce(i, n_emps, n_empx, vsic_emp, vsic_reciprocal_emp, deeq_sic_emp, bec_emp, ngw, c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, &
                            lgam)
          !
          c2(:) = c2(:) - vsicpsi(:, 1)*faux(i)
@@ -1348,7 +1349,7 @@ contains
          !
          if (do_orbdep .and. (.not. wo_odd_in_empty_run)) then
             !
-            CALL nksic_eforce(i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
+            CALL nksic_eforce(i, n_emps, n_empx, vsic_emp, vsic_reciprocal_emp, deeq_sic_emp, bec_emp, ngw, &
                               c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, lgam)
             !
             c2(:) = c2(:) - vsicpsi(:, 1)*faux(i)

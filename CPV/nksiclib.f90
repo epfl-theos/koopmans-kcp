@@ -71,7 +71,7 @@
               integer,     intent(in)  :: ispin, ibnd
               real(dp),    intent(in)  :: f, orb_rhor(nnrx)
               real(dp),    intent(out) :: vsic(nnrx)
-              real(dp),    intent(out) :: vsic_reciprocal(ngm)
+              complex(dp), intent(out) :: vsic_reciprocal(ngm)
               real(dp),    intent(out) :: pink, shart
               logical, optional, intent(in) :: is_empty
           end subroutine nksic_correction_nkipz
@@ -101,7 +101,7 @@
               complex(dp),    intent(in)  :: rhobarg(ngm,2)
               real(dp),    intent(in)  :: grhobar(nnrx,3,2)
               real(dp),    intent(out) :: vsic(nnrx)
-              real(dp),    intent(out) :: vsic_reciprocal(ngm)
+              complex(dp),    intent(out) :: vsic_reciprocal(ngm)
               real(dp),    intent(out) :: wxdsic(nnrx,2)
               logical,     intent(in)  :: do_wxd_
               real(dp),    intent(out) :: pink, shart
@@ -121,7 +121,7 @@
       real(dp)                 :: rhor(nnrx,nspin)
       real(dp),    intent(in)  :: rhoc(nnrx)
       real(dp),    intent(out) :: vsic(nnrx,nx), wtot(sizwtot,2)
-      real(dp),    intent(out) :: vsic_reciprocal(ngm,nx)
+      complex(dp),    intent(out) :: vsic_reciprocal(ngm,nx)
       real(dp),    intent(out) :: deeq_sic(nhm,nhm,nat,nx)
       logical,     intent(in)  :: do_wxd_
       real(dp),    intent(out) :: pink(nx)
@@ -134,7 +134,8 @@
       !
       integer  :: i,j,jj,ibnd,ir
       real(dp) :: focc,pinkpz, shart
-      real(dp),    allocatable :: vsicpz(:), rhor_nocc(:,:), vsicpz_reciprocal(:)
+      real(dp),    allocatable :: vsicpz(:), rhor_nocc(:,:)
+      complex(dp), allocatable :: vsicpz_reciprocal(:)
       complex(dp), allocatable :: rhobarg(:,:)
       logical  :: lgam, is_empty_
       !
@@ -353,7 +354,7 @@
                                           pinkpz, ibnd, shart, is_empty_ )
              !
              vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz(1:nnrx)
-             vsic_reciprocal(1:ngm,i) = vsic_reciprocal(1:ngm,i) + vsicpz_reciprocal(1:ngm,i)
+             vsic_reciprocal(1:ngm,i) = vsic_reciprocal(1:ngm,i) + vsicpz_reciprocal(1:ngm)
              !
              pink(i) = pink(i) + pinkpz
              !
@@ -2412,7 +2413,7 @@ end subroutine nksic_newd
 
 !---------------------------------------------------------------
       subroutine nksic_correction_pz( f, ispin, orb_rhor, &
-                                      vsic, pink, pzalpha, ibnd, shart)
+                                      vsic, vsic_reciprocal, pink, pzalpha, ibnd, shart)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans potential from the orbital density
@@ -2439,6 +2440,7 @@ end subroutine nksic_newd
       integer,     intent(in)  :: ispin, ibnd
       real(dp),    intent(in)  :: f, orb_rhor(nnrx), pzalpha
       real(dp),    intent(out) :: vsic(nnrx)
+      complex(dp),    intent(out) :: vsic_reciprocal(ngm)
       real(dp),    intent(out) :: pink, shart
       !
       !character(19) :: subname='nksic_correction_pz'
@@ -2461,6 +2463,7 @@ end subroutine nksic_newd
       !
       lgam=gamma_only.and..not.do_wf_cmplx
       vsic=0.0_dp
+      vsic_reciprocal=0.0_dp
       pink=0.0_dp
       !
       if ( ibnd > nknmax .and. nknmax .ge. 0 ) return
@@ -2640,6 +2643,11 @@ end subroutine nksic_newd
       deallocate( rhogaux )
       !
       CALL stop_clock( 'nk_corr' )
+      !
+      ! Store the vsic potential in reciprocal space
+      vtmp = vsic(:)
+      call fwfft('Dense', vtmp, dfftp)
+      call psi2rho('Dense', vtmp, dfftp%nnr, vsic_reciprocal, ngm)
       !
       return
       !
@@ -2891,7 +2899,7 @@ end subroutine nksic_correction_pz
 
 !---------------------------------------------------------------
       subroutine nksic_correction_nkipz( f, ispin, orb_rhor, &
-                                      vsic, pink, ibnd, shart, is_empty)
+                                      vsic, vsic_reciprocal, pink, ibnd, shart, is_empty)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans potential from the orbital density
@@ -2916,6 +2924,7 @@ end subroutine nksic_correction_pz
       integer,     intent(in)  :: ispin, ibnd
       real(dp),    intent(in)  :: f, orb_rhor(nnrx)
       real(dp),    intent(out) :: vsic(nnrx)
+      complex(dp),    intent(out) :: vsic_reciprocal(ngm)
       real(dp),    intent(out) :: pink, shart
       logical, optional, intent(in) :: is_empty
       !
@@ -2957,6 +2966,7 @@ end subroutine nksic_correction_pz
       ENDIF
       !
       vsic=0.0_dp
+      vsic_reciprocal=0.0_dp
       pink=0.0_dp
       !
       if ( ibnd > nknmax .and. nknmax .ge. 0 ) return
@@ -3133,7 +3143,12 @@ end subroutine nksic_correction_pz
       deallocate( vxc_ )
       !
       CALL stop_clock( 'nk_corr' )
-
+      !
+      ! Store the vsic potential in reciprocal space
+      vtmp = vsic(:)
+      call fwfft('Dense', vtmp, dfftp)
+      call psi2rho('Dense', vtmp, dfftp%nnr, vsic_reciprocal, ngm)
+      !
       return
       !
 !---------------------------------------------------------------
@@ -3143,7 +3158,7 @@ end subroutine nksic_correction_nkipz
 !---------------------------------------------------------------
       subroutine nksic_correction_nki( f, ispin, orb_rhor, rhor, &
                                        rhoref, rhobar, rhobarg, grhobar,&
-                                       vsic, wxdsic, do_wxd_, pink, ibnd, shart, is_empty )
+                                       vsic, vsic_reciprocal, wxdsic, do_wxd_, pink, ibnd, shart, is_empty )
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans (integrated, NKI)
@@ -3182,6 +3197,7 @@ end subroutine nksic_correction_nkipz
       complex(dp),    intent(in)  :: rhobarg(ngm,2)
       real(dp),    intent(in)  :: grhobar(nnrx,3,2)
       real(dp),    intent(out) :: vsic(nnrx)
+      complex(dp),    intent(out) :: vsic_reciprocal(ngm)
       real(dp),    intent(out) :: wxdsic(nnrx,2)
       logical,     intent(in)  :: do_wxd_
       real(dp),    intent(out) :: pink, shart 
@@ -3248,6 +3264,7 @@ end subroutine nksic_correction_nkipz
       rhoele(:,ispin) = orb_rhor(:)
       !
       vsic=0.0_dp
+      vsic_reciprocal=0.0_dp
       wxdsic=0.0_dp
       pink=0.0_dp
       !
@@ -3545,6 +3562,11 @@ end subroutine nksic_correction_nkipz
          !
       endif
       !
+      ! Store the vsic potential in reciprocal space
+      vtmp = vsic(:)
+      call fwfft('Dense', vtmp, dfftp)
+      call psi2rho('Dense', vtmp, dfftp%nnr, vsic_reciprocal, ngm)
+      !
       deallocate(vxc0)
       deallocate(vxcref)
       deallocate(rhoele)
@@ -3563,7 +3585,7 @@ end subroutine nksic_correction_nkipz
 !---------------------------------------------------------------
 
 !-----------------------------------------------------------------------
-      subroutine nksic_eforce( i, nbsp, nx, vsic, deeq_sic, bec, ngw, c1, c2, vsicpsi, lgam )
+      subroutine nksic_eforce( i, nbsp, nx, vsic, vsic_reciprocal, deeq_sic, bec, ngw, c1, c2, vsicpsi, lgam )
 !-----------------------------------------------------------------------
 !
 ! Compute vsic potential for orbitals i and i+1 (c1 and c2)
@@ -3571,6 +3593,7 @@ end subroutine nksic_correction_nkipz
       use kinds,                    only : dp
       use cp_interfaces,            only : fwfft, invfft
       use fft_base,                 only : dffts, dfftp
+      use gvecp,                    only: ngm
       use gvecs,                    only : ngs, nps, nms
       use grid_dimensions,          only : nnrx
       use smooth_grid_dimensions,   only : nnrsx
@@ -3587,6 +3610,7 @@ end subroutine nksic_correction_nkipz
       !
       integer,       intent(in)  :: i, nbsp, nx, ngw
       real(dp),      intent(in)  :: vsic(nnrx,nx)
+      complex(dp),      intent(in)  :: vsic_reciprocal(ngm,nx)
       real(dp),      intent(in)  :: deeq_sic(nhm,nhm,nat,nx)
       type(twin_matrix),      intent(in)  :: bec!(nkb,nbsp) !modified:giovanni
       complex(dp),   intent(in)  :: c1(ngw), c2(ngw)
@@ -3597,13 +3621,14 @@ end subroutine nksic_correction_nkipz
       ! local vars
       !
       character(12) :: subname='nksic_eforce'
+      real(dp), allocatable      :: vsic_realspace(:)
       integer       :: ir, ig, ierr, j
       integer       :: is, iv, jv, isa, ism
       integer       :: ivoff, jvoff, ia, inl, jnl
       real(dp)      :: wfc(2), dd
       complex(dp) :: wfc_c(2)
       complex(dp)   :: fm, fp
-      complex(dp),  allocatable :: psi1(:), psi2(:)
+      complex(dp),  allocatable :: psi(:), psi1(:), psi2(:)
       real(dp),     allocatable :: aa(:,:)
       complex(dp),     allocatable :: aa_c(:,:)
       complex(dp), parameter :: c_one= CMPLX(1.d0,0.d0)
@@ -3615,6 +3640,10 @@ end subroutine nksic_correction_nkipz
       !
       call start_clock( 'nk_eforce' )
       !
+      allocate(vsic_realspace(nnrx), stat=ierr)
+	  if ( ierr/=0 ) call errore(subname,'allocating vsic_realspace',abs(ierr))
+      allocate(psi(nnrx), stat=ierr)
+	  if ( ierr/=0 ) call errore(subname,'allocating psi',abs(ierr))
       allocate( psi1(nnrx), stat=ierr )
 	  if ( ierr/=0 ) call errore(subname,'allocating psi1',abs(ierr))
       if(.not.lgam) then
@@ -3647,7 +3676,16 @@ end subroutine nksic_correction_nkipz
          if(.not. lgam) then
              CALL invfft('Dense', psi2, dfftp )
          endif
-
+         !
+         ! Transform the ODD potential from reciprocal to real space
+         !
+         call rho2psi('Dense', psi, dfftp%nnr, vsic_reciprocal(:, i), ngm)
+         call invfft('Dense', psi, dfftp)
+         vsic_realspace = dble(psi)
+         !
+         ! HERE CHECK WE HAVE THE SAME THING
+         write(*,*) 'ebl'
+         write(*,*) sum(vsic_realspace - vsic(:,i))
          !
          ! computing the orbital wfcs
          ! and the potentials in real space on the full grid
@@ -3714,6 +3752,7 @@ end subroutine nksic_correction_nkipz
           !
       endif
       !
+      deallocate( psi )
       deallocate( psi1 )
       if(.not.lgam) then
 	  deallocate( psi2 )
@@ -7943,6 +7982,7 @@ END subroutine compute_complexification_index
       integer  :: i,j,jj,ibnd,isp
       real(dp) :: focc,pinkpz,shart
       real(dp), allocatable :: vsicpz(:)
+      complex(dp), allocatable :: vsicpz_reciprocal(:)
       complex(dp), allocatable :: rhobarg(:,:)
       logical :: lgam
       !
