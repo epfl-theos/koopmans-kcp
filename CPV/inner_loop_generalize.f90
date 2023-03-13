@@ -73,7 +73,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    real(dp), allocatable :: Heigbig(:)
    real(dp), allocatable :: Heig(:)
    real(dp), allocatable :: vsic1(:, :), vsic2(:, :)
-   real(dp), allocatable :: vsic1_reciprocal(:, :), vsic2_reciprocal(:, :)
+   complex(dp), allocatable :: vsic1_reciprocal(:, :), vsic2_reciprocal(:, :)
    real(dp), allocatable :: pink1(:), pink2(:)
    !
    complex(dp), allocatable :: Umatbig(:, :)
@@ -558,7 +558,7 @@ subroutine nksic_getvsicah_general(ngw, nbsp, nbspx, c0, bec, &
                            nupdwn(nspin), iupdwn(nspin)
    real(dp)                 :: vsicah2sum
    real(dp)                 :: vsic(nnrx, nbspx)
-   real(dp)                 :: vsic_reciprocal(ngm, nbspx)
+   complex(dp)                 :: vsic_reciprocal(ngm, nbspx)
    real(dp)                 :: deeq_sic(nhm, nhm, nat, nbspx)
    complex(dp)              :: vsicah(nupdwn(isp), nupdwn(isp)), c0(ngw, nbsp)
    logical                  :: lgam

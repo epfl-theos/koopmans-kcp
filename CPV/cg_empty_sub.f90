@@ -1259,7 +1259,7 @@ contains
          !
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot_emp, deltae*innerloop_cg_ratio, lgam, &
                                         n_emps, n_empx, nudx_emp, iupdwn_emp, nupdwn_emp, ispin_emp, &
-                                        c0_emp, rhovan_emp, bec_emp, rhor, rhoc, vsic_emp, pink_emp, &
+                                        c0_emp, rhovan_emp, bec_emp, rhor, rhoc, vsic_emp, vsic_reciprocal_emp, pink_emp, &
                                         deeq_sic_emp, wtot, fsic_emp, sizwtot, .false., wfc_centers_emp, wfc_spreads_emp, .true.)
          !
       end if

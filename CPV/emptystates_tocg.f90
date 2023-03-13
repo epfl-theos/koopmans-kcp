@@ -31,6 +31,7 @@
       USE electrons_module,     ONLY : iupdwn_emp, nupdwn_emp, n_emp, ei_emp,  &
                                        max_emp, ethr_emp, etot_emp, eodd_emp
       USE ions_base,            ONLY : nat, nsp
+      USE gvecp,                ONLY : ngm
       USE gvecw,                ONLY : ngw
       USE orthogonalize_base,   ONLY : calphi, updatc
       USE reciprocal_vectors,   ONLY : gzero, gstart
@@ -89,6 +90,7 @@
       INTEGER,     ALLOCATABLE :: ispin_emp(:)
       REAL(DP),    ALLOCATABLE :: fsic_emp(:)
       REAL(DP),    ALLOCATABLE :: vsic_emp(:,:)
+      complex(DP),    ALLOCATABLE :: vsic_reciprocal_emp(:,:)
       REAL(DP),    ALLOCATABLE :: wxd_emp(:,:)
       REAL(DP),    ALLOCATABLE :: deeq_sic_emp(:,:,:,:)
       COMPLEX(DP), ALLOCATABLE :: vxxpsi_emp(:,:)
@@ -233,6 +235,7 @@
           ALLOCATE( fsic_emp( n_empx ) )
           ! n_empx_odd=n_empx
           ALLOCATE( vsic_emp(nnrx, n_empx) )
+          ALLOCATE( vsic_reciprocal_emp(ngm, n_empx) )
           ALLOCATE( wxd_emp (nnrx, 2) )
           ALLOCATE( deeq_sic_emp (nhm,nhm,nat,n_empx) )
           ALLOCATE( becsum_emp(nhm*(nhm+1)/2,nat,nspin))
@@ -248,6 +251,7 @@
           ALLOCATE( fsic_emp( n_empx ) )
           ! n_empx_odd=1
           ALLOCATE( vsic_emp(1, n_empx) )
+          ALLOCATE( vsic_reciprocal_emp(1, n_empx) )
           ALLOCATE( wxd_emp (1, 2) )
           ALLOCATE( deeq_sic_emp (nhm,nhm,nat,n_empx) )
           ALLOCATE( becsum_emp(nhm*(nhm+1)/2,nat,nspin) )
@@ -448,7 +452,7 @@
                 call nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                                       bec_emp, becsum_emp, deeq_sic_emp, &
                                       ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                      wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                                      wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                       wfc_centers_emp, wfc_spreads_emp, &
                                       icompute_spread, .false.)
                 !write(6,*) "checkbounds", ubound(wfc_centers_emp), ubound(wfc_spreads_emp), nudx_emp, nspin
@@ -500,7 +504,7 @@
                        !
                     ENDIF
                     !   
-                    CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
+                    CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, vsic_reciprocal, deeq_sic_emp, bec_emp, ngw, &
                                        c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )
                     !
                     c2(:) = c2(:) - vsicpsi(:,1) * f_emp(i)
@@ -690,6 +694,7 @@
       !
       IF ( do_orbdep ) THEN
           DEALLOCATE( vsic_emp ) 
+          DEALLOCATE( vsic_reciprocal_emp ) 
           DEALLOCATE( wxd_emp ) 
           DEALLOCATE( deeq_sic_emp )
           DEALLOCATE( becsum_emp )

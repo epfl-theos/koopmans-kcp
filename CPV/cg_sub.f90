@@ -1610,6 +1610,7 @@ contains
          !
       else
          !
+         call ebl_check(vsic(:,1), vsic_reciprocal(:,1))
          !call nksic_rot_emin_cg(itercg,innerloop_init_n,ninner,etot,Omattot,deltae*innerloop_cg_ratio,lgam)
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot, deltae*innerloop_cg_ratio, lgam, &
                                         nbsp, nbspx, nudx, iupdwn, nupdwn, ispin, c0, rhovan, bec, rhor, rhoc, &
