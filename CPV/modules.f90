@@ -514,7 +514,7 @@ contains
       cost = 0.0_dp
       if ( allocated(fsic) )       cost = cost + real( size(fsic) )       *  8.0_dp 
       if ( allocated(vsic) )       cost = cost + real( size(vsic) )       *  8.0_dp 
-      if ( allocated(vsic_reciprocal) ) cost = cost + real( size(vsic) )       * 16.0_dp 
+      if ( allocated(vsic_reciprocal) ) cost = cost + real( size(vsic_reciprocal) ) * 16.0_dp 
       if ( allocated(fion_sic) )   cost = cost + real( size(fion_sic) )   *  8.0_dp 
       if ( allocated(deeq_sic) )   cost = cost + real( size(deeq_sic) )   *  8.0_dp 
       if ( allocated(pink) )       cost = cost + real( size(pink) )       *  8.0_dp 

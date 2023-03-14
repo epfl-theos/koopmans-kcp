@@ -470,7 +470,7 @@
                   ! nk-type functionals?
                   !
                   vsic(1:nnrx, i) = vsic(1:nnrx, i)*pzalpha(i)
-                  vsic_reciprocal(1:nnrx, i) = vsic_reciprocal(1:nnrx, i)*pzalpha(i)
+                  vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i)*pzalpha(i)
                   !
                   call nksic_get_pzfactor_potential(focc, nspin, ispin(i), rhor, orb_rhor(:, jj), &
                                             pink(i), taukin, tauw, edens, upsilonkin, upsilonw, vsic(:, i), pzalpha(i), ibnd, kfact)
@@ -1518,6 +1518,7 @@
 !
          use kinds, only: dp
          use uspp, only: okvan, deeq
+         use gvecp, only: ngm
          use cp_main_variables, only: irb, eigrb
          !
          implicit none
@@ -1528,7 +1529,7 @@
          integer, intent(in)    :: i, nnrx, nat, nhm
          integer, intent(in)    :: ispin, nspin
          real(dp), intent(in)    :: vsic(nnrx)
-         complex(dp), intent(in) :: vsic_reciprocal(nnrx)
+         complex(dp), intent(in) :: vsic_reciprocal(ngm)
          real(dp), intent(in)    :: becsum(nhm*(nhm + 1)/2, nat, nspin)
          real(dp), intent(inout) :: fion(3, nat)
          real(dp), intent(out)   :: deeq_sic(nhm, nhm, nat)
@@ -8342,6 +8343,8 @@
          use gvecp, only: ngm
          use grid_dimensions, only: nnrx
          use ifcore, only: tracebackqq
+         use mp, only: mp_sum
+         use mp_global, only: intra_pool_comm
 
          implicit none
 
@@ -8349,6 +8352,7 @@
          complex(dp), intent(in) :: vsic_reciprocal(ngm)
 
          real(dp), allocatable :: vsic_realspace(:)
+         real(dp) :: sumdiff
          complex(dp), allocatable :: psi(:)
          integer :: return_code
 
@@ -8357,12 +8361,15 @@
 
          call rho2psi('Dense', psi, dfftp%nnr, vsic_reciprocal, ngm)
          call invfft('Dense', psi, dfftp)
+
          vsic_realspace = dble(psi)
-         !
-         write (*, *) 'ebl_check:', sum(vsic_realspace - vsic)
+
+         sumdiff = sum(vsic_realspace - vsic)
+         call mp_sum(sumdiff, intra_pool_comm)
+         write (*, *) 'ebl_check:', sumdiff
 
          return_code = -1
-         if (abs(sum(vsic_realspace - vsic)) > 1d-8) return_code = 0
+         if (abs(sumdiff) > 1d-8) return_code = 0
          
          call tracebackqq(user_exit_code=return_code)
 
