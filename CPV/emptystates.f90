@@ -47,9 +47,11 @@
                                write_hamiltonian, ortho_check, symm_wannier
       USE mp, ONLY: mp_comm_split, mp_comm_free, mp_sum
       USE mp_global, ONLY: intra_image_comm, me_image
-      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, &
-                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp
-      USE nksic, ONLY: do_spinsym, pink_emp, allocate_nksic_empty
+      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, wtot_reciprocal, &
+                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp, &
+                       fsic_emp, deeq_sic_emp, vsic_emp, vsic_reciprocal_emp, &
+                       do_spinsym, allocate_nksic_empty, deallocate_nksic_empty, &
+                       pink_emp
       USE hfmod, ONLY: do_hf
       USE twin_types !added:giovanni
       USE control_flags, ONLY: tatomicwfc, ndr, ndw
@@ -92,11 +94,6 @@
       REAL(DP), ALLOCATABLE :: lambda_rep(:, :)
       COMPLEX(DP), ALLOCATABLE :: lambda_rep_c(:, :)
       INTEGER, ALLOCATABLE :: ispin_emp(:)
-      REAL(DP), ALLOCATABLE :: fsic_emp(:)
-      REAL(DP), ALLOCATABLE :: vsic_emp(:, :)
-      complex(DP), ALLOCATABLE :: vsic_reciprocal_emp(:, :)
-      REAL(DP), ALLOCATABLE :: wxd_emp(:, :)
-      REAL(DP), ALLOCATABLE :: deeq_sic_emp(:, :, :, :)
       COMPLEX(DP), ALLOCATABLE :: vxxpsi_emp(:, :)
       REAL(DP), ALLOCATABLE :: exx_emp(:)
       REAL(DP), ALLOCATABLE :: old_odd_alpha(:)
@@ -228,37 +225,9 @@
       ispin_emp(1:nupdwn_emp(1)) = 1
       IF (nspin == 2) ispin_emp(iupdwn_emp(2):) = 2
       !
-      IF (do_orbdep) THEN
-         !
-         ALLOCATE (fsic_emp(nbspx_emp))
-         ! n_empx_odd=n_empx
-         ALLOCATE (vsic_emp(nnrx, nbspx_emp))
-         ALLOCATE (vsic_reciprocal_emp(ngm, nbspx_emp))
-         ALLOCATE (wxd_emp(nnrx, 2))
-         ALLOCATE (deeq_sic_emp(nhm, nhm, nat, nbspx_emp))
-         ALLOCATE (becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
-         CALL allocate_nksic_empty(nbspx_emp)
-         sizvsic_emp = nnrx
-         !
-         fsic_emp = 0.0d0
-         vsic_emp = 0.0d0
-         vsic_reciprocal_emp = 0.0d0
-         wxd_emp = 0.0d0
-         !
-      ELSE
-         !
-         ALLOCATE (fsic_emp(nbspx_emp))
-         ! n_empx_odd=1
-         ALLOCATE (vsic_reciprocal_emp(1, nbspx_emp))
-         ALLOCATE (vsic_emp(1, nbspx_emp))
-         ALLOCATE (wxd_emp(1, 2))
-         ALLOCATE (deeq_sic_emp(nhm, nhm, nat, nbspx_emp))
-         ALLOCATE (becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
-         !
-         call allocate_nksic_empty(nbspx_emp)
-         sizvsic_emp = 1
-         !
-      END IF
+      allocate(becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
+      !
+      if (do_orbdep) CALL allocate_nksic_empty(nnrx, ngm, nspin, nbspx_emp, nat, nhm)
       !
       IF (do_hf) THEN
          !
@@ -482,10 +451,10 @@
       !
       IF (tcg_) THEN ! compute empty states with conjugate gradient
          !
-         call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, nbspx_emp, &
+         call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, nbspx_emp, &
                              nbsp_emp, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-                             max_emp, wxd_emp, vsic_emp, vsic_reciprocal_emp, sizvsic_emp, pink_emp, becsum_emp, &
-                             deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, v, &
+                             max_emp, becsum_emp, &
+                             nudx_emp, eodd_emp, etot_emp, v, &
                              nfi, .true., eigr, bec, irb, eigrb, &
                              rhor, rhoc, ema0bg, desc_emp)     !!! Added rhoc NICOLA
          !
@@ -521,8 +490,6 @@
                !
                ! Instead, wxd from all occupied states is already computed
                ! by the previous calls to nksic_potentials, and stored wxe_emp
-               !
-               fsic_emp(:) = 0.0
                !
                ! the two lines below were removed by Giovanni, passing do_wxd as input to nksic_potential
                !do_wxd_ = do_wxd
@@ -868,13 +835,8 @@
          CALL deallocate_twin(lambda_emp(iss))
       END DO
       !
-      DEALLOCATE (fsic_emp)
-      !
-      DEALLOCATE (vsic_emp)
-      DEALLOCATE (vsic_reciprocal_emp)
-      DEALLOCATE (wxd_emp)
-      DEALLOCATE (deeq_sic_emp)
       DEALLOCATE (becsum_emp)
+      call deallocate_nksic_empty()
       !
       IF (do_hf) THEN
          DEALLOCATE (vxxpsi_emp)

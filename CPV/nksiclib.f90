@@ -8186,6 +8186,7 @@
                   ! ths sic potential is partly updated here to save some memory
                   !
                   vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic(1:nnrx, ispin(i))
+                  ! vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                   !
                end if
 
@@ -8371,7 +8372,7 @@
          return_code = -1
          if (abs(sumdiff) > 1d-8) return_code = 0
          
-         call tracebackqq(user_exit_code=return_code)
+         ! call tracebackqq(user_exit_code=return_code)
 
          deallocate(vsic_realspace, psi)
       end subroutine ebl_check

@@ -358,12 +358,21 @@ module nksic
   real(dp),    allocatable :: odd_alpha_emp(:) !added:giovanni for alpha renormalization
   real(dp),    allocatable :: vxc_sic(:,:)
   real(dp),    allocatable :: wxdsic(:,:)
+  complex(dp),    allocatable :: wxdsic_reciprocal(:,:)
   real(dp),    allocatable :: orb_rhor(:,:)
   real(dp),    allocatable :: rhoref(:,:)
   real(dp),    allocatable :: rhobar(:,:)
   real(dp),    allocatable :: grhobar(:,:,:)
   real(dp),    allocatable :: wrefsic(:)
   real(dp),    allocatable :: wtot(:,:)
+  complex(dp), allocatable :: wtot_reciprocal(:,:)
+  !
+  real(dp), allocatable :: fsic_emp(:)
+  real(dp), allocatable :: vsic_emp(:, :)
+  complex(dp), allocatable :: vsic_reciprocal_emp(:, :)
+  real(dp), allocatable :: wxd_emp(:, :)
+  complex(dp), allocatable :: wxd_reciprocal_emp(:, :)
+  real(dp), allocatable :: deeq_sic_emp(:, :, :, :)
   !
   complex(dp), allocatable :: vsicpsi(:,:)
   complex(dp) :: complexification_index
@@ -405,9 +414,24 @@ module nksic
 
 contains
   !
-  subroutine allocate_nksic_empty( n_emps)
+  subroutine allocate_nksic_empty(nnrx, ngm, nspin, n_emps, nat, nhm)
 
-  integer :: n_emps
+  implicit none
+
+  integer, intent(in) :: nnrx, ngm, nspin, n_emps, nat, nhm
+
+  ALLOCATE (fsic_emp(n_emps))
+  ALLOCATE (vsic_emp(nnrx, n_emps))
+  ALLOCATE (vsic_reciprocal_emp(ngm, n_emps))
+  ALLOCATE (wxd_emp(nnrx, 2))
+  ALLOCATE (wxd_reciprocal_emp(ngm, 2))
+  ALLOCATE (deeq_sic_emp(nhm, nhm, nat, n_emps))
+  !
+  fsic_emp = 0.0d0
+  vsic_emp = 0.0d0
+  vsic_reciprocal_emp = 0.0d0
+  wxd_emp = 0.0d0
+  wxd_reciprocal_emp = 0.0d0
   
   IF(.not.allocated(pink_emp)) THEN
      !
@@ -460,10 +484,13 @@ contains
           allocate( wrefsic(nnrx) )
       else if ( do_nki .or. do_nkipz) then
           allocate( wxdsic(nnrx,2) )
+          allocate( wxdsic_reciprocal(nnrx,2) )
       endif
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
           allocate(wtot(nnrx,2))
           wtot=0.0_dp
+          allocate(wtot_reciprocal(ngm,2))
+          wtot_reciprocal=0.0_dp
       endif
       !
       if ( dft_is_gradient() ) then 
@@ -507,21 +534,23 @@ contains
       real(dp) :: cost
       !
       cost = 0.0_dp
-      if ( allocated(fsic) )       cost = cost + real( size(fsic) )       *  8.0_dp 
-      if ( allocated(vsic) )       cost = cost + real( size(vsic) )       *  8.0_dp 
+      if ( allocated(fsic) )            cost = cost + real( size(fsic) )            *  8.0_dp 
+      if ( allocated(vsic) )            cost = cost + real( size(vsic) )            *  8.0_dp 
       if ( allocated(vsic_reciprocal) ) cost = cost + real( size(vsic_reciprocal) ) * 16.0_dp 
-      if ( allocated(fion_sic) )   cost = cost + real( size(fion_sic) )   *  8.0_dp 
-      if ( allocated(deeq_sic) )   cost = cost + real( size(deeq_sic) )   *  8.0_dp 
-      if ( allocated(pink) )       cost = cost + real( size(pink) )       *  8.0_dp 
-      if ( allocated(vsicpsi) )    cost = cost + real( size(vsicpsi) )    * 16.0_dp 
-      if ( allocated(vxc_sic) )    cost = cost + real( size(vxc_sic) )    *  8.0_dp 
-      if ( allocated(wxdsic) )     cost = cost + real( size(wxdsic) )     *  8.0_dp 
-      if ( allocated(orb_rhor))    cost = cost + real( size(orb_rhor))    *  8.0_dp
-      if ( allocated(rhoref) )     cost = cost + real( size(rhoref) )     *  8.0_dp
-      if ( allocated(rhobar) )     cost = cost + real( size(rhobar) )     *  8.0_dp
-      if ( allocated(grhobar) )    cost = cost + real( size(grhobar) )    *  8.0_dp
-      if ( allocated(wrefsic) )    cost = cost + real( size(wrefsic) )    *  8.0_dp
-      if ( allocated(wtot) )       cost = cost + real( size(wtot) )       *  8.0_dp
+      if ( allocated(fion_sic) )        cost = cost + real( size(fion_sic) )        *  8.0_dp 
+      if ( allocated(deeq_sic) )        cost = cost + real( size(deeq_sic) )        *  8.0_dp 
+      if ( allocated(pink) )            cost = cost + real( size(pink) )            *  8.0_dp 
+      if ( allocated(vsicpsi) )         cost = cost + real( size(vsicpsi) )         * 16.0_dp 
+      if ( allocated(vxc_sic) )         cost = cost + real( size(vxc_sic) )         *  8.0_dp 
+      if ( allocated(wxdsic) )          cost = cost + real( size(wxdsic) )          *  8.0_dp 
+      if ( allocated(wxdsic_reciprocal) ) cost = cost + real( size(wxdsic_reciprocal) ) * 16.0_dp 
+      if ( allocated(orb_rhor))         cost = cost + real( size(orb_rhor))         *  8.0_dp
+      if ( allocated(rhoref) )          cost = cost + real( size(rhoref) )          *  8.0_dp
+      if ( allocated(rhobar) )          cost = cost + real( size(rhobar) )          *  8.0_dp
+      if ( allocated(grhobar) )         cost = cost + real( size(grhobar) )         *  8.0_dp
+      if ( allocated(wrefsic) )         cost = cost + real( size(wrefsic) )         *  8.0_dp
+      if ( allocated(wtot) )            cost = cost + real( size(wtot) )            *  8.0_dp
+      if ( allocated(wtot_reciprocal) ) cost = cost + real( size(wtot) )            * 16.0_dp
       !
       nksic_memusage = cost / 1000000.0_dp
       !   
@@ -542,10 +571,12 @@ contains
       if(allocated(upsilonkin))  deallocate(upsilonkin)
       if(allocated(upsilonw))    deallocate(upsilonw)
       if(allocated(wxdsic))      deallocate(wxdsic)
+      if(allocated(wxdsic_reciprocal)) deallocate(wxdsic_reciprocal)
       if(allocated(vxc_sic))     deallocate(vxc_sic)
       if(allocated(vsicpsi))     deallocate(vsicpsi)
       if(allocated(wrefsic))     deallocate(wrefsic)
       if(allocated(wtot))        deallocate(wtot)
+      if(allocated(wtot))        deallocate(wtot_reciprocal)
       if(allocated(orb_rhor))    deallocate(orb_rhor)
       if(allocated(grhobar))     deallocate(grhobar)
       if(allocated(rhobar))      deallocate(rhobar)
@@ -562,6 +593,22 @@ contains
       !
   end subroutine deallocate_nksic
   !
+  subroutine deallocate_nksic_empty
+
+      use ifcore, only: tracebackqq
+
+      if(allocated(fsic_emp)) DEALLOCATE(fsic_emp)
+      if(allocated(vsic_emp)) DEALLOCATE(vsic_emp)
+      if(allocated(vsic_reciprocal_emp)) DEALLOCATE(vsic_reciprocal_emp)
+      if(allocated(wxd_emp)) DEALLOCATE(wxd_emp)
+      if(allocated(wxd_reciprocal_emp)) DEALLOCATE(wxd_reciprocal_emp)
+      if(allocated(deeq_sic_emp)) DEALLOCATE(deeq_sic_emp)
+      if(allocated(odd_alpha_emp))    deallocate(odd_alpha_emp)
+
+      call tracebackqq(user_exit_code=-1)
+
+  end subroutine
+
 end module nksic
 
 

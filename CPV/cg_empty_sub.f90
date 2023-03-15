@@ -9,10 +9,9 @@
 !#define DEBUG
 !
 !=======================================================================
-subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
+subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                           n_emps, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-                          maxiter_emp, wxd_emp, vsic_emp, vsic_reciprocal_emp, sizvsic_emp, pink_emp, rhovan_emp, &
-                          deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, &
+                          maxiter_emp, rhovan_emp, nudx_emp, eodd_emp, etot_emp, &
                           filledstates_potential, nfi, tfirst, eigr, bec, irb, eigrb, &
                           rhor, rhoc, ema0bg, desc_emp)
 !=======================================================================
@@ -58,7 +57,8 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
    use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, vsicpsi, &
                     do_innerloop_empty, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
-                    innerloop_until, do_bare_eigs
+                    innerloop_until, do_bare_eigs, fsic_emp, &
+                    wxd_emp, vsic_emp, vsic_reciprocal_emp, pink_emp, deeq_sic_emp
    use electrons_module, only: wfc_spreads_emp, wfc_centers_emp, icompute_spread
    use cp_interfaces, only: gram_empty, nlsm1
    use uspp_param, only: nhm
@@ -83,11 +83,8 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
    real(dp)    :: ema0bg(ngw)
    integer     :: n_emps, n_empx, iupdwn_emp(nspin), nupdwn_emp(nspin), maxiter_emp, &
                   nudx_emp, ispin_emp(n_empx)
-   real(dp)    :: f_emp(n_empx), fsic_emp(n_empx), wxd_emp(sizvsic_emp, 2), vsic_emp(sizvsic_emp, n_empx), &
-                  pink_emp(n_empx), rhovan_emp(nhm*(nhm + 1)/2, nat, nspin), &
-                  deeq_sic_emp(nhm, nhm, nat, n_empx), eodd_emp, etot_emp, &
-                  filledstates_potential(nnrsx, nspin)
-   complex(dp) :: vsic_reciprocal_emp(ngm, n_empx)
+   real(dp)    :: f_emp(n_empx), rhovan_emp(nhm*(nhm + 1)/2, nat, nspin), &
+                  eodd_emp, etot_emp, filledstates_potential(nnrsx, nspin)
    complex(dp) :: c0_emp(ngw, n_empx), cm_emp(ngw, n_empx), phi_emp(ngw, n_empx)
    integer, intent(in)    :: desc_emp(descla_siz_, 2)
    !

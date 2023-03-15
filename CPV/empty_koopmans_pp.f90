@@ -34,8 +34,9 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm
       USE nksic,                ONLY : do_pz, do_wxd, vsicpsi, wtot, &
-                                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp
-      USE nksic,                ONLY : allocate_nksic_empty
+                                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, &
+                                       fsic_emp, vsic_emp, vsic_reciprocal_emp, wxd_emp, &
+                                       deeq_sic_emp, allocate_nksic_empty, deallocate_nksic_empty
       USE input_parameters,     ONLY : odd_nkscalfact_empty, odd_nkscalfact, aux_empty_nbnd 
       USE electrons_module,     ONLY : ei_emp 
       USE twin_types 
@@ -60,11 +61,6 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       REAL(DP),    ALLOCATABLE :: becsum_emp(:,:,:)
       !
       INTEGER,     ALLOCATABLE :: ispin_emp(:)
-      REAL(DP),    ALLOCATABLE :: fsic_emp(:)
-      REAL(DP),    ALLOCATABLE :: vsic_emp(:,:)
-      complex(DP), ALLOCATABLE :: vsic_reciprocal_emp(:,:)
-      REAL(DP),    ALLOCATABLE :: wxd_emp(:,:)
-      REAL(DP),    ALLOCATABLE :: deeq_sic_emp(:,:,:,:)
       REAL(DP),    ALLOCATABLE :: wfc_centers_emp(:,:,:)
       REAL(DP),    ALLOCATABLE :: wfc_spreads_emp(:,:,:)
       REAL(DP),    ALLOCATABLE :: old_odd_alpha(:)
@@ -128,22 +124,11 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       ispin_emp ( 1:nupdwn_emp( 1 ) ) = 1
       IF ( nspin == 2 ) ispin_emp( iupdwn_emp(2) : ) = 2
       !
-      ALLOCATE( fsic_emp( n_empx ) )
-      ALLOCATE( vsic_emp(nnrx, n_empx) )
-      ALLOCATE( vsic_reciprocal_emp(ngm, n_empx) )
-      ALLOCATE( wxd_emp (nnrx, 2) )
-      ALLOCATE( deeq_sic_emp (nhm,nhm,nat,n_empx))
       ALLOCATE( becsum_emp (nhm*(nhm+1)/2,nat,nspin))
       ALLOCATE( wfc_centers_emp(4, nudx_emp, nspin )) 
       ALLOCATE( wfc_spreads_emp(nudx_emp, nspin, 2 ))
-      ALLOCATE( pink_emp(n_emps))
       ! 
-      CALL allocate_nksic_empty(n_empx)
-      !
-      fsic_emp = 0.0d0
-      vsic_emp = 0.0d0
-      vsic_reciprocal_emp = 0.0d0
-      wxd_emp  = 0.0d0
+      CALL allocate_nksic_empty(nnrx, ngm, 2, n_empx, nat, nhm)
       !
       ! read auxilary orbitals
       ! 
@@ -384,18 +369,14 @@ endif
       DEALLOCATE( c0_emp )
       !
       DEALLOCATE( ispin_emp )
-      DEALLOCATE( fsic_emp ) 
       !
       CALL deallocate_twin(bec_emp)
       !
-      DEALLOCATE( vsic_emp ) 
-      DEALLOCATE( vsic_reciprocal_emp ) 
-      DEALLOCATE( wxd_emp ) 
-      DEALLOCATE( deeq_sic_emp )
+      call deallocate_nksic_empty()
+      deallocate( pink_emp)
       DEALLOCATE( becsum_emp )
       DEALLOCATE( wfc_centers_emp )
       DEALLOCATE( wfc_spreads_emp )
-      DEALLOCATE( pink_emp )
       ! 
       RETURN
       !  
