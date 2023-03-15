@@ -55,7 +55,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
    use twin_types !added:giovanni
    use printout_base, only: printout_base_open, printout_base_unit, &
                             printout_base_close
-   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, vsicpsi, sizwtot, &
+   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, vsicpsi, &
                     do_innerloop_empty, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     innerloop_until, do_bare_eigs
@@ -278,7 +278,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
             call nksic_potential(n_emps, n_empx, c0_emp, fsic_emp, &
                                  bec_emp, rhovan_emp, deeq_sic_emp, &
                                  ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                 wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                 wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                  wfc_centers_emp, wfc_spreads_emp, &
                                  icompute_spread, .true.)
             !
@@ -669,7 +669,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -738,7 +738,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                              wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -809,7 +809,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                              wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -962,7 +962,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -1260,7 +1260,7 @@ contains
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot_emp, deltae*innerloop_cg_ratio, lgam, &
                                         n_emps, n_empx, nudx_emp, iupdwn_emp, nupdwn_emp, ispin_emp, &
                                         c0_emp, rhovan_emp, bec_emp, rhor, rhoc, vsic_emp, vsic_reciprocal_emp, pink_emp, &
-                                        deeq_sic_emp, wtot, fsic_emp, sizwtot, .false., wfc_centers_emp, wfc_spreads_emp, .true.)
+                                        deeq_sic_emp, wtot, fsic_emp, .false., wfc_centers_emp, wfc_spreads_emp, .true.)
          !
       end if
       !

@@ -47,7 +47,7 @@
                                write_hamiltonian, ortho_check, symm_wannier
       USE mp, ONLY: mp_comm_split, mp_comm_free, mp_sum
       USE mp_global, ONLY: intra_image_comm, me_image
-      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, sizwtot, &
+      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, &
                        odd_alpha, valpsi, nkscalfact, odd_alpha_emp
       USE nksic, ONLY: do_spinsym, pink_emp, allocate_nksic_empty
       USE hfmod, ONLY: do_hf
@@ -537,7 +537,7 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !

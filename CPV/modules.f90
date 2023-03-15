@@ -402,7 +402,6 @@ module nksic
   integer :: innerloop_until
   real(DP) :: innerloop_cg_ratio
 !$$
-  integer :: sizwtot
 
 contains
   !
@@ -464,12 +463,8 @@ contains
       endif
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
           allocate(wtot(nnrx,2))
-          sizwtot=nnrx
-      else
-          allocate(wtot(1,2))
-          sizwtot=1
+          wtot=0.0_dp
       endif
-      wtot=0.0_dp
       !
       if ( dft_is_gradient() ) then 
           allocate( grhobar(nnrx,3,2) )

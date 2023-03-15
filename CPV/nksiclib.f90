@@ -16,7 +16,7 @@
 !-----------------------------------------------------------------------
       subroutine nksic_potential(nbsp, nx, c, f_diag, bec, becsum, &
                                  deeq_sic, ispin, iupdwn, nupdwn, &
-                                 rhor, rhoc, wtot, sizwtot, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                 rhor, rhoc, wtot, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
                                  wfc_centers, wfc_spreads, &
                                  icompute_spread, is_empty)
 !-----------------------------------------------------------------------
@@ -111,7 +111,7 @@
 
          ! in/out vars
          !
-         integer, intent(in)  :: nbsp, nx, nudx, sizwtot
+         integer, intent(in)  :: nbsp, nx, nudx
          complex(dp), intent(in)  :: c(ngw, nx)
          type(twin_matrix), intent(in)  :: bec!(nkb,nbsp) !modified:giovanni
          real(dp), intent(in)  :: becsum(nhm*(nhm + 1)/2, nat, nspin)
@@ -120,7 +120,7 @@
          real(dp), intent(in)  :: f_diag(nx)
          real(dp)                 :: rhor(nnrx, nspin)
          real(dp), intent(in)  :: rhoc(nnrx)
-         real(dp), intent(out) :: vsic(nnrx, nx), wtot(sizwtot, 2)
+         real(dp), intent(out) :: vsic(nnrx, nx), wtot(nnrx, 2)
          complex(dp), intent(out) :: vsic_reciprocal(ngm, nx)
          real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
          logical, intent(in)  :: do_wxd_
@@ -6135,7 +6135,7 @@
          use ions_base, only: nsp
          use uspp, only: becsum
          use cp_main_variables, only: eigr, rhor
-         use nksic, only: deeq_sic, wtot, fsic, sizwtot
+         use nksic, only: deeq_sic, wtot, fsic
          use control_flags, only: gamma_only, do_wf_cmplx
          use twin_types
          use electrons_module, only: icompute_spread
@@ -6232,7 +6232,7 @@
          pink1(:) = 0.d0
          !
          call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, sizwtot, vsic1, vsic_reciprocal1, pink1, nudx, wfc_centers, &
+                              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, vsic1, vsic_reciprocal1, pink1, nudx, wfc_centers, &
                               wfc_spreads, icompute_spread, is_empty)
          !
          ene1 = sum(pink1(:))
@@ -6266,7 +6266,7 @@
          use ions_base, only: nsp
          use uspp, only: becsum
          use cp_main_variables, only: eigr, rhor
-         use nksic, only: deeq_sic, wtot, fsic, sizwtot, do_wxd, &
+         use nksic, only: deeq_sic, wtot, fsic, do_wxd, &
                           valpsi, odd_alpha
          use control_flags, only: gamma_only, do_wf_cmplx
          use twin_types
@@ -6371,7 +6371,7 @@
          !
          !
          call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, sizwtot, vsic1, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
+                              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, vsic1, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
                               wfc_spreads, icompute_spread, .false.)
          !
          ene1 = sum(pink1(:))
@@ -7881,7 +7881,7 @@
       subroutine nksic_potential_non_ortho(nbsp, nx, c, cdual, f_diag, &
                                            bec, becdual, becsum, &
                                            deeq_sic, ispin, iupdwn, nupdwn, &
-                                           rhor, rhoc, wtot, sizwtot, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                           rhor, rhoc, wtot, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
                                            wfc_centers, wfc_spreads, &
                                            icompute_spread)
 !-----------------------------------------------------------------------
@@ -7979,7 +7979,7 @@
          !
          ! in/out vars
          !
-         integer, intent(in)  :: nbsp, nx, nudx, sizwtot
+         integer, intent(in)  :: nbsp, nx, nudx
          complex(dp), intent(in)  :: c(ngw, nx), cdual(ngw, nx)
          type(twin_matrix), intent(in)  :: bec, becdual!(nkb,nbsp) !modified:giovanni
          real(dp), intent(in)  :: becsum(nhm*(nhm + 1)/2, nat, nspin)
@@ -7988,7 +7988,7 @@
          real(dp), intent(in)  :: f_diag(nx)
          real(dp), intent(in)  :: rhor(nnrx, nspin)
          real(dp), intent(in)  :: rhoc(nnrx)
-         real(dp), intent(out) :: vsic(nnrx, nx), wtot(sizwtot, 2)
+         real(dp), intent(out) :: vsic(nnrx, nx), wtot(nnrx, 2)
          complex(dp), intent(out) :: vsic_reciprocal(ngm, nx)
          real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
          logical, intent(in)  :: do_wxd_
