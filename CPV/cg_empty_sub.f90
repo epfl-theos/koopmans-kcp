@@ -54,11 +54,11 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
    use twin_types !added:giovanni
    use printout_base, only: printout_base_open, printout_base_unit, &
                             printout_base_close
-   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, vsicpsi, &
+   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, wtot_reciprocal, vsicpsi, &
                     do_innerloop_empty, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     innerloop_until, do_bare_eigs, fsic_emp, &
-                    wxd_emp, vsic_emp, vsic_reciprocal_emp, pink_emp, deeq_sic_emp
+                    wxd_emp, wxd_reciprocal_emp, vsic_emp, vsic_reciprocal_emp, pink_emp, deeq_sic_emp
    use electrons_module, only: wfc_spreads_emp, wfc_centers_emp, icompute_spread
    use cp_interfaces, only: gram_empty, nlsm1
    use uspp_param, only: nhm
@@ -275,7 +275,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
             call nksic_potential(n_emps, n_empx, c0_emp, fsic_emp, &
                                  bec_emp, rhovan_emp, deeq_sic_emp, &
                                  ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                 wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                 wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                  wfc_centers_emp, wfc_spreads_emp, &
                                  icompute_spread, .true.)
             !
@@ -304,8 +304,10 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                ! odd_alpha
                !
                if (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
+               if (odd_nkscalfact_empty) wxd_reciprocal_emp(:, :) = wxd_reciprocal_emp(:, :)*odd_alpha(i)/nkscalfact
                !
                vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp(:, ispin_emp(i))
+               vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_reciprocal_emp(:, ispin_emp(i))
                !
             end do
             !
@@ -666,7 +668,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -735,7 +737,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                              wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -806,7 +808,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                              wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -826,8 +828,10 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
             ! odd_alpha
             !
             if (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
+            if (odd_nkscalfact_empty) wxd_reciprocal_emp(:, :) = wxd_reciprocal_emp(:, :)*odd_alpha(i)/nkscalfact
             !
             vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp(:, ispin_emp(i))
+            vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_reciprocal_emp(:, ispin_emp(i))
             !
          end do
          !
@@ -959,7 +963,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -1257,7 +1261,7 @@ contains
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot_emp, deltae*innerloop_cg_ratio, lgam, &
                                         n_emps, n_empx, nudx_emp, iupdwn_emp, nupdwn_emp, ispin_emp, &
                                         c0_emp, rhovan_emp, bec_emp, rhor, rhoc, vsic_emp, vsic_reciprocal_emp, pink_emp, &
-                                        deeq_sic_emp, wtot, fsic_emp, .false., wfc_centers_emp, wfc_spreads_emp, .true.)
+                                        deeq_sic_emp, wtot, wtot_reciprocal, fsic_emp, .false., wfc_centers_emp, wfc_spreads_emp, .true.)
          !
       end if
       !

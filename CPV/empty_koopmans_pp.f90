@@ -33,9 +33,9 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       USE cp_interfaces,        ONLY : readempty_twin, writeempty_twin, nlsm1, readempty
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm
-      USE nksic,                ONLY : do_pz, do_wxd, vsicpsi, wtot, &
+      USE nksic,                ONLY : do_pz, do_wxd, vsicpsi, wtot, wtot_reciprocal, &
                                        odd_alpha, valpsi, nkscalfact, odd_alpha_emp, &
-                                       fsic_emp, vsic_emp, vsic_reciprocal_emp, wxd_emp, &
+                                       fsic_emp, vsic_emp, vsic_reciprocal_emp, wxd_emp, wxd_reciprocal_emp, &
                                        deeq_sic_emp, allocate_nksic_empty, deallocate_nksic_empty
       USE input_parameters,     ONLY : odd_nkscalfact_empty, odd_nkscalfact, aux_empty_nbnd 
       USE electrons_module,     ONLY : ei_emp 
@@ -128,7 +128,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       ALLOCATE( wfc_centers_emp(4, nudx_emp, nspin )) 
       ALLOCATE( wfc_spreads_emp(nudx_emp, nspin, 2 ))
       ! 
-      CALL allocate_nksic_empty(nnrx, ngm, 2, n_empx, nat, nhm)
+      CALL allocate_nksic_empty(nnrx, ngm, n_empx, nat, nhm)
       !
       ! read auxilary orbitals
       ! 
@@ -154,10 +154,12 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       ! we save here wtot in wxd_emp
       !
       wxd_emp(:,:) = 0.0_DP
+      wxd_reciprocal_emp(:,:) = 0.0_DP
       !
       IF ( do_wxd .AND. .NOT. do_pz ) THEN
          !
          wxd_emp(:,:) = wtot(:,:)
+         wxd_reciprocal_emp(:,:) = wtot_reciprocal(:,:)
          !
       ENDIF
       !
@@ -208,7 +210,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       CALL nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                             bec_emp, becsum_emp, deeq_sic_emp, &
                             ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                            wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                            wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                             wfc_centers_emp, wfc_spreads_emp, &
                             icompute_spread, .true.)
       !
@@ -231,8 +233,10 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
          ! odd_alpha
          !
          IF(odd_nkscalfact_empty) wxd_emp(:, ispin_emp(i)) = wxd_emp(:, ispin_emp(i))*odd_alpha(i)/nkscalfact 
+         IF(odd_nkscalfact_empty) wxd_reciprocal_emp(:, ispin_emp(i)) = wxd_reciprocal_emp(:, ispin_emp(i))*odd_alpha(i)/nkscalfact 
          !  
          vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp(:, ispin_emp(i))
+         vsic_reciprocal_emp(:,i) = vsic_reciprocal_emp(:,i) + wxd_reciprocal_emp(:, ispin_emp(i))
          !
       ENDDO
       ! 

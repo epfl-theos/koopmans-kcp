@@ -414,11 +414,11 @@ module nksic
 
 contains
   !
-  subroutine allocate_nksic_empty(nnrx, ngm, nspin, n_emps, nat, nhm)
+  subroutine allocate_nksic_empty(nnrx, ngm, n_emps, nat, nhm)
 
   implicit none
 
-  integer, intent(in) :: nnrx, ngm, nspin, n_emps, nat, nhm
+  integer, intent(in) :: nnrx, ngm, n_emps, nat, nhm
 
   ALLOCATE (fsic_emp(n_emps))
   ALLOCATE (vsic_emp(nnrx, n_emps))
@@ -550,7 +550,7 @@ contains
       if ( allocated(grhobar) )         cost = cost + real( size(grhobar) )         *  8.0_dp
       if ( allocated(wrefsic) )         cost = cost + real( size(wrefsic) )         *  8.0_dp
       if ( allocated(wtot) )            cost = cost + real( size(wtot) )            *  8.0_dp
-      if ( allocated(wtot_reciprocal) ) cost = cost + real( size(wtot) )            * 16.0_dp
+      if ( allocated(wtot_reciprocal) ) cost = cost + real( size(wtot_reciprocal) ) * 16.0_dp
       !
       nksic_memusage = cost / 1000000.0_dp
       !   
@@ -576,7 +576,7 @@ contains
       if(allocated(vsicpsi))     deallocate(vsicpsi)
       if(allocated(wrefsic))     deallocate(wrefsic)
       if(allocated(wtot))        deallocate(wtot)
-      if(allocated(wtot))        deallocate(wtot_reciprocal)
+      if(allocated(wtot_reciprocal)) deallocate(wtot_reciprocal)
       if(allocated(orb_rhor))    deallocate(orb_rhor)
       if(allocated(grhobar))     deallocate(grhobar)
       if(allocated(rhobar))      deallocate(rhobar)
@@ -595,17 +595,12 @@ contains
   !
   subroutine deallocate_nksic_empty
 
-      use ifcore, only: tracebackqq
-
       if(allocated(fsic_emp)) DEALLOCATE(fsic_emp)
       if(allocated(vsic_emp)) DEALLOCATE(vsic_emp)
       if(allocated(vsic_reciprocal_emp)) DEALLOCATE(vsic_reciprocal_emp)
       if(allocated(wxd_emp)) DEALLOCATE(wxd_emp)
       if(allocated(wxd_reciprocal_emp)) DEALLOCATE(wxd_reciprocal_emp)
       if(allocated(deeq_sic_emp)) DEALLOCATE(deeq_sic_emp)
-      if(allocated(odd_alpha_emp))    deallocate(odd_alpha_emp)
-
-      call tracebackqq(user_exit_code=-1)
 
   end subroutine
 

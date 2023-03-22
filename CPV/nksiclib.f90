@@ -16,7 +16,7 @@
 !-----------------------------------------------------------------------
       subroutine nksic_potential(nbsp, nx, c, f_diag, bec, becsum, &
                                  deeq_sic, ispin, iupdwn, nupdwn, &
-                                 rhor, rhoc, wtot, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                 rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
                                  wfc_centers, wfc_spreads, &
                                  icompute_spread, is_empty)
 !-----------------------------------------------------------------------
@@ -33,7 +33,7 @@
          use grid_dimensions, only: nnrx
          USE electrons_base, ONLY: nspin
          use funct, only: dft_is_gradient
-         use nksic, only: orb_rhor, wxdsic, &
+         use nksic, only: orb_rhor, wxdsic, wxdsic_reciprocal, &
                           wrefsic, rhoref, rhobar, &
                           do_nk, do_nki, do_pz, do_nkpz, &
                           do_nkipz, do_pz_renorm, &
@@ -53,64 +53,6 @@
          !
          implicit none
          !
-         ! -- add N. Poilvert, define explicit interface to
-         ! nksic_correction_nkipz
-         !
-         INTERFACE
-            subroutine nksic_correction_nkipz(f, ispin, orb_rhor, &
-                                              vsic, vsic_reciprocal, pink, ibnd, shart, is_empty)
-
-               use kinds, only: dp
-               use constants, only: e2, fpi, hartree_si, electronvolt_si
-               use grid_dimensions, only: nnrx
-               use reciprocal_vectors, only: ngm
-               use cp_interfaces, only: fwfft, invfft, fillgrad
-               use funct, only: dft_is_gradient
-               use mp, only: mp_sum
-
-               integer, intent(in)  :: ispin, ibnd
-               real(dp), intent(in)  :: f, orb_rhor(nnrx)
-               real(dp), intent(out) :: vsic(nnrx)
-               complex(dp), intent(out) :: vsic_reciprocal(ngm)
-               real(dp), intent(out) :: pink, shart
-               logical, optional, intent(in) :: is_empty
-            end subroutine nksic_correction_nkipz
-         END INTERFACE
-         ! -- add N. Poilvert, define explicit interface to
-         ! nksic_correction_nki
-         INTERFACE
-            subroutine nksic_correction_nki(f, ispin, orb_rhor, rhor, &
-                                            rhoref, rhobar, rhobarg, grhobar, &
-                                            vsic, vsic_reciprocal, wxdsic, do_wxd_, pink, ibnd, shart, is_empty)
-
-               use kinds, only: dp
-               use constants, only: e2, fpi
-               use nksic, only: vxc => vxc_sic
-               use reciprocal_vectors, only: ngm
-               use grid_dimensions, only: nnrx
-               use cp_interfaces, only: fwfft, invfft, fillgrad
-               use funct, only: dmxc_spin, dft_is_gradient
-               use mp, only: mp_sum
-               use electrons_base, only: nspin
-
-               integer, intent(in)  :: ispin, ibnd
-               real(dp), intent(in)  :: f, orb_rhor(nnrx)
-               real(dp), intent(in)  :: rhor(nnrx, nspin)
-               real(dp), intent(in)  :: rhoref(nnrx, 2)
-               real(dp), intent(in)  :: rhobar(nnrx, 2)
-               complex(dp), intent(in)  :: rhobarg(ngm, 2)
-               real(dp), intent(in)  :: grhobar(nnrx, 3, 2)
-               real(dp), intent(out) :: vsic(nnrx)
-               complex(dp), intent(out) :: vsic_reciprocal(ngm)
-               real(dp), intent(out) :: wxdsic(nnrx, 2)
-               logical, intent(in)  :: do_wxd_
-               real(dp), intent(out) :: pink, shart
-               logical, optional, intent(in) :: is_empty
-            end subroutine nksic_correction_nki
-         END INTERFACE
-
-         ! in/out vars
-         !
          integer, intent(in)  :: nbsp, nx, nudx
          complex(dp), intent(in)  :: c(ngw, nx)
          type(twin_matrix), intent(in)  :: bec!(nkb,nbsp) !modified:giovanni
@@ -121,7 +63,7 @@
          real(dp)                 :: rhor(nnrx, nspin)
          real(dp), intent(in)  :: rhoc(nnrx)
          real(dp), intent(out) :: vsic(nnrx, nx), wtot(nnrx, 2)
-         complex(dp), intent(out) :: vsic_reciprocal(ngm, nx)
+         complex(dp), intent(out) :: vsic_reciprocal(ngm, nx), wtot_reciprocal(ngm, 2)
          real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
          logical, intent(in)  :: do_wxd_
          real(dp), intent(out) :: pink(nx)
@@ -168,6 +110,7 @@
          !
          if (do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
             wtot = 0.0_dp
+            wtot_reciprocal = 0.0_dp
          end if
          !
          if (do_nkpz .or. do_nkipz) then
@@ -333,16 +276,18 @@
                   !
                   call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                             rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                            vsic(:, i), vsic_reciprocal(:, i), wxdsic, do_wxd_, pink(i), ibnd, shart, is_empty_)
+                             vsic(:, i), vsic_reciprocal(:, i), wxdsic, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
                   !
                   ! here information is accumulated over states
                   ! (wtot is added in the next loop)
                   !
                   wtot(1:nnrx, 1:2) = wtot(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+                  wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
                   !
                   ! ths sic potential is partly updated here to save some memory
                   !
                   vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic(1:nnrx, ispin(i))
+                  vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                   !
                   wfc_spreads(ibnd, ispin(i), 2) = shart
                   !
@@ -383,8 +328,10 @@
                   if (nspin == 1) then
                      !
                      wtot(1:nnrx, 1) = wtot(1:nnrx, 1) + wxdsic(1:nnrx, 2)
+                     wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
                      !
                      wtot(1:nnrx, 2) = wtot(1:nnrx, 2) + wxdsic(1:nnrx, 1)
+                     wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)
                      !
                   end if
                   !
@@ -409,6 +356,7 @@
             do i = 1, nbsp
                !
                vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot(1:nnrx, ispin(i))
+               vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + wtot_reciprocal(1:ngm, ispin(i))
                !
             end do
             !
@@ -506,6 +454,7 @@
          end if !added:linh draw vsic potentials
          !
          if (allocated(vsicpz)) deallocate (vsicpz)
+         if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
          !
          ! USPP:
          ! compute corrections to the D coefficients of the pseudopots
@@ -2062,7 +2011,7 @@
 
 !---------------------------------------------------------------
       subroutine nksic_get_pzfactor_potential(f, nspin, ispin, rhor, orb_rhor, &
-                                              pink, taukin, tauw, edens, upsilonkin, upsilonw, vsic, vsic_reciprocal, alpha, ibnd, kfact)
+                                         pink, taukin, tauw, edens, upsilonkin, upsilonw, vsic, vsic_reciprocal, alpha, ibnd, kfact)
 !---------------------------------------------------------------
 !
 ! ... sum up the kinetic energy-density taukin ... this works both for summing
@@ -2216,7 +2165,7 @@
          vtmp = vsic(:)
          call fwfft('Dense', vtmp, dfftp)
          call psi2rho('Dense', vtmp, dfftp%nnr, vsic_reciprocal, ngm)
-         deallocate(vtmp)
+         deallocate (vtmp)
          !
          deallocate (upsilonh, vsicaux, rhog_dummy)
          !
@@ -3171,7 +3120,7 @@
 !---------------------------------------------------------------
       subroutine nksic_correction_nki(f, ispin, orb_rhor, rhor, &
                                       rhoref, rhobar, rhobarg, grhobar, &
-                                      vsic, vsic_reciprocal, wxdsic, do_wxd_, pink, ibnd, shart, is_empty)
+                                      vsic, vsic_reciprocal, wxdsic, wxdsic_reciprocal, do_wxd_, pink, ibnd, shart, is_empty)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans (integrated, NKI)
@@ -3212,11 +3161,12 @@
          real(dp), intent(out) :: vsic(nnrx)
          complex(dp), intent(out) :: vsic_reciprocal(ngm)
          real(dp), intent(out) :: wxdsic(nnrx, 2)
+         complex(dp), intent(out) :: wxdsic_reciprocal(ngm, 2)
          logical, intent(in)  :: do_wxd_
          real(dp), intent(out) :: pink, shart
          logical, optional, intent(in) :: is_empty
          !
-         integer       :: ig
+         integer       :: ig, i
          real(dp)      :: fact, ehele, etmp
          real(dp)      :: etxcref, etxc0, w2cst
          !
@@ -3228,6 +3178,7 @@
          complex(dp), allocatable :: vcorr(:)
          complex(dp), allocatable :: rhogaux(:, :)
          complex(dp), allocatable :: vtmp(:)
+         complex(dp), allocatable :: wxdtmp(:, :)
          !
          real(dp), allocatable :: grhoraux(:, :, :)
          real(dp), allocatable :: orb_grhor(:, :, :)
@@ -3279,6 +3230,7 @@
          vsic = 0.0_dp
          vsic_reciprocal = 0.0_dp
          wxdsic = 0.0_dp
+         wxdsic_reciprocal = 0.0_dp
          pink = 0.0_dp
          !
          ! Compute self-hartree contributions
@@ -3550,12 +3502,23 @@
          !   calculate wxd
          !
          wxdsic(:, :) = 0.0d0
+         wxdsic_reciprocal(:, :) = 0.0d0
          !
          if (do_wxd_) then
             !
             wxdsic(:, 1:2) = (1.0_dp - f)*vxc0(:, 1:2) - vxc(:, 1:2) + f*vxcref(:, 1:2)
             !
          end if
+         !
+         ! Transform wxdsic to reciprocal space
+         !
+         allocate (wxdtmp(ngm, 2))
+         wxdtmp = wxdsic(:, :)
+         do i = 1, 2
+            call fwfft('Dense', wxdtmp(:, i), dfftp)
+            call psi2rho('Dense', wxdtmp(:, i), dfftp%nnr, wxdsic_reciprocal(:, i), ngm)
+         end do
+         deallocate (wxdtmp)
          !
          call stop_clock('nk_corr_vxc')
          !
@@ -3568,10 +3531,12 @@
          if (do_wxd_) then
             !
             wxdsic = wxdsic*nkscalfact
+            wxdsic_reciprocal = wxdsic_reciprocal*nkscalfact
             !
          else
             !
             wxdsic = 0.d0
+            wxdsic_reciprocal = 0.d0
             !
          end if
          !
@@ -4342,7 +4307,7 @@
 
             dalpha = passoprod/dmaxeig
             !
-            call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, dtmp, lgam)
+           call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, dtmp, lgam)
 
             !
             ! deal with non-variational functionals,
@@ -4967,7 +4932,7 @@
                   signalpha = signalpha*(-0.717d0)
                   dalpha = spasso*passo*signalpha
                   !
-                  call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+        call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
                   !
                end do
 
@@ -5516,7 +5481,7 @@
                   signalpha = signalpha*(-0.717d0)
                   dalpha = spasso*passo*signalpha
                   !
-                  call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+        call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
                   !
                end do
 
@@ -6135,7 +6100,7 @@
          use ions_base, only: nsp
          use uspp, only: becsum
          use cp_main_variables, only: eigr, rhor
-         use nksic, only: deeq_sic, wtot, fsic
+         use nksic, only: deeq_sic, wtot, wtot_reciprocal, fsic
          use control_flags, only: gamma_only, do_wf_cmplx
          use twin_types
          use electrons_module, only: icompute_spread
@@ -6232,7 +6197,7 @@
          pink1(:) = 0.d0
          !
          call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, vsic1, vsic_reciprocal1, pink1, nudx, wfc_centers, &
+                      ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1, vsic_reciprocal1, pink1, nudx, wfc_centers, &
                               wfc_spreads, icompute_spread, is_empty)
          !
          ene1 = sum(pink1(:))
@@ -6266,7 +6231,7 @@
          use ions_base, only: nsp
          use uspp, only: becsum
          use cp_main_variables, only: eigr, rhor
-         use nksic, only: deeq_sic, wtot, fsic, do_wxd, &
+         use nksic, only: deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
                           valpsi, odd_alpha
          use control_flags, only: gamma_only, do_wf_cmplx
          use twin_types
@@ -6371,7 +6336,7 @@
          !
          !
          call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, vsic1, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
+              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
                               wfc_spreads, icompute_spread, .false.)
          !
          ene1 = sum(pink1(:))
@@ -7881,7 +7846,7 @@
       subroutine nksic_potential_non_ortho(nbsp, nx, c, cdual, f_diag, &
                                            bec, becdual, becsum, &
                                            deeq_sic, ispin, iupdwn, nupdwn, &
-                                           rhor, rhoc, wtot, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                           rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
                                            wfc_centers, wfc_spreads, &
                                            icompute_spread)
 !-----------------------------------------------------------------------
@@ -7903,7 +7868,7 @@
          use grid_dimensions, only: nnrx
          use electrons_base, only: nspin
          use funct, only: dft_is_gradient
-         use nksic, only: orb_rhor, wxdsic, &
+         use nksic, only: orb_rhor, wxdsic, wxdsic_reciprocal, &
                           wrefsic, rhoref, rhobar, &
                           do_nk, do_nki, do_pz, do_nkpz, &
                           do_nkipz, grhobar, fion_sic, &
@@ -7949,7 +7914,7 @@
          INTERFACE
             subroutine nksic_correction_nki(f, ispin, orb_rhor, rhor, &
                                             rhoref, rhobar, rhobarg, grhobar, &
-                                            vsic, vsic_reciprocal, wxdsic, do_wxd_, pink, ibnd, is_empty)
+                                            vsic, vsic_reciprocal, wxdsic, wxdsic_reciprocal, do_wxd_, pink, ibnd, is_empty)
 
                use kinds, only: dp
                use constants, only: e2, fpi
@@ -7970,6 +7935,7 @@
                real(dp), intent(out) :: vsic(nnrx)
                complex(dp), intent(out) :: vsic_reciprocal(ngm)
                real(dp), intent(out) :: wxdsic(nnrx, 2)
+               complex(dp), intent(out) :: wxdsic_reciprocal(ngm, 2)
                logical, intent(in)  :: do_wxd_
                real(dp), intent(out) :: pink
                logical, optional, intent(in) :: is_empty
@@ -7989,7 +7955,7 @@
          real(dp), intent(in)  :: rhor(nnrx, nspin)
          real(dp), intent(in)  :: rhoc(nnrx)
          real(dp), intent(out) :: vsic(nnrx, nx), wtot(nnrx, 2)
-         complex(dp), intent(out) :: vsic_reciprocal(ngm, nx)
+         complex(dp), intent(out) :: vsic_reciprocal(ngm, nx), wtot_reciprocal(ngm, 2)
          real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
          logical, intent(in)  :: do_wxd_
          real(dp), intent(out) :: pink(nx)
@@ -8023,6 +7989,7 @@
 
          if (do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
             wtot = 0.0_dp
+            wtot_reciprocal = 0.0_dp
          end if
          !
          if (do_nkpz .or. do_nkipz) then
@@ -8119,7 +8086,7 @@
                   !
                   call nksic_correction_nk(focc, ispin(i), orb_rhor(:, jj), &
                                            rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                           vsic(:, i), wxdsic, wrefsic, do_wxd_, &
+                                           vsic(:, i), wxdsic, wxdsic, wrefsic, do_wxd_, &
                                            pink(i), ibnd, shart)
                   !
                   wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -8176,24 +8143,25 @@
                   !
                   call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                             rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                            vsic(:, i), vsic_reciprocal(:, i), wxdsic, do_wxd_, pink(i), ibnd)
+                                            vsic(:, i), vsic_reciprocal(:, i), wxdsic, wxdsic_reciprocal, do_wxd_, pink(i), ibnd)
                   !
                   ! here information is accumulated over states
                   ! (wtot is added in the next loop)
                   !
                   wtot(1:nnrx, 1:2) = wtot(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+                  wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
                   !
                   ! ths sic potential is partly updated here to save some memory
                   !
                   vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic(1:nnrx, ispin(i))
-                  ! vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
+                  vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                   !
                end if
 
                if (do_nkipz) then
                   !
-                  call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz, &
-                                              vsicpz_reciprocal, pinkpz, ibnd, shart)
+                  call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz, vsicpz_reciprocal, &
+                                              pinkpz, ibnd, shart)
                   !
                   vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx)
                   vsic_reciprocal(:, i) = vsic_reciprocal(:, i) + vsicpz_reciprocal(:)
@@ -8215,6 +8183,8 @@
                      wtot(1:nnrx, 1) = wtot(1:nnrx, 1) + wxdsic(1:nnrx, 2)
                      wtot(1:nnrx, 2) = wtot(1:nnrx, 2) + wxdsic(1:nnrx, 1)
                      !
+                     wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
+                     wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)
                   end if
                   !
                end if
@@ -8239,6 +8209,7 @@
             do i = 1, nbsp
                !
                vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot(1:nnrx, ispin(i))
+               vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + wtot_reciprocal(1:ngm, ispin(i))
                !
             end do
             !
@@ -8300,7 +8271,7 @@
          !
          if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
          !
-         call ebl_check(vsic(:,10), vsic_reciprocal(:,10))
+         call ebl_check(vsic(:, 10), vsic_reciprocal(:, 10))
 
          !
          ! USPP:
@@ -8343,7 +8314,7 @@
          use fft_base, only: dfftp
          use gvecp, only: ngm
          use grid_dimensions, only: nnrx
-         use ifcore, only: tracebackqq
+         ! use ifcore, only: tracebackqq
          use mp, only: mp_sum
          use mp_global, only: intra_pool_comm
 
@@ -8357,8 +8328,8 @@
          complex(dp), allocatable :: psi(:)
          integer :: return_code
 
-         allocate(vsic_realspace(size(vsic)))
-         allocate(psi(size(vsic)))
+         allocate (vsic_realspace(size(vsic)))
+         allocate (psi(size(vsic)))
 
          call rho2psi('Dense', psi, dfftp%nnr, vsic_reciprocal, ngm)
          call invfft('Dense', psi, dfftp)
@@ -8371,8 +8342,8 @@
 
          return_code = -1
          if (abs(sumdiff) > 1d-8) return_code = 0
-         
+
          ! call tracebackqq(user_exit_code=return_code)
 
-         deallocate(vsic_realspace, psi)
+         deallocate (vsic_realspace, psi)
       end subroutine ebl_check

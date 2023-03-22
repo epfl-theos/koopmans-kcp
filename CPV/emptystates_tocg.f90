@@ -46,9 +46,9 @@
                                        bec_csv, reademptyc0, writeemptyc0
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm, me_image
-      USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot, &
+      USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot, wtot_reciprocal, &
                                        odd_alpha, valpsi, nkscalfact
-      USE nksic,                ONLY : do_spinsym, pink_emp, allocate_nksic_empty
+      USE nksic,                ONLY : do_spinsym, pink_emp, allocate_nksic_empty, deallocate_nksic_empty
       USE hfmod,                ONLY : do_hf, vxxpsi
       USE twin_types !added:giovanni
       USE control_flags,        ONLY : tatomicwfc, trane, ndr, ndw
@@ -90,8 +90,9 @@
       INTEGER,     ALLOCATABLE :: ispin_emp(:)
       REAL(DP),    ALLOCATABLE :: fsic_emp(:)
       REAL(DP),    ALLOCATABLE :: vsic_emp(:,:)
-      complex(DP),    ALLOCATABLE :: vsic_reciprocal_emp(:,:)
+      complex(DP), ALLOCATABLE :: vsic_reciprocal_emp(:,:)
       REAL(DP),    ALLOCATABLE :: wxd_emp(:,:)
+      complex(DP), ALLOCATABLE :: wxd_reciprocal_emp(:,:)
       REAL(DP),    ALLOCATABLE :: deeq_sic_emp(:,:,:,:)
       COMPLEX(DP), ALLOCATABLE :: vxxpsi_emp(:,:)
       REAL(DP),    ALLOCATABLE :: exx_emp(:)
@@ -229,37 +230,8 @@
       ispin_emp( 1:nupdwn_emp( 1 ) ) = 1
       IF( nspin == 2 ) ispin_emp( iupdwn_emp(2) : ) = 2
       !
-      !
-      IF ( do_orbdep ) THEN
-          !
-          ALLOCATE( fsic_emp( n_empx ) )
-          ! n_empx_odd=n_empx
-          ALLOCATE( vsic_emp(nnrx, n_empx) )
-          ALLOCATE( vsic_reciprocal_emp(ngm, n_empx) )
-          ALLOCATE( wxd_emp (nnrx, 2) )
-          ALLOCATE( deeq_sic_emp (nhm,nhm,nat,n_empx) )
-          ALLOCATE( becsum_emp(nhm*(nhm+1)/2,nat,nspin))
-          CALL allocate_nksic_empty(n_empx)
-          sizvsic_emp=nnrx
-          !
-          fsic_emp = 0.0d0
-          vsic_emp = 0.0d0
-          wxd_emp  = 0.0d0
-          ! 
-      ELSE
-          !
-          ALLOCATE( fsic_emp( n_empx ) )
-          ! n_empx_odd=1
-          ALLOCATE( vsic_emp(1, n_empx) )
-          ALLOCATE( vsic_reciprocal_emp(1, n_empx) )
-          ALLOCATE( wxd_emp (1, 2) )
-          ALLOCATE( deeq_sic_emp (nhm,nhm,nat,n_empx) )
-          ALLOCATE( becsum_emp(nhm*(nhm+1)/2,nat,nspin) )
-          !
-          call allocate_nksic_empty(n_empx)
-          sizvsic_emp=1
-          !
-      ENDIF
+      ALLOCATE( becsum_emp(nhm*(nhm+1)/2,nat,nspin))
+      if (do_orbdep) CALL allocate_nksic_empty(nnrx, ngm, n_empx, nat, nhm)
       !
       IF ( do_hf ) THEN
           !
@@ -388,10 +360,12 @@
       IF ( do_orbdep ) THEN
           !
           wxd_emp(:,:) = 0.0_DP
+          wxd_reciprocal_emp(:,:) = 0.0_DP
           !
           IF ( do_wxd .AND. .NOT. do_pz ) THEN
               !
               wxd_emp(:,:) = wtot(:,:)
+              wxd_reciprocal_emp(:,:) = wtot_reciprocal(:,:)
               !
           ENDIF
       ENDIF
@@ -467,8 +441,10 @@
                     ! odd_alpha
                     !
                     IF(odd_nkscalfact) wxd_emp(:,:) = wxd_emp(:,:)*odd_alpha(i)/nkscalfact 
+                    IF(odd_nkscalfact) wxd_reciprocal_emp(:,:) = wxd_reciprocal_emp(:,:)*odd_alpha(i)/nkscalfact 
                     !  
                     vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp(:, ispin_emp(i))
+                    vsic_reciprocal_emp(:,i) = vsic_reciprocal_emp(:,i) + wxd_reciprocal_emp(:, ispin_reciprocal_emp(i))
                     !
                 ENDDO
                 !
@@ -690,15 +666,9 @@
          CALL deallocate_twin(lambda_emp(iss))
       ENDDO
       !
-      DEALLOCATE( fsic_emp ) 
+      IF ( do_orbdep ) THEN call deallocate_nksic_empty()
       !
-      IF ( do_orbdep ) THEN
-          DEALLOCATE( vsic_emp ) 
-          DEALLOCATE( vsic_reciprocal_emp ) 
-          DEALLOCATE( wxd_emp ) 
-          DEALLOCATE( deeq_sic_emp )
-          DEALLOCATE( becsum_emp )
-      ENDIF
+      DEALLOCATE( becsum_emp )
       !
       IF ( do_hf ) THEN
           DEALLOCATE( vxxpsi_emp )

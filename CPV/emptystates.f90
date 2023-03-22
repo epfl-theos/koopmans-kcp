@@ -48,7 +48,7 @@
       USE mp, ONLY: mp_comm_split, mp_comm_free, mp_sum
       USE mp_global, ONLY: intra_image_comm, me_image
       USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, wtot_reciprocal, &
-                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp, &
+                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp, wxd_reciprocal_emp, &
                        fsic_emp, deeq_sic_emp, vsic_emp, vsic_reciprocal_emp, &
                        do_spinsym, allocate_nksic_empty, deallocate_nksic_empty, &
                        pink_emp
@@ -227,7 +227,7 @@
       !
       allocate(becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
       !
-      if (do_orbdep) CALL allocate_nksic_empty(nnrx, ngm, nspin, nbspx_emp, nat, nhm)
+      if (do_orbdep) CALL allocate_nksic_empty(nnrx, ngm, nbspx_emp, nat, nhm)
       !
       IF (do_hf) THEN
          !
@@ -418,10 +418,12 @@
       IF (do_orbdep .and. (.not. wo_odd_in_empty_run)) THEN
          !
          wxd_emp(:, :) = 0.0_DP
+         wxd_reciprocal_emp(:, :) = 0.0_DP
          !
          IF (do_wxd .AND. .NOT. do_pz) THEN
             !
             wxd_emp(:, :) = wtot(:, :)
+            wxd_reciprocal_emp(:, :) = wtot_reciprocal(:, :)
             !
          END IF
       END IF
@@ -504,7 +506,7 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !
@@ -525,8 +527,10 @@
                   ! odd_alpha
                   !
                   IF (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
+                  IF (odd_nkscalfact_empty) wxd_reciprocal_emp(:, :) = wxd_reciprocal_emp(:, :)*odd_alpha(i)/nkscalfact
                   !
                   vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp(:, ispin_emp(i))
+                  vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_reciprocal_emp(:, ispin_emp(i))
                   !
                END DO
                !
