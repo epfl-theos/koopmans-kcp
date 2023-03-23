@@ -370,8 +370,8 @@ module nksic
   real(dp), allocatable :: fsic_emp(:)
   real(dp), allocatable :: vsic_emp(:, :)
   complex(dp), allocatable :: vsic_reciprocal_emp(:, :)
-  real(dp), allocatable :: wxd_emp(:, :)
-  complex(dp), allocatable :: wxd_reciprocal_emp(:, :)
+  real(dp), allocatable :: wxd_emp_realspace(:, :)
+  complex(dp), allocatable :: wxd_emp_reciprocal(:, :)
   real(dp), allocatable :: deeq_sic_emp(:, :, :, :)
   !
   complex(dp), allocatable :: vsicpsi(:,:)
@@ -423,15 +423,15 @@ contains
   ALLOCATE (fsic_emp(n_emps))
   ALLOCATE (vsic_emp(nnrx, n_emps))
   ALLOCATE (vsic_reciprocal_emp(ngm, n_emps))
-  ALLOCATE (wxd_emp(nnrx, 2))
-  ALLOCATE (wxd_reciprocal_emp(ngm, 2))
+  ALLOCATE (wxd_emp_realspace(nnrx, 2))
+  ALLOCATE (wxd_emp_reciprocal(ngm, 2))
   ALLOCATE (deeq_sic_emp(nhm, nhm, nat, n_emps))
   !
   fsic_emp = 0.0d0
   vsic_emp = 0.0d0
   vsic_reciprocal_emp = 0.0d0
-  wxd_emp = 0.0d0
-  wxd_reciprocal_emp = 0.0d0
+  wxd_emp_realspace = 0.0d0
+  wxd_emp_reciprocal = 0.0d0
   
   IF(.not.allocated(pink_emp)) THEN
      !
@@ -598,8 +598,8 @@ contains
       if(allocated(fsic_emp)) DEALLOCATE(fsic_emp)
       if(allocated(vsic_emp)) DEALLOCATE(vsic_emp)
       if(allocated(vsic_reciprocal_emp)) DEALLOCATE(vsic_reciprocal_emp)
-      if(allocated(wxd_emp)) DEALLOCATE(wxd_emp)
-      if(allocated(wxd_reciprocal_emp)) DEALLOCATE(wxd_reciprocal_emp)
+      if(allocated(wxd_emp_realspace)) DEALLOCATE(wxd_emp_realspace)
+      if(allocated(wxd_emp_reciprocal)) DEALLOCATE(wxd_emp_reciprocal)
       if(allocated(deeq_sic_emp)) DEALLOCATE(deeq_sic_emp)
 
   end subroutine

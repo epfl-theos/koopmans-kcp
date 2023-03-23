@@ -48,7 +48,7 @@
       USE mp, ONLY: mp_comm_split, mp_comm_free, mp_sum
       USE mp_global, ONLY: intra_image_comm, me_image
       USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot_realspace, wtot_reciprocal, &
-                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp, wxd_reciprocal_emp, &
+                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp_realspace, wxd_emp_reciprocal, &
                        fsic_emp, deeq_sic_emp, vsic_emp, vsic_reciprocal_emp, &
                        do_spinsym, allocate_nksic_empty, deallocate_nksic_empty, &
                        pink_emp
@@ -413,17 +413,17 @@
       ! init xd potential
       !
       ! we need to use wtot_realspace from previous calls with occupied states
-      ! we save here wtot_realspace in wxd_emp
+      ! we save here wtot_realspace in wxd_emp_realspace
       !
       IF (do_orbdep .and. (.not. wo_odd_in_empty_run)) THEN
          !
-         wxd_emp(:, :) = 0.0_DP
-         wxd_reciprocal_emp(:, :) = 0.0_DP
+         wxd_emp_realspace(:, :) = 0.0_DP
+         wxd_emp_reciprocal(:, :) = 0.0_DP
          !
          IF (do_wxd .AND. .NOT. do_pz) THEN
             !
-            wxd_emp(:, :) = wtot_realspace(:, :)
-            wxd_reciprocal_emp(:, :) = wtot_reciprocal(:, :)
+            wxd_emp_realspace(:, :) = wtot_realspace(:, :)
+            wxd_emp_reciprocal(:, :) = wtot_reciprocal(:, :)
             !
          END IF
       END IF
@@ -522,15 +522,15 @@
                !
                DO i = 1, nbsp_emp
                   !
-                  ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of occupied states.
+                  ! Here wxd_emp_realspace <-> wtot_realspace that computed from nksic_potential of occupied states.
                   ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
                   ! odd_alpha
                   !
-                  IF (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
-                  IF (odd_nkscalfact_empty) wxd_reciprocal_emp(:, :) = wxd_reciprocal_emp(:, :)*odd_alpha(i)/nkscalfact
+                  IF (odd_nkscalfact_empty) wxd_emp_realspace(:, :) = wxd_emp_realspace(:, :)*odd_alpha(i)/nkscalfact
+                  IF (odd_nkscalfact_empty) wxd_emp_reciprocal(:, :) = wxd_emp_reciprocal(:, :)*odd_alpha(i)/nkscalfact
                   !
-                  vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp(:, ispin_emp(i))
-                  vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_reciprocal_emp(:, ispin_emp(i))
+                  vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp_realspace(:, ispin_emp(i))
+                  vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_emp_reciprocal(:, ispin_emp(i))
                   !
                END DO
                !

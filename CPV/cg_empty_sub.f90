@@ -58,7 +58,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                     do_innerloop_empty, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     innerloop_until, do_bare_eigs, fsic_emp, &
-                    wxd_emp, wxd_reciprocal_emp, vsic_emp, vsic_reciprocal_emp, pink_emp, deeq_sic_emp
+                    wxd_emp_realspace, wxd_emp_reciprocal, vsic_emp, vsic_reciprocal_emp, pink_emp, deeq_sic_emp
    use electrons_module, only: wfc_spreads_emp, wfc_centers_emp, icompute_spread
    use cp_interfaces, only: gram_empty, nlsm1
    use uspp_param, only: nhm
@@ -299,15 +299,15 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
             !
             do i = 1, n_emps
                !
-               ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of occupied states.
+               ! Here wxd_emp_realspace <-> wtot_realspace that computed from nksic_potential of occupied states.
                ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
                ! odd_alpha
                !
-               if (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
-               if (odd_nkscalfact_empty) wxd_reciprocal_emp(:, :) = wxd_reciprocal_emp(:, :)*odd_alpha(i)/nkscalfact
+               if (odd_nkscalfact_empty) wxd_emp_realspace(:, :) = wxd_emp_realspace(:, :)*odd_alpha(i)/nkscalfact
+               if (odd_nkscalfact_empty) wxd_emp_reciprocal(:, :) = wxd_emp_reciprocal(:, :)*odd_alpha(i)/nkscalfact
                !
-               vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp(:, ispin_emp(i))
-               vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_reciprocal_emp(:, ispin_emp(i))
+               vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp_realspace(:, ispin_emp(i))
+               vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_emp_reciprocal(:, ispin_emp(i))
                !
             end do
             !
@@ -821,17 +821,17 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          !
          do i = 1, n_emps
             !
-            ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of
+            ! Here wxd_emp_realspace <-> wtot_realspace that computed from nksic_potential of
             ! occupied states.
             ! wtot_realspace is scaled with nkscalfact constant, we thus need to
             ! rescaled it here with
             ! odd_alpha
             !
-            if (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
-            if (odd_nkscalfact_empty) wxd_reciprocal_emp(:, :) = wxd_reciprocal_emp(:, :)*odd_alpha(i)/nkscalfact
+            if (odd_nkscalfact_empty) wxd_emp_realspace(:, :) = wxd_emp_realspace(:, :)*odd_alpha(i)/nkscalfact
+            if (odd_nkscalfact_empty) wxd_emp_reciprocal(:, :) = wxd_emp_reciprocal(:, :)*odd_alpha(i)/nkscalfact
             !
-            vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp(:, ispin_emp(i))
-            vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_reciprocal_emp(:, ispin_emp(i))
+            vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp_realspace(:, ispin_emp(i))
+            vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_emp_reciprocal(:, ispin_emp(i))
             !
          end do
          !

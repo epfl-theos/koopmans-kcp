@@ -91,8 +91,8 @@
       REAL(DP),    ALLOCATABLE :: fsic_emp(:)
       REAL(DP),    ALLOCATABLE :: vsic_emp(:,:)
       complex(DP), ALLOCATABLE :: vsic_reciprocal_emp(:,:)
-      REAL(DP),    ALLOCATABLE :: wxd_emp(:,:)
-      complex(DP), ALLOCATABLE :: wxd_reciprocal_emp(:,:)
+      REAL(DP),    ALLOCATABLE :: wxd_emp_realspace(:,:)
+      complex(DP), ALLOCATABLE :: wxd_emp_reciprocal(:,:)
       REAL(DP),    ALLOCATABLE :: deeq_sic_emp(:,:,:,:)
       COMPLEX(DP), ALLOCATABLE :: vxxpsi_emp(:,:)
       REAL(DP),    ALLOCATABLE :: exx_emp(:)
@@ -355,17 +355,17 @@
       ! init xd potential
       !
       ! we need to use wtot_realspace from previous calls with occupied states
-      ! we save here wtot_realspace in wxd_emp
+      ! we save here wtot_realspace in wxd_emp_realspace
       !
       IF ( do_orbdep ) THEN
           !
-          wxd_emp(:,:) = 0.0_DP
-          wxd_reciprocal_emp(:,:) = 0.0_DP
+          wxd_emp_realspace(:,:) = 0.0_DP
+          wxd_emp_reciprocal(:,:) = 0.0_DP
           !
           IF ( do_wxd .AND. .NOT. do_pz ) THEN
               !
-              wxd_emp(:,:) = wtot_realspace(:,:)
-              wxd_reciprocal_emp(:,:) = wtot_reciprocal(:,:)
+              wxd_emp_realspace(:,:) = wtot_realspace(:,:)
+              wxd_emp_reciprocal(:,:) = wtot_reciprocal(:,:)
               !
           ENDIF
       ENDIF
@@ -381,7 +381,7 @@
             stop
 !          call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx,&
 !                           n_emps, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-!                           max_emp, wxd_emp, vsic_emp, sizvsic_emp, pink_emp, becsum_emp, &
+!                           max_emp, wxd_emp_realspace, vsic_emp, sizvsic_emp, pink_emp, becsum_emp, &
 !                           deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, v, &
 !                           nfi, .true., eigr, bec, irb, eigrb, &
 !                           rhor, ema0bg, desc_emp)
@@ -436,15 +436,15 @@
                 !
                 DO i = 1, n_emps
                     !  
-                    ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of occupied states.
+                    ! Here wxd_emp_realspace <-> wtot_realspace that computed from nksic_potential of occupied states.
                     ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
                     ! odd_alpha
                     !
-                    IF(odd_nkscalfact) wxd_emp(:,:) = wxd_emp(:,:)*odd_alpha(i)/nkscalfact 
-                    IF(odd_nkscalfact) wxd_reciprocal_emp(:,:) = wxd_reciprocal_emp(:,:)*odd_alpha(i)/nkscalfact 
+                    IF(odd_nkscalfact) wxd_emp_realspace(:,:) = wxd_emp_realspace(:,:)*odd_alpha(i)/nkscalfact 
+                    IF(odd_nkscalfact) wxd_emp_reciprocal(:,:) = wxd_emp_reciprocal(:,:)*odd_alpha(i)/nkscalfact 
                     !  
-                    vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp(:, ispin_emp(i))
-                    vsic_reciprocal_emp(:,i) = vsic_reciprocal_emp(:,i) + wxd_reciprocal_emp(:, ispin_reciprocal_emp(i))
+                    vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp_realspace(:, ispin_emp(i))
+                    vsic_reciprocal_emp(:,i) = vsic_reciprocal_emp(:,i) + wxd_emp_reciprocal(:, ispin_reciprocal_emp(i))
                     !
                 ENDDO
                 !
