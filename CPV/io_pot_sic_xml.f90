@@ -41,6 +41,7 @@ MODULE io_pot_sic_xml
       ! ... the '.save' directory is created if not already present
       !
       USE io_files, ONLY : outdir, prefix
+      USE gvecp, ONLY : ngm
       USE fft_base, ONLY : dfftp
       USE io_global, ONLY : ionode
       USE mp_global, ONLY : intra_pool_comm, inter_pool_comm
@@ -48,13 +49,15 @@ MODULE io_pot_sic_xml
       !
       IMPLICIT NONE
       !
-      REAL(DP),         INTENT(IN)           :: pot(dfftp%nnr)
+      COMPLEX(DP),      INTENT(IN)           :: pot(ngm)
       CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: field_specifier
       CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: extension
       !
       CHARACTER(LEN=256)    :: dirname, file_base
       CHARACTER(LEN=256)    :: ext
       REAL(DP), ALLOCATABLE :: potaux(:)
+      REAL(DP)              :: realpot(dfftp%nnr)
+      COMPLEX(DP)           :: psi(dfftp%nnr)
       !
       !
       ext = ' '
@@ -72,8 +75,13 @@ MODULE io_pot_sic_xml
       file_base = TRIM( dirname ) // '/sic_potential' // TRIM( ext )
       END IF
       !
+      ! Transform potential to real-space
+      call rho2psi('Dense', psi, dfftp%nnr, pot, ngm)
+      call invfft('Dense', psi, dfftp)
+      realpot = dble(psi)
+      !
       ! 
-      CALL write_pot_xml( file_base, pot(:), dfftp%nr1, dfftp%nr2, &
+      CALL write_pot_xml( file_base, realpot(:), dfftp%nr1, dfftp%nr2, &
               dfftp%nr3, dfftp%nr1x, dfftp%nr2x, dfftp%ipp, dfftp%npp, &
               ionode, intra_pool_comm, inter_pool_comm )
       RETURN
@@ -89,16 +97,19 @@ MODULE io_pot_sic_xml
       !
       USE io_files, ONLY : tmp_dir, prefix
       USE fft_base, ONLY : dfftp
+      USe gvecp,    ONLY : ngm
       USE io_global, ONLY : ionode
       USE mp_global, ONLY : intra_pool_comm, inter_pool_comm
       !
       IMPLICIT NONE
       !
-      REAL(DP),         INTENT(OUT)          :: pot(dfftp%nnr)
+      REAL(DP),         INTENT(OUT)          :: pot(ngm)
       CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: extension
       !
       CHARACTER(LEN=256)    :: dirname, file_base
       CHARACTER(LEN=256)    :: ext
+      REAL(DP)              :: realpot(dfftp%nnr)
+      COMPLEX(DP)           :: psi(ngm)
       !
       ext = ' '
       !
@@ -108,10 +119,14 @@ MODULE io_pot_sic_xml
       !
       file_base = TRIM( dirname ) // '/sic-potential' // TRIM( ext )
       !
-      !
-      CALL read_pot_xml( file_base, pot(:), dfftp%nr1, dfftp%nr2, &
+      CALL read_pot_xml( file_base, realpot(:), dfftp%nr1, dfftp%nr2, &
                dfftp%nr3, dfftp%nr1x, dfftp%nr2x, dfftp%ipp, dfftp%npp, &
                ionode, intra_pool_comm, inter_pool_comm ) 
+      !
+      ! Transform to reciprocal space
+      psi = realpot(:)
+      call fwfft('Dense', psi, dfftp)
+      call psi2rho('Dense', psi, dfftp%nnr, pot, ngm)
       !
       RETURN
       !

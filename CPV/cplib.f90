@@ -4669,10 +4669,6 @@ subroutine nksic_init
       ! do nothing
    CASE ("hf", "b3lyp", "pbe0")
       do_hybrid = .TRUE.
-   CASE ("nk", "non-koopmans")
-      do_nk = .TRUE.
-      do_wref = .TRUE.
-      do_wxd = .TRUE.
    CASE ("nk0")
       do_nk = .TRUE.
       do_wref = .FALSE.
@@ -4683,8 +4679,6 @@ subroutine nksic_init
       fref = 1.0
    CASE ("pz", "perdew-zunger")
       do_pz = .TRUE.
-   CASE ("nkpz", "pznk")
-      do_nkpz = .TRUE.
    CASE ("nkipz", "pznki")
       do_nkipz = .TRUE.
       do_wxd = .TRUE.
