@@ -79,7 +79,7 @@
       !
       integer  :: i, j, jj, ibnd, ir
       real(dp) :: focc, pinkpz, shart
-      real(dp), allocatable :: vsicpz(:), rhor_nocc(:, :)
+      real(dp), allocatable :: vsicpz_realspace(:), rhor_nocc(:, :)
       complex(dp), allocatable :: vsicpz_reciprocal(:)
       complex(dp), allocatable :: rhobarg(:, :)
       logical  :: lgam, is_empty_
@@ -117,9 +117,9 @@
       end if
       !
       if (do_nkpz .or. do_nkipz) then
-         allocate (vsicpz(nnrx))
+         allocate (vsicpz_realspace(nnrx))
          allocate (vsicpz_reciprocal(ngm))
-         vsicpz = 0.0_dp
+         vsicpz_realspace = 0.0_dp
          vsicpz_reciprocal = 0.0_dp
       end if
       !
@@ -242,10 +242,10 @@
             !
             if (do_nkpz) then
                !
-               call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz, &
+               call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz_realspace, &
                                           wrefsic, pinkpz, ibnd, ispin(i))
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx) &
+               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
                                  + wrefsic(1:nnrx)
                !
                pink(i) = pink(i) + pinkpz
@@ -298,10 +298,10 @@
 
             if (do_nkipz) then
                !
-               call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz, vsicpz_reciprocal, &
+               call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz_realspace, vsicpz_reciprocal, &
                                            pinkpz, ibnd, shart, is_empty_)
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx)
+               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx)
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + vsicpz_reciprocal(1:ngm)
                !
                pink(i) = pink(i) + pinkpz
@@ -457,7 +457,7 @@
          !
       end if !added:linh draw vsic potentials
       !
-      if (allocated(vsicpz)) deallocate (vsicpz)
+      if (allocated(vsicpz_realspace)) deallocate (vsicpz_realspace)
       if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
       !
       ! USPP:
@@ -6143,7 +6143,7 @@
       !
       integer  :: i, j, jj, ibnd, isp
       real(dp) :: focc, pinkpz, shart
-      real(dp), allocatable :: vsicpz(:)
+      real(dp), allocatable :: vsicpz_realspace(:)
       complex(dp), allocatable :: vsicpz_reciprocal(:)
       complex(dp), allocatable :: rhobarg(:, :)
       logical :: lgam
@@ -6168,9 +6168,9 @@
       end if
       !
       if (do_nkpz .or. do_nkipz) then
-         allocate (vsicpz(nnrx))
+         allocate (vsicpz_realspace(nnrx))
          allocate (vsicpz_reciprocal(ngm))
-         vsicpz = 0.0_dp
+         vsicpz_realspace = 0.0_dp
          vsicpz_reciprocal = 0.0_dp
       end if
       !
@@ -6283,10 +6283,10 @@
             !
             if (do_nkpz) then
                !
-               call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz, &
+               call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz_realspace, &
                                           wrefsic, pinkpz, ibnd, ispin(i))
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx) &
+               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
                                  + wrefsic(1:nnrx)
                !
                pink(i) = pink(i) + pinkpz
@@ -6336,10 +6336,10 @@
 
             if (do_nkipz) then
                !
-               call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz, vsicpz_reciprocal, &
+               call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz_realspace, vsicpz_reciprocal, &
                                            pinkpz, ibnd, shart)
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx)
+               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx)
                vsic_reciprocal(:, i) = vsic_reciprocal(:, i) + vsicpz_reciprocal(:)
                !
                pink(i) = pink(i) + pinkpz
@@ -6443,7 +6443,7 @@
          !
       end if !added:linh draw vsic potentials
       !
-      if (allocated(vsicpz)) deallocate (vsicpz)
+      if (allocated(vsicpz_realspace)) deallocate (vsicpz_realspace)
       !
       if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
       !

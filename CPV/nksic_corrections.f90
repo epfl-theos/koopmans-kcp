@@ -6409,7 +6409,7 @@ module nksic_corrections
 !       !
 !       integer  :: i, j, jj, ibnd, isp
 !       real(dp) :: focc, pinkpz, shart
-!       real(dp), allocatable :: vsicpz(:)
+!       real(dp), allocatable :: vsicpz_realspace(:)
 !       complex(dp), allocatable :: vsicpz_reciprocal(:)
 !       complex(dp), allocatable :: rhobarg(:, :)
 !       logical :: lgam
@@ -6434,9 +6434,9 @@ module nksic_corrections
 !       end if
 !       !
 !       if (do_nkpz .or. do_nkipz) then
-!          allocate (vsicpz(nnrx))
+!          allocate (vsicpz_realspace(nnrx))
 !          allocate (vsicpz_reciprocal(ngm))
-!          vsicpz = 0.0_dp
+!          vsicpz_realspace = 0.0_dp
 !          vsicpz_reciprocal = 0.0_dp
 !       end if
 !       !
@@ -6549,10 +6549,10 @@ module nksic_corrections
 !             !
 !             if (do_nkpz) then
 !                !
-!                call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz, &
+!                call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz_realspace, &
 !                                           wrefsic, pinkpz, ibnd, ispin(i))
 !                !
-!                vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx) &
+!                vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
 !                                  + wrefsic(1:nnrx)
 !                !
 !                pink(i) = pink(i) + pinkpz
@@ -6601,10 +6601,10 @@ module nksic_corrections
 ! 
 !             if (do_nkipz) then
 !                !
-!                call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz, vsicpz_reciprocal, &
+!                call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz_realspace, vsicpz_reciprocal, &
 !                                            pinkpz, ibnd, shart)
 !                !
-!                vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz(1:nnrx)
+!                vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx)
 !                vsic_reciprocal(:, i) = vsic_reciprocal(:, i) + vsicpz_reciprocal(:)
 !                !
 !                pink(i) = pink(i) + pinkpz
@@ -6708,7 +6708,7 @@ module nksic_corrections
 !          !
 !       end if !added:linh draw vsic potentials
 !       !
-!       if (allocated(vsicpz)) deallocate (vsicpz)
+!       if (allocated(vsicpz_realspace)) deallocate (vsicpz_realspace)
 !       !
 !       if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
 !       !

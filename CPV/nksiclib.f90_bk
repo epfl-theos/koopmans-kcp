@@ -149,7 +149,7 @@
       !
       integer  :: i,j,jj,ibnd,isp,ir
       real(dp) :: focc,pinkpz, shart
-      real(dp),    allocatable :: vsicpz(:), rhor_nocc(:,:)
+      real(dp),    allocatable :: vsicpz_realspace(:), rhor_nocc(:,:)
       complex(dp), allocatable :: rhobarg(:,:)
       logical  :: lgam, is_empty_
       !
@@ -185,8 +185,8 @@
       endif
       !
       if ( do_nkpz .or. do_nkipz) then
-          allocate(vsicpz(nnrx))
-          vsicpz=0.0_dp
+          allocate(vsicpz_realspace(nnrx))
+          vsicpz_realspace=0.0_dp
       endif
       !
       pink=0.0_dp
@@ -307,10 +307,10 @@
           !
           if ( do_nkpz ) then
              !
-             call nksic_correction_nkpz( focc, orb_rhor(:,jj), vsicpz, &
+             call nksic_correction_nkpz( focc, orb_rhor(:,jj), vsicpz_realspace, &
                                          wrefsic, pinkpz, ibnd, ispin(i))
              !
-             vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz(1:nnrx) &
+             vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz_realspace(1:nnrx) &
                             + wrefsic(1:nnrx)
              !
              pink(i) = pink(i) +pinkpz
@@ -361,10 +361,10 @@
 
           if ( do_nkipz ) then
              !
-             call nksic_correction_nkipz( focc, ispin(i), orb_rhor(:,jj), vsicpz, &
+             call nksic_correction_nkipz( focc, ispin(i), orb_rhor(:,jj), vsicpz_realspace, &
                                           pinkpz, ibnd, shart, is_empty_ )
              !
-             vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz(1:nnrx)
+             vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz_realspace(1:nnrx)
              !
              pink(i) = pink(i) + pinkpz
              !
@@ -513,7 +513,7 @@
          !
       endif !added:linh draw vsic potentials
       !
-      if ( allocated(vsicpz) ) deallocate(vsicpz)
+      if ( allocated(vsicpz_realspace) ) deallocate(vsicpz_realspace)
       !
       ! USPP:
       ! compute corrections to the D coefficients of the pseudopots
@@ -8007,7 +8007,7 @@ END subroutine compute_complexification_index
       !
       integer  :: i,j,jj,ibnd,isp
       real(dp) :: focc,pinkpz,shart
-      real(dp), allocatable :: vsicpz(:)
+      real(dp), allocatable :: vsicpz_realspace(:)
       complex(dp), allocatable :: rhobarg(:,:)
       logical :: lgam
       complex(dp), dimension(nudx,nudx,nspin) :: overlap_
@@ -8031,8 +8031,8 @@ END subroutine compute_complexification_index
       endif
       !
       if ( do_nkpz .or. do_nkipz) then
-          allocate(vsicpz(nnrx))
-          vsicpz=0.0_dp
+          allocate(vsicpz_realspace(nnrx))
+          vsicpz_realspace=0.0_dp
       endif
       !
       pink=0.0_dp
@@ -8144,10 +8144,10 @@ END subroutine compute_complexification_index
           !
           if( do_nkpz ) then
               !
-              call nksic_correction_nkpz( focc, orb_rhor(:,jj), vsicpz, &
+              call nksic_correction_nkpz( focc, orb_rhor(:,jj), vsicpz_realspace, &
                                           wrefsic, pinkpz, ibnd, ispin(i))
               !
-              vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz(1:nnrx) &
+              vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz_realspace(1:nnrx) &
                              + wrefsic(1:nnrx)
               !
               pink(i) = pink(i) +pinkpz
@@ -8195,10 +8195,10 @@ END subroutine compute_complexification_index
 
           if( do_nkipz ) then
               !
-              call nksic_correction_nkipz( focc, ispin(i), orb_rhor(:,jj), vsicpz, &
+              call nksic_correction_nkipz( focc, ispin(i), orb_rhor(:,jj), vsicpz_realspace, &
                                            pinkpz, ibnd, shart)
               !
-              vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz(1:nnrx)
+              vsic(1:nnrx,i) = vsic(1:nnrx,i) + vsicpz_realspace(1:nnrx)
               !
               pink(i) = pink(i) + pinkpz
               !
@@ -8298,7 +8298,7 @@ END subroutine compute_complexification_index
          !
       endif !added:linh draw vsic potentials
       !
-      if ( allocated(vsicpz) ) deallocate(vsicpz)
+      if ( allocated(vsicpz_realspace) ) deallocate(vsicpz_realspace)
 
       !
       ! USPP:
