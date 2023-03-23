@@ -1058,7 +1058,8 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          !
          ! faux takes into account spin multiplicity.
          !
-         call nksic_eforce(i, n_emps, n_empx, vsic_emp, vsic_reciprocal_emp, deeq_sic_emp, bec_emp, ngw, c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, &
+         call nksic_eforce(i, n_emps, n_empx, vsic_emp, vsic_reciprocal_emp, &
+                           deeq_sic_emp, bec_emp, ngw, c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, &
                            lgam)
          !
          c2(:) = c2(:) - vsicpsi(:, 1)*faux(i)
@@ -1261,7 +1262,8 @@ contains
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot_emp, deltae*innerloop_cg_ratio, lgam, &
                                         n_emps, n_empx, nudx_emp, iupdwn_emp, nupdwn_emp, ispin_emp, &
                                         c0_emp, rhovan_emp, bec_emp, rhor, rhoc, vsic_emp, vsic_reciprocal_emp, pink_emp, &
-                                        deeq_sic_emp, wtot, wtot_reciprocal, fsic_emp, .false., wfc_centers_emp, wfc_spreads_emp, .true.)
+                                        deeq_sic_emp, wtot, wtot_reciprocal, fsic_emp, .false., wfc_centers_emp, &
+                                        wfc_spreads_emp, .true.)
          !
       end if
       !

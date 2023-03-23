@@ -1,6 +1,7 @@
 subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold, lgam, &
                                      nbsp, nbspx, nudx, iupdwn, nupdwn, ispin, c0, becsum, bec, rhor, rhoc, &
-                                     vsic, vsic_reciprocal, pink, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, wfc_centers, wfc_spreads, is_empty)
+                                     vsic, vsic_reciprocal, pink, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                     wfc_centers, wfc_spreads, is_empty)
    !
    ! ... Finds the orthogonal rotation matrix Omattot that minimizes
    !     the orbital-dependent and hence the total energy, and then
@@ -830,7 +831,8 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    pink1(:) = 0.d0
    !
    call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                        ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1, vsic1_reciprocal, do_wxd, pink1, nudx, wfc_centers, &
+                        ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, &
+                        vsic1, vsic1_reciprocal, do_wxd, pink1, nudx, wfc_centers, &
                         wfc_spreads, icompute_spread, is_empty)
    !
    ene1 = sum(pink1(:))

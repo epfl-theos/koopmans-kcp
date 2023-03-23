@@ -275,7 +275,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
             fsic = f
             !
             call nksic_potential(nbsp, nbspx, c0, fsic, bec, rhovan, deeq_sic, &
-                                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd, pink, nudx, wfc_centers, &
+                                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, &
+                                 vsic, vsic_reciprocal, do_wxd, pink, nudx, wfc_centers, &
                                  wfc_spreads, icompute_spread, .false.)
             !
             eodd = sum(pink(1:nbsp))
@@ -728,7 +729,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                ! with ultrasoft!!
                !
                call nksic_potential(nbsp, nbspx, cm, fsic, becm, rhovan, deeq_sic, &
-                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd, pink, nudx, &
+                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, &
+                                    vsic, vsic_reciprocal, do_wxd, pink, nudx, &
                                     wfc_centers, wfc_spreads, &
                                     icompute_spread, .false.)
                !
@@ -1080,7 +1082,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                ! warning:giovanni don't we need becm down here??? otherwise problems with ultrasoft
                !
                call nksic_potential(nbsp, nbspx, cm, fsic, becm, rhovan, deeq_sic, &
-                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd, pink, nudx, &
+                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, &
+                                    vsic, vsic_reciprocal, do_wxd, pink, nudx, &
                                     wfc_centers, wfc_spreads, &
                                     icompute_spread, .false.)
                !
@@ -1614,7 +1617,8 @@ contains
          !call nksic_rot_emin_cg(itercg,innerloop_init_n,ninner,etot,Omattot,deltae*innerloop_cg_ratio,lgam)
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot, deltae*innerloop_cg_ratio, lgam, &
                                         nbsp, nbspx, nudx, iupdwn, nupdwn, ispin, c0, rhovan, bec, rhor, rhoc, &
-                                        vsic, vsic_reciprocal, pink, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, wfc_centers, wfc_spreads, .false.)
+                                        vsic, vsic_reciprocal, pink, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                        wfc_centers, wfc_spreads, .false.)
          !
       end if
       !

@@ -75,11 +75,9 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
   USE mp,                   ONLY : mp_sum, mp_bcast
   USE efield_mod,           ONLY : do_efield
   USE hfmod,                ONLY : do_hf, vxxpsi, exx
-  USE nksic,                ONLY : do_orbdep, vsic, vsic_reciprocal, wtot, wtot_reciprocal, fsic, fion_sic, deeq_sic, pink, do_wxd, &
-                                   valpsi, odd_alpha 
-  !
-  USE nksic,                ONLY : do_innerloop,do_innerloop_cg, innerloop_dd_nstep, &
-                                   innerloop_init_n
+  USE nksic,                ONLY : do_orbdep, vsic, vsic_reciprocal, wtot, wtot_reciprocal, fsic, fion_sic, &
+                                   deeq_sic, pink, do_wxd, valpsi, odd_alpha, do_innerloop, do_innerloop_cg, &
+                                   innerloop_dd_nstep, innerloop_init_n
   use ions_base,            only : nsp
   use electrons_module,     ONLY : icompute_spread, wfc_centers, wfc_spreads
   use cp_main_variables,    ONLY : becdual
