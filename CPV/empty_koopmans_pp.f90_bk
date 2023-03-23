@@ -60,7 +60,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       !
       INTEGER,     ALLOCATABLE :: ispin_emp(:)
       REAL(DP),    ALLOCATABLE :: fsic_emp(:)
-      REAL(DP),    ALLOCATABLE :: vsic_emp(:,:)
+      REAL(DP),    ALLOCATABLE :: vsic_emp_realspace(:,:)
       REAL(DP),    ALLOCATABLE :: wxd_emp_realspace(:,:)
       REAL(DP),    ALLOCATABLE :: deeq_sic_emp(:,:,:,:)
       REAL(DP),    ALLOCATABLE :: wfc_centers_emp(:,:,:)
@@ -125,7 +125,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       IF ( nspin == 2 ) ispin_emp( iupdwn_emp(2) : ) = 2
       !
       ALLOCATE( fsic_emp( n_empx ) )
-      ALLOCATE( vsic_emp(nnrx, n_empx) )
+      ALLOCATE( vsic_emp_realspace(nnrx, n_empx) )
       ALLOCATE( wxd_emp_realspace (nnrx, 2) )
       ALLOCATE( deeq_sic_emp (nhm,nhm,nat,n_empx))
       ALLOCATE( becsum_emp (nhm*(nhm+1)/2,nat,nspin))
@@ -135,7 +135,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       CALL allocate_nksic_empty(n_empx)
       !
       fsic_emp = 0.0d0
-      vsic_emp = 0.0d0
+      vsic_emp_realspace = 0.0d0
       wxd_emp_realspace  = 0.0d0
       !
       ! read auxilary orbitals
@@ -217,7 +217,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       CALL nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                             bec_emp, becsum_emp, deeq_sic_emp, &
                             ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                            wtot_realspace, sizwtot_realspace, vsic_emp, .false., pink_emp, nudx_emp, &
+                            wtot_realspace, sizwtot_realspace, vsic_emp_realspace, .false., pink_emp, nudx_emp, &
                             wfc_centers_emp, wfc_spreads_emp, &
                             icompute_spread, .true.)
       !
@@ -241,7 +241,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
          !
          IF(odd_nkscalfact_empty) wxd_emp_realspace(:, ispin_emp(i)) = wxd_emp_realspace(:, ispin_emp(i))*odd_alpha(i)/nkscalfact 
          !  
-         vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp_realspace(:, ispin_emp(i))
+         vsic_emp_realspace(:,i) = vsic_emp_realspace(:,i) + wxd_emp_realspace(:, ispin_emp(i))
          !
       ENDDO
       ! 
@@ -262,7 +262,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
             !
          ENDIF
          !   
-         CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
+         CALL nksic_eforce( i, n_emps, n_empx, vsic_emp_realspace, deeq_sic_emp, bec_emp, ngw, &
                             c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )
          !
          c2(:) = c2(:) + vsicpsi(:,1) 
@@ -378,7 +378,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       !
       CALL deallocate_twin(bec_emp)
       !
-      DEALLOCATE( vsic_emp ) 
+      DEALLOCATE( vsic_emp_realspace ) 
       DEALLOCATE( wxd_emp_realspace ) 
       DEALLOCATE( deeq_sic_emp )
       DEALLOCATE( becsum_emp )

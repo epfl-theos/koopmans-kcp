@@ -89,8 +89,8 @@
       COMPLEX(DP), ALLOCATABLE :: lambda_rep_c(:,:)
       INTEGER,     ALLOCATABLE :: ispin_emp(:)
       REAL(DP),    ALLOCATABLE :: fsic_emp(:)
-      REAL(DP),    ALLOCATABLE :: vsic_emp(:,:)
-      complex(DP), ALLOCATABLE :: vsic_reciprocal_emp(:,:)
+      REAL(DP),    ALLOCATABLE :: vsic_emp_realspace(:,:)
+      complex(DP), ALLOCATABLE :: vsic_emp_reciprocal(:,:)
       REAL(DP),    ALLOCATABLE :: wxd_emp_realspace(:,:)
       complex(DP), ALLOCATABLE :: wxd_emp_reciprocal(:,:)
       REAL(DP),    ALLOCATABLE :: deeq_sic_emp(:,:,:,:)
@@ -104,7 +104,7 @@
       LOGICAL :: lgam !added:giovanni
       LOGICAL :: done_extra !added:giovanni
       COMPLEX(DP), PARAMETER :: c_zero=CMPLX(0.d0,0.d0)
-      INTEGER :: sizvsic_emp
+      INTEGER :: sizvsic_emp_realspace
       INTEGER :: ndr_loc, ndw_loc
 
       lgam=gamma_only.and..not.do_wf_cmplx
@@ -381,7 +381,7 @@
             stop
 !          call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx,&
 !                           n_emps, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-!                           max_emp, wxd_emp_realspace, vsic_emp, sizvsic_emp, pink_emp, becsum_emp, &
+!                           max_emp, wxd_emp_realspace, vsic_emp_realspace, sizvsic_emp_realspace, pink_emp, becsum_emp, &
 !                           deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, v, &
 !                           nfi, .true., eigr, bec, irb, eigrb, &
 !                           rhor, ema0bg, desc_emp)
@@ -426,7 +426,7 @@
                 call nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                                       bec_emp, becsum_emp, deeq_sic_emp, &
                                       ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                      wtot_realspace, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                      wtot_realspace, vsic_emp_realspace, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
                                       wfc_centers_emp, wfc_spreads_emp, &
                                       icompute_spread, .false.)
                 !write(6,*) "checkbounds", ubound(wfc_centers_emp), ubound(wfc_spreads_emp), nudx_emp, nspin
@@ -443,8 +443,8 @@
                     IF(odd_nkscalfact) wxd_emp_realspace(:,:) = wxd_emp_realspace(:,:)*odd_alpha(i)/nkscalfact 
                     IF(odd_nkscalfact) wxd_emp_reciprocal(:,:) = wxd_emp_reciprocal(:,:)*odd_alpha(i)/nkscalfact 
                     !  
-                    vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp_realspace(:, ispin_emp(i))
-                    vsic_reciprocal_emp(:,i) = vsic_reciprocal_emp(:,i) + wxd_emp_reciprocal(:, ispin_reciprocal_emp(i))
+                    vsic_emp_realspace(:,i) = vsic_emp_realspace(:,i) + wxd_emp_realspace(:, ispin_emp(i))
+                    vsic_emp_reciprocal(:,i) = vsic_emp_reciprocal(:,i) + wxd_emp_reciprocal(:, ispin_reciprocal_emp(i))
                     !
                 ENDDO
                 !
@@ -480,7 +480,7 @@
                        !
                     ENDIF
                     !   
-                    CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, vsic_reciprocal, deeq_sic_emp, bec_emp, ngw, &
+                    CALL nksic_eforce( i, n_emps, n_empx, vsic_emp_realspace, vsic_reciprocal, deeq_sic_emp, bec_emp, ngw, &
                                        c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )
                     !
                     c2(:) = c2(:) - vsicpsi(:,1) * f_emp(i)

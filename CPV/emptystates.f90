@@ -49,7 +49,7 @@
       USE mp_global, ONLY: intra_image_comm, me_image
       USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot_realspace, wtot_reciprocal, &
                        odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp_realspace, wxd_emp_reciprocal, &
-                       fsic_emp, deeq_sic_emp, vsic_emp, vsic_reciprocal_emp, &
+                       fsic_emp, deeq_sic_emp, vsic_emp_realspace, vsic_emp_reciprocal, &
                        do_spinsym, allocate_nksic_empty, deallocate_nksic_empty, &
                        pink_emp
       USE hfmod, ONLY: do_hf
@@ -104,7 +104,7 @@
       LOGICAL :: lgam !added:giovanni
       LOGICAL :: done_extra !added:giovanni
       COMPLEX(DP), PARAMETER :: c_zero = CMPLX(0.d0, 0.d0)
-      INTEGER :: sizvsic_emp
+      INTEGER :: sizvsic_emp_realspace
       INTEGER :: ndr_loc, ndw_loc
       !
       LOGICAL :: odd_nkscalfact_old
@@ -506,7 +506,7 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot_realspace, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot_realspace, wtot_reciprocal, vsic_emp_realspace, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !
@@ -529,8 +529,8 @@
                   IF (odd_nkscalfact_empty) wxd_emp_realspace(:, :) = wxd_emp_realspace(:, :)*odd_alpha(i)/nkscalfact
                   IF (odd_nkscalfact_empty) wxd_emp_reciprocal(:, :) = wxd_emp_reciprocal(:, :)*odd_alpha(i)/nkscalfact
                   !
-                  vsic_emp(:, i) = vsic_emp(:, i) + wxd_emp_realspace(:, ispin_emp(i))
-                  vsic_reciprocal_emp(:, i) = vsic_reciprocal_emp(:, i) + wxd_emp_reciprocal(:, ispin_emp(i))
+                  vsic_emp_realspace(:, i) = vsic_emp_realspace(:, i) + wxd_emp_realspace(:, ispin_emp(i))
+                  vsic_emp_reciprocal(:, i) = vsic_emp_reciprocal(:, i) + wxd_emp_reciprocal(:, ispin_emp(i))
                   !
                END DO
                !
@@ -566,7 +566,7 @@
                      !
                   END IF
                   !
-                  CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp, vsic_reciprocal_emp, deeq_sic_emp, bec_emp, ngw, &
+                  CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp_realspace, vsic_emp_reciprocal, deeq_sic_emp, bec_emp, ngw, &
                                     c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, lgam)
                   !
                   c2(:) = c2(:) - vsicpsi(:, 1)*f_aux(i)

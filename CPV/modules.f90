@@ -368,8 +368,8 @@ module nksic
   complex(dp), allocatable :: wtot_reciprocal(:,:)
   !
   real(dp), allocatable :: fsic_emp(:)
-  real(dp), allocatable :: vsic_emp(:, :)
-  complex(dp), allocatable :: vsic_reciprocal_emp(:, :)
+  real(dp), allocatable :: vsic_emp_realspace(:, :)
+  complex(dp), allocatable :: vsic_emp_reciprocal(:, :)
   real(dp), allocatable :: wxd_emp_realspace(:, :)
   complex(dp), allocatable :: wxd_emp_reciprocal(:, :)
   real(dp), allocatable :: deeq_sic_emp(:, :, :, :)
@@ -421,15 +421,15 @@ contains
   integer, intent(in) :: nnrx, ngm, n_emps, nat, nhm
 
   ALLOCATE (fsic_emp(n_emps))
-  ALLOCATE (vsic_emp(nnrx, n_emps))
-  ALLOCATE (vsic_reciprocal_emp(ngm, n_emps))
+  ALLOCATE (vsic_emp_realspace(nnrx, n_emps))
+  ALLOCATE (vsic_emp_reciprocal(ngm, n_emps))
   ALLOCATE (wxd_emp_realspace(nnrx, 2))
   ALLOCATE (wxd_emp_reciprocal(ngm, 2))
   ALLOCATE (deeq_sic_emp(nhm, nhm, nat, n_emps))
   !
   fsic_emp = 0.0d0
-  vsic_emp = 0.0d0
-  vsic_reciprocal_emp = 0.0d0
+  vsic_emp_realspace = 0.0d0
+  vsic_emp_reciprocal = 0.0d0
   wxd_emp_realspace = 0.0d0
   wxd_emp_reciprocal = 0.0d0
   
@@ -596,8 +596,8 @@ contains
   subroutine deallocate_nksic_empty
 
       if(allocated(fsic_emp)) DEALLOCATE(fsic_emp)
-      if(allocated(vsic_emp)) DEALLOCATE(vsic_emp)
-      if(allocated(vsic_reciprocal_emp)) DEALLOCATE(vsic_reciprocal_emp)
+      if(allocated(vsic_emp_realspace)) DEALLOCATE(vsic_emp_realspace)
+      if(allocated(vsic_emp_reciprocal)) DEALLOCATE(vsic_emp_reciprocal)
       if(allocated(wxd_emp_realspace)) DEALLOCATE(wxd_emp_realspace)
       if(allocated(wxd_emp_reciprocal)) DEALLOCATE(wxd_emp_reciprocal)
       if(allocated(deeq_sic_emp)) DEALLOCATE(deeq_sic_emp)
