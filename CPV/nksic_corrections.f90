@@ -2652,7 +2652,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :)
 !       type(twin_matrix) :: bec1
 ! !       real(dp),    allocatable :: bec1(:,:)
@@ -2679,7 +2679,7 @@ module nksic_corrections
 !       allocate (Umatbig(nbspx, nbspx))
 !       allocate (Heigbig(nbspx))
 !       allocate (wfc_ctmp(ngw, nbspx))
-!       allocate (vsic1(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx))
 !       allocate (pink1(nbspx))
 ! 
@@ -2806,7 +2806,7 @@ module nksic_corrections
 ! 
 !          dalpha = passoprod/dmaxeig
 !          !
-!          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, dtmp, lgam)
+!          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, dtmp, lgam)
 ! 
 !          !
 !          ! deal with non-variational functionals,
@@ -2857,7 +2857,7 @@ module nksic_corrections
 !          Omattot = MATMUL(Omattot, Omat1tot)
 !          !
 !          pink(:) = pink1(:)
-!          vsic(:, :) = vsic1(:, :)
+!          vsic(:, :) = vsic1_realspace(:, :)
 !          vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
 !          call copy_twin(bec, bec1)
 ! !         bec%rvec(:,:)   = bec1(:,:)
@@ -2896,7 +2896,7 @@ module nksic_corrections
 !       deallocate (Umatbig)
 !       deallocate (Heigbig)
 !       deallocate (wfc_ctmp)
-!       deallocate (vsic1)
+!       deallocate (vsic1_realspace)
 !       deallocate (vsic_reciprocal1)
 !       call deallocate_twin(bec1)
 !       deallocate (pink1)
@@ -2941,7 +2941,7 @@ module nksic_corrections
 !       real(dp) :: esic
 !       real(dp)                 :: bec1(nkb, nbsp)
 !       real(dp)                 :: Omat1tot(nbspx, nbspx)
-!       real(dp)                 :: vsic1(nnrx, nbspx)
+!       real(dp)                 :: vsic1_realspace(nnrx, nbspx)
 !       complex(dp)              :: vsic_reciprocal1(ngm, nbspx)
 !       complex(dp), allocatable :: Umat(:, :)
 !       complex(dp)              :: Umatbig(nbspx, nbspx)
@@ -3007,7 +3007,7 @@ module nksic_corrections
 !             dalpha = 0.d0
 !          end if
 ! 
-!          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, esic)
+!          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, esic)
 ! 
 !          if (ionode) write (nfile, '(5F24.13,2I10)') dalpha/3.141592*dmaxeig, dmaxeig, etot, esic, deigrms, ninner, nouter
 ! 
@@ -3089,7 +3089,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1(:, :), vsic2(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :), vsic_reciprocal2(:, :)
 !       type(twin_matrix)       :: bec1, bec2
 !       real(dp), allocatable :: pink1(:), pink2(:)
@@ -3134,7 +3134,7 @@ module nksic_corrections
 !       allocate (hi(nbsp, nbsp))
 !       allocate (gi(nbsp, nbsp))
 !       allocate (pink1(nbspx), pink2(nbspx))
-!       allocate (vsic1(nnrx, nbspx), vsic2(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx), vsic_reciprocal2(ngm, nbspx))
 !       call init_twin(bec1, lgam)
 !       call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -3380,7 +3380,7 @@ module nksic_corrections
 !          call nksic_getOmattot_new(nbsp, nbspx, nudx, nspin, ispin, &
 !                                    iupdwn, nupdwn, wfc_centers, wfc_spreads, &
 !                                    dalpha, Heigbig, Umatbig, c0, wfc_ctmp, &
-!                                    Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, ene1, lgam)
+!                                    Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam)
 !          call minparabola(ene0, spasso*dene0, ene1, passof, passo, enesti)
 !          !
 !          ! We neglect this step for paper writing purposes
@@ -3491,7 +3491,7 @@ module nksic_corrections
 !          else !missed minimum, case 1 or 2
 !             !
 !             pink(:) = pink1(:)
-!             vsic(:, :) = vsic1(:, :)
+!             vsic(:, :) = vsic1_realspace(:, :)
 !             vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
 !             c0(:, :) = wfc_ctmp(:, :)
 !             call copy_twin(bec, bec1)
@@ -3516,7 +3516,7 @@ module nksic_corrections
 !             !
 ! ! =======
 ! !           pink(:) = pink1(:)
-! !           vsic(:,:) = vsic1(:,:)
+! !           vsic(:,:) = vsic1_realspace(:,:)
 ! !           c0(:,:) = wfn_ctmp(:,:)
 ! !           bec%rvec(:,:) = bec1(:,:)
 ! !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -3564,7 +3564,7 @@ module nksic_corrections
 !       deallocate (hi)
 !       deallocate (gi)
 !       deallocate (pink1, pink2)
-!       deallocate (vsic1, vsic2)
+!       deallocate (vsic1_realspace, vsic2)
 !       deallocate (vsic_reciprocal1, vsic_reciprocal2)
 !       call deallocate_twin(bec1)
 !       call deallocate_twin(bec2)
@@ -3643,7 +3643,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1(:, :), vsic2(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :), vsic_reciprocal2(:, :)
 !       type(twin_matrix)       :: bec1, bec2
 !       real(dp), allocatable :: pink1(:), pink2(:)
@@ -3687,7 +3687,7 @@ module nksic_corrections
 !       allocate (hi(nbsp, nbsp))
 !       allocate (gi(nbsp, nbsp))
 !       allocate (pink1(nbspx), pink2(nbspx))
-!       allocate (vsic1(nnrx, nbspx), vsic2(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx), vsic_reciprocal2(ngm, nbspx))
 !       call init_twin(bec1, lgam)
 !       call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -3926,7 +3926,7 @@ module nksic_corrections
 !          dalpha = spasso*passof
 !          !
 !          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, &
-!                                Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, ene1, lgam)
+!                                Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam)
 !          call minparabola(ene0, spasso*dene0, ene1, passof, passo, enesti)
 ! 
 !          !
@@ -4040,7 +4040,7 @@ module nksic_corrections
 !          else !missed minimum, case 1 or 2
 !             !
 !             pink(:) = pink1(:)
-!             vsic(:, :) = vsic1(:, :)
+!             vsic(:, :) = vsic1_realspace(:, :)
 !             vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
 !             c0(:, :) = wfc_ctmp(:, :)
 !             call copy_twin(bec, bec1)
@@ -4065,7 +4065,7 @@ module nksic_corrections
 !             !
 ! ! =======
 ! !           pink(:) = pink1(:)
-! !           vsic(:,:) = vsic1(:,:)
+! !           vsic(:,:) = vsic1_realspace(:,:)
 ! !           c0(:,:) = wfn_ctmp(:,:)
 ! !           bec%rvec(:,:) = bec1(:,:)
 ! !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -4114,7 +4114,7 @@ module nksic_corrections
 !       deallocate (hi)
 !       deallocate (gi)
 !       deallocate (pink1, pink2)
-!       deallocate (vsic1, vsic2)
+!       deallocate (vsic1_realspace, vsic2)
 !       deallocate (vsic_reciprocal1, vsic_reciprocal2)
 !       call deallocate_twin(bec1)
 !       call deallocate_twin(bec2)
@@ -4191,7 +4191,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1(:, :), vsic2(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :), vsic_reciprocal2(:, :)
 !       type(twin_matrix)       :: bec1, bec2
 !       real(dp), allocatable :: pink1(:), pink2(:)
@@ -4216,7 +4216,7 @@ module nksic_corrections
 !       allocate (hi(nbsp, nbsp))
 !       allocate (gi(nbsp, nbsp))
 !       allocate (pink1(nbspx), pink2(nbspx))
-!       allocate (vsic1(nnrx, nbspx), vsic2(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx), vsic_reciprocal2(ngm, nbspx))
 !       call init_twin(bec1, lgam)
 !       call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -4436,7 +4436,7 @@ module nksic_corrections
 !          dalpha = spasso*passof
 !          !
 !          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, &
-!                                Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, ene1, lgam)
+!                                Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam)
 !          call minparabola(ene0, spasso*dene0, ene1, passof, passo, enesti)
 ! 
 !          !
@@ -4505,7 +4505,7 @@ module nksic_corrections
 !          else
 !             !
 !             pink(:) = pink1(:)
-!             vsic(:, :) = vsic1(:, :)
+!             vsic(:, :) = vsic1_realspace(:, :)
 !             vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
 !             c0(:, :) = wfc_ctmp(:, :)
 !             call copy_twin(bec, bec1)
@@ -4520,7 +4520,7 @@ module nksic_corrections
 !             !
 ! ! =======
 ! !           pink(:) = pink1(:)
-! !           vsic(:,:) = vsic1(:,:)
+! !           vsic(:,:) = vsic1_realspace(:,:)
 ! !           c0(:,:) = wfn_ctmp(:,:)
 ! !           bec%rvec(:,:) = bec1(:,:)
 ! !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -4568,7 +4568,7 @@ module nksic_corrections
 !       deallocate (hi)
 !       deallocate (gi)
 !       deallocate (pink1, pink2)
-!       deallocate (vsic1, vsic2)
+!       deallocate (vsic1_realspace, vsic2)
 !       deallocate (vsic_reciprocal1, vsic_reciprocal2)
 !       call deallocate_twin(bec1)
 !       call deallocate_twin(bec2)
@@ -4585,7 +4585,7 @@ module nksic_corrections
 !    subroutine nksic_getOmattot_new(nbsp, nbspx, nudx, nspin, ispin, &
 !                                    iupdwn, nupdwn, wfc_centers, wfc_spreads, &
 !                                    dalpha, Heigbig, Umatbig, wfc0, &
-!                                    wfc1, Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, ene1, lgam, is_empty)!warning:giovanni bec1 here needs to be a twin!
+!                                    wfc1, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam, is_empty)!warning:giovanni bec1 here needs to be a twin!
 ! !---------------------------------------------------------------
 ! !
 ! ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
@@ -4621,7 +4621,7 @@ module nksic_corrections
 !       complex(dp)                    :: wfc1(ngw, nbspx)
 !       complex(dp)                       :: Omat1tot(nbspx, nbspx)
 !       type(twin_matrix)     :: bec1 !(nkb,nbsp) !modified:giovanni
-!       real(dp)                       :: vsic1(nnrx, nbspx)
+!       real(dp)                       :: vsic1_realspace(nnrx, nbspx)
 !       complex(dp)                    :: vsic_reciprocal1(ngm, nbspx)
 !       real(dp)                       :: pink1(nbspx)
 !       real(dp)                       :: ene1
@@ -4691,12 +4691,12 @@ module nksic_corrections
 !       !
 !       call calbec(1, nsp, eigr, wfc1, bec1)
 ! 
-!       vsic1(:, :) = 0.d0
+!       vsic1_realspace(:, :) = 0.d0
 !       vsic_reciprocal1(:, :) = 0.d0
 !       pink1(:) = 0.d0
 !       !
 !       call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-!                       ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1, vsic_reciprocal1, pink1, nudx, wfc_centers, &
+!                       ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, pink1, nudx, wfc_centers, &
 !                            wfc_spreads, icompute_spread, is_empty)
 !       !
 !       ene1 = sum(pink1(:))
@@ -4713,7 +4713,7 @@ module nksic_corrections
 ! !---------------------------------------------------------------
 ! 
 ! !---------------------------------------------------------------
-!    subroutine nksic_getOmattot(dalpha, Heigbig, Umatbig, wfc0, wfc1, Omat1tot, bec1, vsic1, vsic_reciprocal1, pink1, ene1, lgam)!warning:giovanni bec1 here needs to be a twin!
+!    subroutine nksic_getOmattot(dalpha, Heigbig, Umatbig, wfc0, wfc1, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam)!warning:giovanni bec1 here needs to be a twin!
 ! !---------------------------------------------------------------
 ! !
 ! ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
@@ -4751,7 +4751,7 @@ module nksic_corrections
 !       complex(dp)                    :: wfc1(ngw, nbspx)
 !       complex(dp)                       :: Omat1tot(nbspx, nbspx)
 !       type(twin_matrix)     :: bec1 !(nkb,nbsp) !modified:giovanni
-!       real(dp)                       :: vsic1(nnrx, nbspx)
+!       real(dp)                       :: vsic1_realspace(nnrx, nbspx)
 !       complex(dp)                    :: vsic_reciprocal1(ngm, nbspx)
 !       real(dp)                       :: pink1(nbspx)
 !       real(dp)                       :: ene1
@@ -4829,13 +4829,13 @@ module nksic_corrections
 !          !
 !       end if
 !       !
-!       vsic1(:, :) = 0.d0
+!       vsic1_realspace(:, :) = 0.d0
 !       vsic_reciprocal1(:, :) = 0.d0
 !       pink1(:) = 0.d0
 !       !
 !       !
 !       call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-!               ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
+!               ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
 !                            wfc_spreads, icompute_spread, .false.)
 !       !
 !       ene1 = sum(pink1(:))

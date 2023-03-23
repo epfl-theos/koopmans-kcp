@@ -74,7 +74,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    !
    real(dp), allocatable :: Heigbig(:)
    real(dp), allocatable :: Heig(:)
-   real(dp), allocatable :: vsic1(:, :), vsic2(:, :)
+   real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
    complex(dp), allocatable :: vsic1_reciprocal(:, :), vsic2_reciprocal(:, :)
    real(dp), allocatable :: pink1(:), pink2(:)
    !
@@ -134,7 +134,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    allocate (hi(nbsp, nbsp))
    allocate (gi(nbsp, nbsp))
    allocate (pink1(nbspx), pink2(nbspx))
-   allocate (vsic1(nnrx, nbspx), vsic2(nnrx, nbspx))
+   allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
    allocate (vsic1_reciprocal(ngm, nbspx), vsic2_reciprocal(ngm, nbspx))
    !
    call init_twin(bec1, lgam)
@@ -368,7 +368,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                           dalpha, Heigbig, Umatbig, &
                                           c0, wfc_ctmp, Omat1tot, bec1, rhor, rhoc, &
                                           becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
-                                          vsic1, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
+                                          vsic1_realspace, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
             if (i == 1) odd_test1 = ene1
             if (i == 2) odd_test2 = ene1
          end do
@@ -386,7 +386,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                     dalpha, Heigbig, Umatbig, &
                                     c0, wfc_ctmp, Omat1tot, bec1, rhor, rhoc, &
                                     becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
-                                    vsic1, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
+                                    vsic1_realspace, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
       !
       call minparabola(ene0, spasso*dene0, ene1, passof, passo, enesti)
       !
@@ -485,7 +485,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
          write (stdout, '("# WARNING: innerloop missed minimum case 1 or 2",/)')
          !
          pink(:) = pink1(:)
-         vsic(:, :) = vsic1(:, :)
+         vsic(:, :) = vsic1_realspace(:, :)
          vsic_reciprocal(:, :) = vsic1_reciprocal(:, :)
          c0(:, :) = wfc_ctmp(:, :)
          call copy_twin(bec, bec1)
@@ -521,7 +521,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    deallocate (hi)
    deallocate (gi)
    deallocate (pink1, pink2)
-   deallocate (vsic1, vsic2)
+   deallocate (vsic1_realspace, vsic2)
    deallocate (vsic1_reciprocal, vsic2_reciprocal)
    call deallocate_twin(bec1)
    call deallocate_twin(bec2)
@@ -710,7 +710,7 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
                                     dalpha, Heigbig, Umatbig, &
                                     wfc0, wfc1, Omat1tot, bec1, rhor, rhoc, &
                                     becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
-                                    vsic1, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
+                                    vsic1_realspace, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
    !
    ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
    !     the force matrix (Heigbig, Umatbig) and the step of size dalpha.
@@ -744,7 +744,7 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    complex(dp)                    :: wfc1(ngw, nbspx)
    complex(dp)                    :: Omat1tot(nbspx, nbspx)
    type(twin_matrix)              :: bec1
-   real(dp)                       :: vsic1(nnrx, nbspx)
+   real(dp)                       :: vsic1_realspace(nnrx, nbspx)
    complex(dp)                    :: vsic1_reciprocal(ngm, nbspx)
    real(dp)                       :: pink1(nbspx)
    real(dp)                       :: ene1
@@ -826,13 +826,13 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    call nlsm1(nbsp, 1, nsp, eigr, wfc1, bec1, 1, lgam)
    !call calbec(1,nsp,eigr,wfc1,bec)
    !
-   vsic1(:, :) = 0.d0
+   vsic1_realspace(:, :) = 0.d0
    vsic1_reciprocal(:, :) = 0.d0
    pink1(:) = 0.d0
    !
    call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
                         ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, &
-                        vsic1, vsic1_reciprocal, do_wxd, pink1, nudx, wfc_centers, &
+                        vsic1_realspace, vsic1_reciprocal, do_wxd, pink1, nudx, wfc_centers, &
                         wfc_spreads, icompute_spread, is_empty)
    !
    ene1 = sum(pink1(:))
