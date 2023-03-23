@@ -344,7 +344,7 @@ module nksic
   !
   real(dp),    allocatable :: fsic(:)
   complex(dp), allocatable :: vsic_reciprocal(:,:)
-  real(dp),    allocatable :: vsic(:,:)
+  real(dp),    allocatable :: vsic_realspace(:,:)
   real(dp),    allocatable :: fion_sic(:,:)
   real(dp),    allocatable :: deeq_sic(:,:,:,:)
   real(dp),    allocatable :: pink(:)
@@ -462,7 +462,7 @@ contains
       integer, intent(in):: nnrx
       !
       allocate( fsic(nx) )
-      allocate( vsic(nnrx,nx) )
+      allocate( vsic_realspace(nnrx,nx) )
       allocate( vsic_reciprocal(ngm,nx) )
       allocate( fion_sic(3,nat) )
       !
@@ -515,7 +515,7 @@ contains
       !
       fsic     = 0.0d0
       pink     = 0.0d0
-      vsic     = 0.0d0
+      vsic_realspace     = 0.0d0
       vsic_reciprocal = 0.0d0
       deeq_sic = 0.0d0
       vsicpsi  = 0.0d0
@@ -535,7 +535,7 @@ contains
       !
       cost = 0.0_dp
       if ( allocated(fsic) )            cost = cost + real( size(fsic) )            *  8.0_dp 
-      if ( allocated(vsic) )            cost = cost + real( size(vsic) )            *  8.0_dp 
+      if ( allocated(vsic_realspace) )            cost = cost + real( size(vsic_realspace) )            *  8.0_dp 
       if ( allocated(vsic_reciprocal) ) cost = cost + real( size(vsic_reciprocal) ) * 16.0_dp 
       if ( allocated(fion_sic) )        cost = cost + real( size(fion_sic) )        *  8.0_dp 
       if ( allocated(deeq_sic) )        cost = cost + real( size(deeq_sic) )        *  8.0_dp 
@@ -559,7 +559,7 @@ contains
   subroutine deallocate_nksic
       !
       use input_parameters, only: odd_nkscalfact
-      if(allocated(vsic))        deallocate(vsic)
+      if(allocated(vsic_realspace))        deallocate(vsic_realspace)
       if(allocated(vsic_reciprocal)) deallocate(vsic_reciprocal)
       if(allocated(fion_sic))    deallocate(fion_sic)
       if(allocated(deeq_sic))    deallocate(deeq_sic)

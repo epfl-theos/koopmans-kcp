@@ -16,7 +16,7 @@
 !-----------------------------------------------------------------------
    subroutine nksic_potential(nbsp, nx, c, f_diag, bec, becsum, &
                               deeq_sic, ispin, iupdwn, nupdwn, &
-                              rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                              rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic_realspace, vsic_reciprocal, do_wxd_, pink, nudx, &
                               wfc_centers, wfc_spreads, &
                               icompute_spread, is_empty)
 !-----------------------------------------------------------------------
@@ -48,8 +48,8 @@
       use control_flags, only: gamma_only, do_wf_cmplx
       use uspp_param, only: nhm
       use cp_interfaces, only: nksic_get_orbitalrho
-      use input_parameters, only: draw_pot, pot_number, odd_nkscalfact  !added:linh draw vsic potentials
-      use io_pot_sic_xml, only: write_pot_sic  !added:linh draw vsic potentials
+      use input_parameters, only: draw_pot, pot_number, odd_nkscalfact  !added:linh draw vsic_realspace potentials
+      use io_pot_sic_xml, only: write_pot_sic  !added:linh draw vsic_realspace potentials
       USE io_global, ONLY: stdout
       use core, ONLY: nlcc_any
       use twin_types
@@ -65,7 +65,7 @@
       real(dp), intent(in)  :: f_diag(nx)
       real(dp)                 :: rhor(nnrx, nspin)
       real(dp), intent(in)  :: rhoc(nnrx)
-      real(dp), intent(out) :: vsic(nnrx, nx), wtot_realspace(nnrx, 2)
+      real(dp), intent(out) :: vsic_realspace(nnrx, nx), wtot_realspace(nnrx, 2)
       complex(dp), intent(out) :: vsic_reciprocal(ngm, nx), wtot_reciprocal(ngm, 2)
       real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
       logical, intent(in)  :: do_wxd_
@@ -124,7 +124,7 @@
       end if
       !
       pink = 0.0_dp
-      vsic = 0.0_dp
+      vsic_realspace = 0.0_dp
       vsic_reciprocal = 0.0_dp
       !
       !
@@ -221,7 +221,7 @@
                !
                call nksic_correction_nk(focc, ispin(i), orb_rhor(:, jj), &
                                         rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                        vsic(:, i), wxdsic_realspace, wrefsic, do_wxd_, &
+                                        vsic_realspace(:, i), wxdsic_realspace, wrefsic, do_wxd_, &
                                         pink(i), ibnd, shart)
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -233,7 +233,7 @@
                !
                ! ths sic potential is partly updated here to save some memory
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + wrefsic(1:nnrx) &
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + wrefsic(1:nnrx) &
                                  - wxdsic_realspace(1:nnrx, ispin(i))
                !
             end if
@@ -245,7 +245,7 @@
                call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz_realspace, &
                                           wrefsic, pinkpz, ibnd, ispin(i))
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
                                  + wrefsic(1:nnrx)
                !
                pink(i) = pink(i) + pinkpz
@@ -257,7 +257,7 @@
             if (do_pz) then
                !
                call nksic_correction_pz(focc, ispin(i), orb_rhor(:, jj), &
-                                        vsic(:, i), vsic_reciprocal(:, i), pink(i), pzalpha(i), ibnd, shart)
+                                        vsic_realspace(:, i), vsic_reciprocal(:, i), pink(i), pzalpha(i), ibnd, shart)
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
                !
@@ -279,7 +279,7 @@
                !
                call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                          rhor, rhoref, rhobar, rhobarg, grhobar, &
-                             vsic(:, i), vsic_reciprocal(:, i), wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
+                             vsic_realspace(:, i), vsic_reciprocal(:, i), wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
                !
                ! here information is accumulated over states
                ! (wtot_realspace is added in the next loop)
@@ -289,7 +289,7 @@
                !
                ! ths sic potential is partly updated here to save some memory
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -301,7 +301,7 @@
                call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz_realspace, vsicpz_reciprocal, &
                                            pinkpz, ibnd, shart, is_empty_)
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx)
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + vsicpz_realspace(1:nnrx)
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + vsicpz_reciprocal(1:ngm)
                !
                pink(i) = pink(i) + pinkpz
@@ -358,7 +358,7 @@
          !
          do i = 1, nbsp
             !
-            vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot_realspace(1:nnrx, ispin(i))
+            vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + wtot_realspace(1:nnrx, ispin(i))
             vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + wtot_reciprocal(1:ngm, ispin(i))
             !
          end do
@@ -377,7 +377,7 @@
                !
                if (i > nbsp) exit inner_loop_odd_alpha
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i)*odd_alpha(i)/nkscalfact
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i)*odd_alpha(i)/nkscalfact
                vsic_reciprocal(:, i) = vsic_reciprocal(:, i)*odd_alpha(i)/nkscalfact
                !
                valpsi(i, :) = valpsi(i, :)*pink(i)/nkscalfact
@@ -417,14 +417,14 @@
                                         taukin, tauw, pzalpha(i), ibnd, kfact)
                !
                !
-               ! update vsic with factor here: it works for pz, will it work for
+               ! update vsic_realspace with factor here: it works for pz, will it work for
                ! nk-type functionals?
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i)*pzalpha(i)
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i)*pzalpha(i)
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i)*pzalpha(i)
                !
                call nksic_get_pzfactor_potential(focc, nspin, ispin(i), rhor, orb_rhor(:, jj), &
-                                            pink(i), taukin, tauw, edens, upsilonkin, upsilonw, vsic(:, i), &
+                                            pink(i), taukin, tauw, edens, upsilonkin, upsilonw, vsic_realspace(:, i), &
                                             vsic_reciprocal(:, i), pzalpha(i), ibnd, kfact)
                !
                pink(i) = pink(i)*pzalpha(i)
@@ -445,24 +445,24 @@
          !
       end if
       !
-      if (draw_pot) then !added:linh draw vsic potentials
+      if (draw_pot) then !added:linh draw vsic_realspace potentials
          !
          write (stdout, *) "I am writing out vsic", nbsp
          !
          do i = 1, nbsp
             !
-            if (i == pot_number) call write_pot_sic(vsic(:, i))
+            if (i == pot_number) call write_pot_sic(vsic_realspace(:, i))
             !
          end do
          !
-      end if !added:linh draw vsic potentials
+      end if !added:linh draw vsic_realspace potentials
       !
       if (allocated(vsicpz_realspace)) deallocate (vsicpz_realspace)
       if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
       !
       ! USPP:
       ! compute corrections to the D coefficients of the pseudopots
-      ! due to vsic(r, i) in the case of orbital dependent functionals.
+      ! due to vsic_realspace(r, i) in the case of orbital dependent functionals.
       ! The corresponding contributions to the forces are computed.
       !
       ! IMPORTANT: the following call makes use of newd.
@@ -477,7 +477,7 @@
          !
          DO i = 1, nbsp
             !
-            CALL nksic_newd(i, nnrx, ispin(i), nspin, vsic(:, i), vsic_reciprocal(:, i), nat, nhm, &
+            CALL nksic_newd(i, nnrx, ispin(i), nspin, vsic_realspace(:, i), vsic_reciprocal(:, i), nat, nhm, &
                             becsum, fion_sic, deeq_sic(:, :, :, i)) !this is for ultrasoft! watch out! warning:giovanni this has to be modified in order to run ultrasoft
             !
          END DO
@@ -492,7 +492,7 @@
          deallocate (rhor_nocc)
          !
       end if
-      call ebl_check(vsic(:, 1), vsic_reciprocal(:, 1))
+      call ebl_check(vsic_realspace(:, 1), vsic_reciprocal(:, 1))
       !
       CALL stop_clock('nksic_drv')
       return
@@ -1462,7 +1462,7 @@
 !---------------------------------------------------------------
 
 !-----------------------------------------------------------------------
-   subroutine nksic_newd(i, nnrx, ispin, nspin, vsic, vsic_reciprocal, nat, nhm, &
+   subroutine nksic_newd(i, nnrx, ispin, nspin, vsic_realspace, vsic_reciprocal, nat, nhm, &
                          becsum, fion, deeq_sic)
 !-----------------------------------------------------------------------
 !
@@ -1481,7 +1481,7 @@
       !
       integer, intent(in)    :: i, nnrx, nat, nhm
       integer, intent(in)    :: ispin, nspin
-      real(dp), intent(in)    :: vsic(nnrx)
+      real(dp), intent(in)    :: vsic_realspace(nnrx)
       complex(dp), intent(in) :: vsic_reciprocal(ngm)
       real(dp), intent(in)    :: becsum(nhm*(nhm + 1)/2, nat, nspin)
       real(dp), intent(inout) :: fion(3, nat)
@@ -1508,7 +1508,7 @@
       ! deeq coefficients are overwritten
       !
       vsic_aux = 0.0d0
-      vsic_aux(:, ispin) = vsic(:)
+      vsic_aux(:, ispin) = vsic_realspace(:)
       !
       call newd(vsic_aux, irb, eigrb, becsum, fion)
       !
@@ -1605,7 +1605,7 @@
 
 !---------------------------------------------------------------
    subroutine nksic_get_pzfactor_potential(f, nspin, ispin, rhor, orb_rhor, &
-                                         pink, taukin, tauw, edens, upsilonkin, upsilonw, vsic, vsic_reciprocal, alpha, ibnd, kfact)
+                                         pink, taukin, tauw, edens, upsilonkin, upsilonw, vsic_realspace, vsic_reciprocal, alpha, ibnd, kfact)
 !---------------------------------------------------------------
 !
 ! ... sum up the kinetic energy-density taukin ... this works both for summing
@@ -1632,7 +1632,7 @@
       real(dp), intent(inout) :: upsilonkin(nnrx, 3, nspin), upsilonw(nnrx, 3, nspin)
       real(dp), intent(in)    :: alpha
       real(dp), intent(inout) :: pink
-      real(dp), intent(out)   :: vsic(nnrx)
+      real(dp), intent(out)   :: vsic_realspace(nnrx)
       complex(dp), intent(out):: vsic_reciprocal(ngm)
       !
       INTEGER :: ir, j
@@ -1750,13 +1750,13 @@
       !
       do ir = 1, nnrx
          !
-         vsic(ir) = vsic(ir) + vsicaux(ir, ispin)
+         vsic_realspace(ir) = vsic_realspace(ir) + vsicaux(ir, ispin)
          !
       end do
       !
-      ! Store the vsic potential in reciprocal space
+      ! Store the vsic_realspace potential in reciprocal space
       allocate (vtmp(ngm))
-      vtmp = vsic(:)
+      vtmp = vsic_realspace(:)
       call fwfft('Dense', vtmp, dfftp)
       call psi2rho('Dense', vtmp, dfftp%nnr, vsic_reciprocal, ngm)
       deallocate (vtmp)
@@ -1970,10 +1970,10 @@
    end subroutine nksic_get_upsilon_pz
 
 !-----------------------------------------------------------------------
-   subroutine nksic_eforce(i, nbsp, nx, vsic, vsic_reciprocal, deeq_sic, bec, ngw, c1, c2, vsicpsi, lgam)
+   subroutine nksic_eforce(i, nbsp, nx, vsic_realspace, vsic_reciprocal, deeq_sic, bec, ngw, c1, c2, vsicpsi, lgam)
 !-----------------------------------------------------------------------
 !
-! Compute vsic potential for orbitals i and i+1 (c1 and c2)
+! Compute vsic_realspace potential for orbitals i and i+1 (c1 and c2)
 !
       use kinds, only: dp
       use cp_interfaces, only: fwfft, invfft
@@ -1994,7 +1994,7 @@
       ! input/output vars
       !
       integer, intent(in)  :: i, nbsp, nx, ngw
-      real(dp), intent(in)  :: vsic(nnrx, nx)
+      real(dp), intent(in)  :: vsic_realspace(nnrx, nx)
       complex(dp), intent(in)  :: vsic_reciprocal(ngm, nx)
       real(dp), intent(in)  :: deeq_sic(nhm, nhm, nat, nx)
       type(twin_matrix), intent(in)  :: bec!(nkb,nbsp) !modified:giovanni
@@ -2006,7 +2006,7 @@
       ! local vars
       !
       character(12) :: subname = 'nksic_eforce'
-      real(dp), allocatable      :: vsic_realspace(:)
+      real(dp), allocatable      :: vsic_realspace_local(:)
       integer       :: ir, ig, ierr, j
       integer       :: is, iv, jv, isa, ism
       integer       :: ivoff, jvoff, ia, inl, jnl
@@ -2025,8 +2025,8 @@
       !
       call start_clock('nk_eforce')
       !
-      allocate (vsic_realspace(nnrx), stat=ierr)
-      if (ierr /= 0) call errore(subname, 'allocating vsic_realspace', abs(ierr))
+      allocate (vsic_realspace_local(nnrx), stat=ierr)
+      if (ierr /= 0) call errore(subname, 'allocating vsic_realspace_local', abs(ierr))
       allocate (psi(nnrx), stat=ierr)
       if (ierr /= 0) call errore(subname, 'allocating psi', abs(ierr))
       allocate (psi1(nnrx), stat=ierr)
@@ -2066,9 +2066,9 @@
          !
          call rho2psi('Dense', psi, dfftp%nnr, vsic_reciprocal(:, i), ngm)
          call invfft('Dense', psi, dfftp)
-         vsic_realspace = dble(psi)
+         vsic_realspace_local = dble(psi)
          !
-         call ebl_check(vsic(:, i), vsic_reciprocal(:, i))
+         call ebl_check(vsic_realspace(:, i), vsic_reciprocal(:, i))
          !
          ! computing the orbital wfcs
          ! and the potentials in real space on the full grid
@@ -2079,7 +2079,7 @@
                wfc(1) = DBLE(psi1(ir))
                wfc(2) = AIMAG(psi1(ir))
                !
-               psi1(ir) = CMPLX(wfc(1)*vsic(ir, i), wfc(2)*vsic(ir, i + 1))
+               psi1(ir) = CMPLX(wfc(1)*vsic_realspace(ir, i), wfc(2)*vsic_realspace(ir, i + 1))
                !
             end do
          else
@@ -2088,8 +2088,8 @@
                wfc_c(1) = psi1(ir)
                wfc_c(2) = psi2(ir)
                !
-               psi1(ir) = wfc_c(1)*vsic(ir, i)
-               psi2(ir) = wfc_c(2)*vsic(ir, i + 1)
+               psi1(ir) = wfc_c(1)*vsic_realspace(ir, i)
+               psi2(ir) = wfc_c(2)*vsic_realspace(ir, i + 1)
                !
             end do
          end if
@@ -2315,7 +2315,7 @@
             end if
             call invfft('Wave', psis, dffts)
             !
-            vsicg(1:nnrx) = vsic(1:nnrx, i + j - 1)
+            vsicg(1:nnrx) = vsic_realspace(1:nnrx, i + j - 1)
             call fwfft('Dense', vsicg, dfftp)
             !
             vsics = 0.0_dp
@@ -2522,7 +2522,7 @@
       use electrons_base, only: nbsp, nbspx, nspin, &
                                 iupdwn, nupdwn
       use cp_interfaces, only: invfft
-      use nksic, only: vsic, vsic_reciprocal, pink, &
+      use nksic, only: vsic_realspace, vsic_reciprocal, pink, &
                        do_nk, do_wref, do_wxd, &
                        innerloop_nmax
       use uspp, only: nkb
@@ -2765,7 +2765,7 @@
          Omattot = MATMUL(Omattot, Omat1tot)
          !
          pink(:) = pink1(:)
-         vsic(:, :) = vsic1_realspace(:, :)
+         vsic_realspace(:, :) = vsic1_realspace(:, :)
          vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
          call copy_twin(bec, bec1)
 !         bec%rvec(:,:)   = bec1(:,:)
@@ -2931,7 +2931,7 @@
 !---------------------------------------------------------------
 
 !-----------------------------------------------------------------------
-   subroutine nksic_rot_emin_cg_new(c0, cm, vsic, vsic_reciprocal, ngw, nnrx, bec, &
+   subroutine nksic_rot_emin_cg_new(c0, cm, vsic_realspace, vsic_reciprocal, ngw, nnrx, bec, &
                                     nouter, init_n, ninner, etot, Omattot, &
                                     rot_threshold, nbsp, nbspx, nudx, nspin, iupdwn, &
                                     nupdwn, pink, wfc_centers, wfc_spreads, lgam)
@@ -2969,7 +2969,7 @@
       real(dp), intent(in)  :: etot
       complex(dp)          :: Omattot(nbspx, nbspx), c0(ngw, nbsp), cm(ngw, nbsp)
       real(dp), intent(in)  :: rot_threshold
-      real(dp), intent(inout) :: pink(nbsp), vsic(nnrx, nbspx), vsic_reciprocal(ngm, nbspx), &
+      real(dp), intent(inout) :: pink(nbsp), vsic_realspace(nnrx, nbspx), vsic_reciprocal(ngm, nbspx), &
                                  wfc_centers(4, nudx, nspin), wfc_spreads(nudx, nspin, 2)
       logical               :: lgam
       type(twin_matrix)     :: bec
@@ -3346,7 +3346,7 @@
             IF (enever .lt. ene0) THEN
                !
                pink(:) = pink2(:)
-               vsic(:, :) = vsic2_realspace(:, :)
+               vsic_realspace(:, :) = vsic2_realspace(:, :)
                vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
                c0(:, :) = wfc_ctmp2(:, :)
                call copy_twin(bec, bec2)
@@ -3387,7 +3387,7 @@
          else if (ene1 >= enever) then !found minimum
             !
             pink(:) = pink2(:)
-            vsic(:, :) = vsic2_realspace(:, :)
+            vsic_realspace(:, :) = vsic2_realspace(:, :)
             vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
             c0(:, :) = wfc_ctmp2(:, :)
             call copy_twin(bec, bec2)
@@ -3399,7 +3399,7 @@
          else !missed minimum, case 1 or 2
             !
             pink(:) = pink1(:)
-            vsic(:, :) = vsic1_realspace(:, :)
+            vsic_realspace(:, :) = vsic1_realspace(:, :)
             vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
             c0(:, :) = wfc_ctmp(:, :)
             call copy_twin(bec, bec1)
@@ -3424,7 +3424,7 @@
             !
 ! =======
 !           pink(:) = pink1(:)
-!           vsic(:,:) = vsic1_realspace(:,:)
+!           vsic_realspace(:,:) = vsic1_realspace(:,:)
 !           c0(:,:) = wfn_ctmp(:,:)
 !           bec%rvec(:,:) = bec1(:,:)
 !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -3505,7 +3505,7 @@
       use electrons_base, only: nbsp, nbspx, nspin, &
                                 iupdwn, nupdwn
       use cp_interfaces, only: invfft
-      use nksic, only: vsic, vsic_reciprocal, pink, &
+      use nksic, only: vsic_realspace, vsic_reciprocal, pink, &
                        innerloop_cg_nsd, innerloop_cg_nreset, &
                        innerloop_nmax, &
                        innerloop_atleast
@@ -3895,7 +3895,7 @@
             IF (enever .lt. ene0) THEN
                !
                pink(:) = pink2(:)
-               vsic(:, :) = vsic2_realspace(:, :)
+               vsic_realspace(:, :) = vsic2_realspace(:, :)
                vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
                c0(:, :) = wfc_ctmp2(:, :)
                call copy_twin(bec, bec2)
@@ -3936,7 +3936,7 @@
          else if (ene1 >= enever) then !found minimum
             !
             pink(:) = pink2(:)
-            vsic(:, :) = vsic2_realspace(:, :)
+            vsic_realspace(:, :) = vsic2_realspace(:, :)
             vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
             c0(:, :) = wfc_ctmp2(:, :)
             call copy_twin(bec, bec2)
@@ -3948,7 +3948,7 @@
          else !missed minimum, case 1 or 2
             !
             pink(:) = pink1(:)
-            vsic(:, :) = vsic1_realspace(:, :)
+            vsic_realspace(:, :) = vsic1_realspace(:, :)
             vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
             c0(:, :) = wfc_ctmp(:, :)
             call copy_twin(bec, bec1)
@@ -3973,7 +3973,7 @@
             !
 ! =======
 !           pink(:) = pink1(:)
-!           vsic(:,:) = vsic1_realspace(:,:)
+!           vsic_realspace(:,:) = vsic1_realspace(:,:)
 !           c0(:,:) = wfn_ctmp(:,:)
 !           bec%rvec(:,:) = bec1(:,:)
 !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -4056,7 +4056,7 @@
       use electrons_base, only: nbsp, nbspx, nspin, &
                                 iupdwn, nupdwn
       use cp_interfaces, only: invfft
-      use nksic, only: vsic, vsic_reciprocal, pink, &
+      use nksic, only: vsic_realspace, vsic_reciprocal, pink, &
                        innerloop_cg_nsd, innerloop_cg_nreset, &
                        innerloop_nmax
       use uspp, only: nkb
@@ -4403,7 +4403,7 @@
          if (ene1 >= enever) then
             !
             pink(:) = pink2(:)
-            vsic(:, :) = vsic2_realspace(:, :)
+            vsic_realspace(:, :) = vsic2_realspace(:, :)
             vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
             c0(:, :) = wfc_ctmp2(:, :)
             call copy_twin(bec, bec2)
@@ -4413,7 +4413,7 @@
          else
             !
             pink(:) = pink1(:)
-            vsic(:, :) = vsic1_realspace(:, :)
+            vsic_realspace(:, :) = vsic1_realspace(:, :)
             vsic_reciprocal(:, :) = vsic_reciprocal1(:, :)
             c0(:, :) = wfc_ctmp(:, :)
             call copy_twin(bec, bec1)
@@ -4428,7 +4428,7 @@
             !
 ! =======
 !           pink(:) = pink1(:)
-!           vsic(:,:) = vsic1_realspace(:,:)
+!           vsic_realspace(:,:) = vsic1_realspace(:,:)
 !           c0(:,:) = wfn_ctmp(:,:)
 !           bec%rvec(:,:) = bec1(:,:)
 !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -4498,7 +4498,7 @@
 !
 ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
 !     the force matrix (Heigbig, Umatbig) and the step of size dalpha.
-!     Other quantities such as bec, vsic, pink are also calculated for wfc1.
+!     Other quantities such as bec, vsic_realspace, pink are also calculated for wfc1.
 
       use kinds, only: dp
       use grid_dimensions, only: nnrx
@@ -4595,7 +4595,7 @@
       end do spin_loop
 
       !
-      ! recalculate bec & vsic according to the new wavefunction
+      ! recalculate bec & vsic_realspace according to the new wavefunction
       !
       call calbec(1, nsp, eigr, wfc1, bec1)
 
@@ -4626,7 +4626,7 @@
 !
 ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
 !     the force matrix (Heigbig, Umatbig) and the step of size dalpha.
-!     Other quantities such as bec, vsic, pink are also calculated for wfc1.
+!     Other quantities such as bec, vsic_realspace, pink are also calculated for wfc1.
 !
 
       use kinds, only: dp
@@ -4724,7 +4724,7 @@
          !
       end do spin_loop
       !
-      ! recalculate bec & vsic according to the new wavefunction
+      ! recalculate bec & vsic_realspace according to the new wavefunction
       !
       call calbec(1, nsp, eigr, wfc1, bec1)
       !
@@ -4912,7 +4912,7 @@
       use electrons_base, only: nbspx
       use cp_interfaces, only: invfft
       use fft_base, only: dfftp
-      use nksic, only: vsic
+      use nksic, only: vsic_realspace
       use wavefunctions_module, only: c0
       !
       implicit none
@@ -4953,8 +4953,8 @@
                do i = 1, nnrx
 !$$ Imposing Pederson condition
                   vsicahtmp = vsicahtmp &
-                              + 2.d0*DBLE(CONJG(psi1(i))*(vsic(i, nbnd2) &
-                                                          - vsic(i, nbnd1))*psi2(i))*dwfnnorm
+                              + 2.d0*DBLE(CONJG(psi1(i))*(vsic_realspace(i, nbnd2) &
+                                                          - vsic_realspace(i, nbnd1))*psi2(i))*dwfnnorm
 !$$ The following two lines give exactly the same results: checked
                   overlaptmp = overlaptmp + DBLE(CONJG(psi1(i))*psi2(i))*dwfnnorm
 !              overlaptmp = overlaptmp + dble(psi1(i)) * dble(psi2(i)) * dwfnnorm
@@ -5002,7 +5002,7 @@
       use electrons_base, only: nspin, iupdwn, nupdwn
       use cp_interfaces, only: invfft
       use fft_base, only: dfftp
-      use nksic, only: vsic, fsic
+      use nksic, only: vsic_realspace, fsic
       use wavefunctions_module, only: c0
       !
       implicit none
@@ -5053,8 +5053,8 @@
                !
                vsicahtmp = vsicahtmp + &
                            DBLE(CONJG(psi1(i))*psi2(i) &
-                                *(vsic(i, j2)*fsic(j2) &
-                                  - vsic(i, j1)*fsic(j1)))
+                                *(vsic_realspace(i, j2)*fsic(j2) &
+                                  - vsic_realspace(i, j1)*fsic(j1)))
                !
             end do
             vsicahtmp = vsicahtmp*cost
@@ -5098,7 +5098,7 @@
       use electrons_base, only: nspin, iupdwn, nupdwn
       use cp_interfaces, only: invfft
       use fft_base, only: dfftp
-      use nksic, only: vsic, fsic
+      use nksic, only: vsic_realspace, fsic
       use wavefunctions_module, only: c0
       !
       implicit none
@@ -5170,8 +5170,8 @@
                      !
                      vsicahtmp = vsicahtmp + &
                                  cost*DBLE(wfc1(i, jj1)*wfc2(i, jj2) &
-                                           *(vsic(i, j2 + jj2 - 1)*fsic(j2 + jj2 - 1) &
-                                             - vsic(i, j1 + jj1 - 1)*fsic(j1 + jj1 - 1)))
+                                           *(vsic_realspace(i, j2 + jj2 - 1)*fsic(j2 + jj2 - 1) &
+                                             - vsic_realspace(i, j1 + jj1 - 1)*fsic(j1 + jj1 - 1)))
                      !
                   end do
                   !
@@ -5220,7 +5220,7 @@
       use mp, only: mp_sum
       use mp_global, only: intra_image_comm
       use cp_interfaces, only: invfft
-      use nksic, only: vsic, vsic_reciprocal, vsicpsi, &
+      use nksic, only: vsic_realspace, vsic_reciprocal, vsicpsi, &
                        deeq_sic  ! to be passed directly
       use twin_types
       !
@@ -5260,7 +5260,7 @@
          ! NOTE: USPP not implemented
          !
          j1 = nbnd1 + iupdwn(isp) - 1
-         CALL nksic_eforce(j1, nbsp, nbspx, vsic, vsic_reciprocal, &
+         CALL nksic_eforce(j1, nbsp, nbspx, vsic_realspace, vsic_reciprocal, &
                            deeq_sic, bec, ngw, c0(:, j1), c0(:, j1 + 1), vsicpsi, lgam)
          !
          do jj1 = 1, 2
@@ -5339,7 +5339,7 @@
       use mp_global, only: intra_image_comm
       use electrons_base, only: nspin, iupdwn, nupdwn, nbsp, nbspx
       use cp_interfaces, only: invfft
-      use nksic, only: vsic, vsic_reciprocal, vsicpsi, &
+      use nksic, only: vsic_realspace, vsic_reciprocal, vsicpsi, &
                        valpsi, deeq_sic  ! to be passed directly
       use wavefunctions_module, only: c0
       use cp_main_variables, only: bec  ! to be passed directly
@@ -5379,7 +5379,7 @@
          ! NOTE: USPP not implemented
          !
          j1 = nbnd1 + iupdwn(isp) - 1
-         CALL nksic_eforce(j1, nbsp, nbspx, vsic, vsic_reciprocal, &
+         CALL nksic_eforce(j1, nbsp, nbspx, vsic_realspace, vsic_reciprocal, &
                            deeq_sic, bec, ngw, c0(:, j1), c0(:, j1 + 1), vsicpsi, lgam)
          !
          do jj1 = 1, 2
@@ -5469,7 +5469,7 @@
 !       use electrons_base,             only : nspin, iupdwn, nupdwn, nbsp,nbspx
 !       use cp_interfaces,              only : invfft
 !       use fft_base,                   only : dfftp
-!       use nksic,                      only : vsic, fsic, vsicpsi, &
+!       use nksic,                      only : vsic_realspace, fsic, vsicpsi, &
 !                                              deeq_sic  ! to be passed directly
 !       use wavefunctions_module,       only : c0
 !       use cp_main_variables,          only : bec  ! to be passed directly
@@ -5534,7 +5534,7 @@
 !           !
 !           ! NOTE: USPP not implemented
 !           !
-!           CALL nksic_eforce( j1, nbsp, nbspx, vsic, &
+!           CALL nksic_eforce( j1, nbsp, nbspx, vsic_realspace, &
 !                              deeq_sic, bec, ngw, c0(:,j1), c0(:,j1+1), h0c0(:,j1:j1+1), lgam )
 !           !
 !       enddo
@@ -5794,7 +5794,7 @@
    SUBROUTINE spread_sort(ngw, nspin, nbsp, nudx, nupdwn, iupdwn, tempspreads, wfc_centers, sort_spreads)
 
       USE kinds, ONLY: DP
-      USE input_parameters, only: draw_pot, sortwfc_spread !added:linh draw vsic potentials
+      USE input_parameters, only: draw_pot, sortwfc_spread !added:linh draw vsic_realspace potentials
       USE wavefunctions_module, only: c0, cm
       USE mp, only: mp_bcast
 
@@ -6076,7 +6076,7 @@
    subroutine nksic_potential_non_ortho(nbsp, nx, c, cdual, f_diag, &
                                         bec, becdual, becsum, &
                                         deeq_sic, ispin, iupdwn, nupdwn, &
-                                        rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                        rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic_realspace, vsic_reciprocal, do_wxd_, pink, nudx, &
                                         wfc_centers, wfc_spreads, &
                                         icompute_spread)
 !-----------------------------------------------------------------------
@@ -6112,8 +6112,8 @@
       use uspp_param, only: nhm
       use cp_interfaces, only: nksic_get_orbitalrho !added:giovanni
       use twin_types !added:giovanni
-      use input_parameters, only: draw_pot, pot_number  !added:linh draw vsic potentials
-      use io_pot_sic_xml, only: write_pot_sic  !added:linh draw vsic potentials
+      use input_parameters, only: draw_pot, pot_number  !added:linh draw vsic_realspace potentials
+      use io_pot_sic_xml, only: write_pot_sic  !added:linh draw vsic_realspace potentials
       USE io_global, ONLY: stdout
       !
       implicit none
@@ -6129,7 +6129,7 @@
       real(dp), intent(in)  :: f_diag(nx)
       real(dp), intent(in)  :: rhor(nnrx, nspin)
       real(dp), intent(in)  :: rhoc(nnrx)
-      real(dp), intent(out) :: vsic(nnrx, nx), wtot_realspace(nnrx, 2)
+      real(dp), intent(out) :: vsic_realspace(nnrx, nx), wtot_realspace(nnrx, 2)
       complex(dp), intent(out) :: vsic_reciprocal(ngm, nx), wtot_reciprocal(ngm, 2)
       real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
       logical, intent(in)  :: do_wxd_
@@ -6175,7 +6175,7 @@
       end if
       !
       pink = 0.0_dp
-      vsic = 0.0_dp
+      vsic_realspace = 0.0_dp
       vsic_reciprocal = 0.0_dp
       !
       ! if using pz_renorm factors, compute here tauw and upsilonw
@@ -6261,7 +6261,7 @@
                !
                call nksic_correction_nk(focc, ispin(i), orb_rhor(:, jj), &
                                         rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                        vsic(:, i), wxdsic_realspace, wrefsic, do_wxd_, &
+                                        vsic_realspace(:, i), wxdsic_realspace, wrefsic, do_wxd_, &
                                         pink(i), ibnd, shart)
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -6273,7 +6273,7 @@
                !
                ! ths sic potential is partly updated here to save some memory
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + wrefsic(1:nnrx) &
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + wrefsic(1:nnrx) &
                                  - wxdsic_realspace(1:nnrx, ispin(i))
                !
             end if
@@ -6286,7 +6286,7 @@
                call nksic_correction_nkpz(focc, orb_rhor(:, jj), vsicpz_realspace, &
                                           wrefsic, pinkpz, ibnd, ispin(i))
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + vsicpz_realspace(1:nnrx) &
                                  + wrefsic(1:nnrx)
                !
                pink(i) = pink(i) + pinkpz
@@ -6299,7 +6299,7 @@
             if (do_pz) then
                !
                call nksic_correction_pz(focc, ispin(i), orb_rhor(:, jj), &
-                                        vsic(:, i), vsic_reciprocal(:, i), pink(i), pzalpha(i), ibnd, shart)
+                                        vsic_realspace(:, i), vsic_reciprocal(:, i), pink(i), pzalpha(i), ibnd, shart)
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
                !
@@ -6318,7 +6318,7 @@
                !
                call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                          rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                         vsic(:, i), vsic_reciprocal(:, i), wxdsic_realspace, &
+                                         vsic_realspace(:, i), vsic_reciprocal(:, i), wxdsic_realspace, &
                                          wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart)
                !
                ! here information is accumulated over states
@@ -6329,7 +6329,7 @@
                !
                ! ths sic potential is partly updated here to save some memory
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                !
             end if
@@ -6339,7 +6339,7 @@
                call nksic_correction_nkipz(focc, ispin(i), orb_rhor(:, jj), vsicpz_realspace, vsicpz_reciprocal, &
                                            pinkpz, ibnd, shart)
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) + vsicpz_realspace(1:nnrx)
+               vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + vsicpz_realspace(1:nnrx)
                vsic_reciprocal(:, i) = vsic_reciprocal(:, i) + vsicpz_reciprocal(:)
                !
                pink(i) = pink(i) + pinkpz
@@ -6384,7 +6384,7 @@
          !
          do i = 1, nbsp
             !
-            vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot_realspace(1:nnrx, ispin(i))
+            vsic_realspace(1:nnrx, i) = vsic_realspace(1:nnrx, i) + wtot_realspace(1:nnrx, ispin(i))
             vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + wtot_reciprocal(1:ngm, ispin(i))
             !
          end do
@@ -6415,15 +6415,15 @@
                call nksic_get_pz_factor(nspin, ispin(i), orb_rhor(:, jj), rhor, &
                                         taukin, tauw, pzalpha(i), ibnd, kfact)
                !
-               ! update vsic with factor here: it works for pz, will it work for
+               ! update vsic_realspace with factor here: it works for pz, will it work for
                ! nk-type functionals?
                !
-!                 vsic(:,i) = vsic(:,i)*pzalpha(i)
+!                 vsic_realspace(:,i) = vsic_realspace(:,i)*pzalpha(i)
 !                 pink(i) = pink(i)*pzalpha(i)
                !
                !
 !                 call nksic_get_pzfactor_potential(focc, nspin, ispin(i), rhor, orb_rhor(:,jj), &
-!                                       pink(i), taukin, tauw, edens, upsilonkin, upsilonw, vsic(:,i), pzalpha(i), ibnd, kfact)
+!                                       pink(i), taukin, tauw, edens, upsilonkin, upsilonw, vsic_realspace(:,i), pzalpha(i), ibnd, kfact)
                !
             end do inner_loop_renorm
             !
@@ -6432,27 +6432,27 @@
       end if
       !
       !
-      if (draw_pot) then !added:linh draw vsic potentials
+      if (draw_pot) then !added:linh draw vsic_realspace potentials
          !
          write (stdout, *) "I am writing out vsic", nbsp
          do i = 1, nbsp
             !
-            if (i == pot_number) call write_pot_sic(vsic(:, i))
+            if (i == pot_number) call write_pot_sic(vsic_realspace(:, i))
             !
          end do
          !
-      end if !added:linh draw vsic potentials
+      end if !added:linh draw vsic_realspace potentials
       !
       if (allocated(vsicpz_realspace)) deallocate (vsicpz_realspace)
       !
       if (allocated(vsicpz_reciprocal)) deallocate (vsicpz_reciprocal)
       !
-      call ebl_check(vsic(:, 10), vsic_reciprocal(:, 10))
+      call ebl_check(vsic_realspace(:, 10), vsic_reciprocal(:, 10))
 
       !
       ! USPP:
       ! compute corrections to the D coefficients of the pseudopots
-      ! due to vsic(r, i) in the case of orbital dependent functionals.
+      ! due to vsic_realspace(r, i) in the case of orbital dependent functionals.
       ! The corresponding contributions to the forces are computed.
       !
       ! IMPORTANT: the following call makes use of newd.
@@ -6467,7 +6467,7 @@
          !
          DO i = 1, nbsp
             !
-            CALL nksic_newd(i, nnrx, ispin(i), nspin, vsic(:, i), vsic_reciprocal(:, i), nat, nhm, &
+            CALL nksic_newd(i, nnrx, ispin(i), nspin, vsic_realspace(:, i), vsic_reciprocal(:, i), nat, nhm, &
                             becsum, fion_sic, deeq_sic(:, :, :, i))
             !
          END DO
@@ -6483,7 +6483,7 @@
    end subroutine nksic_potential_non_ortho
 !-----------------------------------------------------------------------
 
-   subroutine ebl_check(vsic, vsic_reciprocal)
+   subroutine ebl_check(vsic_realspace, vsic_reciprocal)
 
       use kinds, only: dp
       use cp_interfaces, only: invfft
@@ -6496,23 +6496,23 @@
 
       implicit none
 
-      real(dp), intent(in) :: vsic(nnrx)
+      real(dp), intent(in) :: vsic_realspace(nnrx)
       complex(dp), intent(in) :: vsic_reciprocal(ngm)
 
-      real(dp), allocatable :: vsic_realspace(:)
+      real(dp), allocatable :: vsic_realspace_local(:)
       real(dp) :: sumdiff
       complex(dp), allocatable :: psi(:)
       integer :: return_code
 
-      allocate (vsic_realspace(size(vsic)))
-      allocate (psi(size(vsic)))
+      allocate (vsic_realspace_local(size(vsic_realspace)))
+      allocate (psi(size(vsic_realspace)))
 
       call rho2psi('Dense', psi, dfftp%nnr, vsic_reciprocal, ngm)
       call invfft('Dense', psi, dfftp)
 
-      vsic_realspace = dble(psi)
+      vsic_realspace_local = dble(psi)
 
-      sumdiff = sum(vsic_realspace - vsic)
+      sumdiff = sum(vsic_realspace_local - vsic_realspace)
       call mp_sum(sumdiff, intra_pool_comm)
       write (*, *) 'ebl_check:', sumdiff
 
@@ -6521,5 +6521,5 @@
 
       ! call tracebackqq(user_exit_code=return_code)
 
-      deallocate (vsic_realspace, psi)
+      deallocate (vsic_realspace_local, psi)
    end subroutine ebl_check
