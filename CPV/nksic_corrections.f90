@@ -3089,7 +3089,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2_realspace(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :), vsic_reciprocal2(:, :)
 !       type(twin_matrix)       :: bec1, bec2
 !       real(dp), allocatable :: pink1(:), pink2(:)
@@ -3134,7 +3134,7 @@ module nksic_corrections
 !       allocate (hi(nbsp, nbsp))
 !       allocate (gi(nbsp, nbsp))
 !       allocate (pink1(nbspx), pink2(nbspx))
-!       allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx), vsic2_realspace(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx), vsic_reciprocal2(ngm, nbspx))
 !       call init_twin(bec1, lgam)
 !       call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -3402,7 +3402,7 @@ module nksic_corrections
 ! !        if(ninner.ge.15) dalpha = spasso*passo*0.00001
 ! !$$
 !          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, &
-!                                Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+!                                Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
 ! #ifdef __DEBUG
 !          if (ionode) then
 !             !
@@ -3431,14 +3431,14 @@ module nksic_corrections
 !                signalpha = signalpha*(-0.717d0)
 !                dalpha = spasso*passo*signalpha
 !                !
-!         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+!         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
 !                !
 !             end do
 ! 
 !             IF (enever .lt. ene0) THEN
 !                !
 !                pink(:) = pink2(:)
-!                vsic(:, :) = vsic2(:, :)
+!                vsic(:, :) = vsic2_realspace(:, :)
 !                vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
 !                c0(:, :) = wfc_ctmp2(:, :)
 !                call copy_twin(bec, bec2)
@@ -3479,7 +3479,7 @@ module nksic_corrections
 !          else if (ene1 >= enever) then !found minimum
 !             !
 !             pink(:) = pink2(:)
-!             vsic(:, :) = vsic2(:, :)
+!             vsic(:, :) = vsic2_realspace(:, :)
 !             vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
 !             c0(:, :) = wfc_ctmp2(:, :)
 !             call copy_twin(bec, bec2)
@@ -3564,7 +3564,7 @@ module nksic_corrections
 !       deallocate (hi)
 !       deallocate (gi)
 !       deallocate (pink1, pink2)
-!       deallocate (vsic1_realspace, vsic2)
+!       deallocate (vsic1_realspace, vsic2_realspace)
 !       deallocate (vsic_reciprocal1, vsic_reciprocal2)
 !       call deallocate_twin(bec1)
 !       call deallocate_twin(bec2)
@@ -3643,7 +3643,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2_realspace(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :), vsic_reciprocal2(:, :)
 !       type(twin_matrix)       :: bec1, bec2
 !       real(dp), allocatable :: pink1(:), pink2(:)
@@ -3687,7 +3687,7 @@ module nksic_corrections
 !       allocate (hi(nbsp, nbsp))
 !       allocate (gi(nbsp, nbsp))
 !       allocate (pink1(nbspx), pink2(nbspx))
-!       allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx), vsic2_realspace(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx), vsic_reciprocal2(ngm, nbspx))
 !       call init_twin(bec1, lgam)
 !       call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -3949,7 +3949,7 @@ module nksic_corrections
 ! !        if(ninner.ge.15) dalpha = spasso*passo*0.00001
 ! !$$
 !          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, &
-!                                Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+!                                Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
 ! 
 ! #ifdef __DEBUG
 !          if (ionode) then
@@ -3980,14 +3980,14 @@ module nksic_corrections
 !                signalpha = signalpha*(-0.717d0)
 !                dalpha = spasso*passo*signalpha
 !                !
-!         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+!         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
 !                !
 !             end do
 ! 
 !             IF (enever .lt. ene0) THEN
 !                !
 !                pink(:) = pink2(:)
-!                vsic(:, :) = vsic2(:, :)
+!                vsic(:, :) = vsic2_realspace(:, :)
 !                vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
 !                c0(:, :) = wfc_ctmp2(:, :)
 !                call copy_twin(bec, bec2)
@@ -4028,7 +4028,7 @@ module nksic_corrections
 !          else if (ene1 >= enever) then !found minimum
 !             !
 !             pink(:) = pink2(:)
-!             vsic(:, :) = vsic2(:, :)
+!             vsic(:, :) = vsic2_realspace(:, :)
 !             vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
 !             c0(:, :) = wfc_ctmp2(:, :)
 !             call copy_twin(bec, bec2)
@@ -4114,7 +4114,7 @@ module nksic_corrections
 !       deallocate (hi)
 !       deallocate (gi)
 !       deallocate (pink1, pink2)
-!       deallocate (vsic1_realspace, vsic2)
+!       deallocate (vsic1_realspace, vsic2_realspace)
 !       deallocate (vsic_reciprocal1, vsic_reciprocal2)
 !       call deallocate_twin(bec1)
 !       call deallocate_twin(bec2)
@@ -4191,7 +4191,7 @@ module nksic_corrections
 !       complex(dp), allocatable :: Umat(:, :)
 !       real(dp), allocatable :: Heig(:)
 !       complex(dp), allocatable :: vsicah(:, :)
-!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
+!       real(dp), allocatable :: vsic1_realspace(:, :), vsic2_realspace(:, :)
 !       complex(dp), allocatable :: vsic_reciprocal1(:, :), vsic_reciprocal2(:, :)
 !       type(twin_matrix)       :: bec1, bec2
 !       real(dp), allocatable :: pink1(:), pink2(:)
@@ -4216,7 +4216,7 @@ module nksic_corrections
 !       allocate (hi(nbsp, nbsp))
 !       allocate (gi(nbsp, nbsp))
 !       allocate (pink1(nbspx), pink2(nbspx))
-!       allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
+!       allocate (vsic1_realspace(nnrx, nbspx), vsic2_realspace(nnrx, nbspx))
 !       allocate (vsic_reciprocal1(ngm, nbspx), vsic_reciprocal2(ngm, nbspx))
 !       call init_twin(bec1, lgam)
 !       call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -4459,7 +4459,7 @@ module nksic_corrections
 ! !        if(ninner.ge.15) dalpha = spasso*passo*0.00001
 ! !$$
 !          call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, &
-!                                Omat2tot, bec2, vsic2, vsic_reciprocal2, pink2, enever, lgam)
+!                                Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
 ! 
 ! #ifdef __DEBUG
 !          if (ionode) then
@@ -4495,7 +4495,7 @@ module nksic_corrections
 !          if (ene1 >= enever) then
 !             !
 !             pink(:) = pink2(:)
-!             vsic(:, :) = vsic2(:, :)
+!             vsic(:, :) = vsic2_realspace(:, :)
 !             vsic_reciprocal(:, :) = vsic_reciprocal2(:, :)
 !             c0(:, :) = wfc_ctmp2(:, :)
 !             call copy_twin(bec, bec2)
@@ -4568,7 +4568,7 @@ module nksic_corrections
 !       deallocate (hi)
 !       deallocate (gi)
 !       deallocate (pink1, pink2)
-!       deallocate (vsic1_realspace, vsic2)
+!       deallocate (vsic1_realspace, vsic2_realspace)
 !       deallocate (vsic_reciprocal1, vsic_reciprocal2)
 !       call deallocate_twin(bec1)
 !       call deallocate_twin(bec2)

@@ -74,7 +74,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    !
    real(dp), allocatable :: Heigbig(:)
    real(dp), allocatable :: Heig(:)
-   real(dp), allocatable :: vsic1_realspace(:, :), vsic2(:, :)
+   real(dp), allocatable :: vsic1_realspace(:, :), vsic2_realspace(:, :)
    complex(dp), allocatable :: vsic1_reciprocal(:, :), vsic2_reciprocal(:, :)
    real(dp), allocatable :: pink1(:), pink2(:)
    !
@@ -134,7 +134,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    allocate (hi(nbsp, nbsp))
    allocate (gi(nbsp, nbsp))
    allocate (pink1(nbspx), pink2(nbspx))
-   allocate (vsic1_realspace(nnrx, nbspx), vsic2(nnrx, nbspx))
+   allocate (vsic1_realspace(nnrx, nbspx), vsic2_realspace(nnrx, nbspx))
    allocate (vsic1_reciprocal(ngm, nbspx), vsic2_reciprocal(ngm, nbspx))
    !
    call init_twin(bec1, lgam)
@@ -411,7 +411,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                     dalpha, Heigbig, Umatbig, &
                                     c0, wfc_ctmp2, Omat2tot, bec2, rhor, rhoc, &
                                     becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
-                                    vsic2, vsic2_reciprocal, pink2, enever, lgam, is_empty)
+                                    vsic2_realspace, vsic2_reciprocal, pink2, enever, lgam, is_empty)
       !
       if (ene0 < ene1 .and. ene0 < enever) then !missed minimum case 3
          !
@@ -434,14 +434,14 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                           dalpha, Heigbig, Umatbig, &
                                           c0, wfc_ctmp2, Omat2tot, bec2, rhor, rhoc, &
                                           becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
-                                          vsic2, vsic2_reciprocal, pink2, enever, lgam, is_empty)
+                                          vsic2_realspace, vsic2_reciprocal, pink2, enever, lgam, is_empty)
             !
          end do
          !
          if (enever .lt. ene0) then
             !
             pink(:) = pink2(:)
-            vsic(:, :) = vsic2(:, :)
+            vsic(:, :) = vsic2_realspace(:, :)
             vsic_reciprocal(:, :) = vsic2_reciprocal(:, :)
             c0(:, :) = wfc_ctmp2(:, :)
             call copy_twin(bec, bec2)
@@ -472,7 +472,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
       elseif (ene1 >= enever) then !found minimum
          !
          pink(:) = pink2(:)
-         vsic(:, :) = vsic2(:, :)
+         vsic(:, :) = vsic2_realspace(:, :)
          vsic_reciprocal(:, :) = vsic2_reciprocal(:, :)
          c0(:, :) = wfc_ctmp2(:, :)
          call copy_twin(bec, bec2)
@@ -521,7 +521,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    deallocate (hi)
    deallocate (gi)
    deallocate (pink1, pink2)
-   deallocate (vsic1_realspace, vsic2)
+   deallocate (vsic1_realspace, vsic2_realspace)
    deallocate (vsic1_reciprocal, vsic2_reciprocal)
    call deallocate_twin(bec1)
    call deallocate_twin(bec2)

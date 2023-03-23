@@ -4564,7 +4564,7 @@ end subroutine nksic_rot_test
       complex(dp), allocatable :: Umat(:,:)
       real(dp),    allocatable :: Heig(:)
       complex(dp),    allocatable :: vsicah(:,:)
-      real(dp),    allocatable :: vsic1_realspace(:,:), vsic2(:,:)
+      real(dp),    allocatable :: vsic1_realspace(:,:), vsic2_realspace(:,:)
       type(twin_matrix)       :: bec1,bec2
       real(dp),    allocatable :: pink1(:), pink2(:)
       logical :: restartcg_innerloop, ene_ok_innerloop, ltresh, setpassomax
@@ -4608,7 +4608,7 @@ end subroutine nksic_rot_test
       allocate( hi(nbsp,nbsp) )
       allocate( gi(nbsp,nbsp) )
       allocate( pink1(nbspx), pink2(nbspx) )
-      allocate( vsic1_realspace(nnrx,nbspx), vsic2(nnrx,nbspx) )
+      allocate( vsic1_realspace(nnrx,nbspx), vsic2_realspace(nnrx,nbspx) )
       call init_twin(bec1, lgam)
       call allocate_twin(bec1,nkb,nbsp,lgam)
       call init_twin(bec2,lgam)
@@ -4876,7 +4876,7 @@ end subroutine nksic_rot_test
 !        if(ninner.ge.15) dalpha = spasso*passo*0.00001
 !$$
         call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, &
-                               Omat2tot, bec2, vsic2, pink2, enever, lgam)
+                               Omat2tot, bec2, vsic2_realspace, pink2, enever, lgam)
 #ifdef __DEBUG
         if(ionode) then
             !
@@ -4905,14 +4905,14 @@ end subroutine nksic_rot_test
                signalpha=signalpha*(-0.717d0)
                dalpha = spasso*passo*signalpha
                !
-               call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, pink2, enever, lgam)
+               call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2_realspace, pink2, enever, lgam)
                !
             enddo
 
             IF(enever.lt.ene0) THEN
                !
                pink(:)   = pink2(:)
-               vsic(:,:) = vsic2(:,:)
+               vsic(:,:) = vsic2_realspace(:,:)
                c0(:,:)   = wfc_ctmp2(:,:)
                call copy_twin(bec,bec2)
    !             bec%rvec(:,:)  = bec2(:,:)
@@ -4952,7 +4952,7 @@ end subroutine nksic_rot_test
         else if( ene1 >= enever ) then !found minimum
             !
             pink(:)   = pink2(:)
-            vsic(:,:) = vsic2(:,:)
+            vsic(:,:) = vsic2_realspace(:,:)
             c0(:,:)   = wfc_ctmp2(:,:)
             call copy_twin(bec,bec2)
 !             bec%rvec(:,:)  = bec2(:,:)
@@ -5035,7 +5035,7 @@ end subroutine nksic_rot_test
       deallocate( hi )
       deallocate( gi )
       deallocate( pink1, pink2 )
-      deallocate( vsic1_realspace, vsic2 )
+      deallocate( vsic1_realspace, vsic2_realspace )
       call deallocate_twin(bec1)
       call deallocate_twin(bec2)
 
@@ -5116,7 +5116,7 @@ end subroutine nksic_rot_emin_cg_new
       complex(dp), allocatable :: Umat(:,:)
       real(dp),    allocatable :: Heig(:)
       complex(dp),    allocatable :: vsicah(:,:)
-      real(dp),    allocatable :: vsic1_realspace(:,:), vsic2(:,:)
+      real(dp),    allocatable :: vsic1_realspace(:,:), vsic2_realspace(:,:)
       type(twin_matrix)       :: bec1,bec2
       real(dp),    allocatable :: pink1(:), pink2(:)
       logical :: restartcg_innerloop, ene_ok_innerloop, ltresh, setpassomax
@@ -5162,7 +5162,7 @@ end subroutine nksic_rot_emin_cg_new
       allocate( hi(nbsp,nbsp) )
       allocate( gi(nbsp,nbsp) )
       allocate( pink1(nbspx), pink2(nbspx) )
-      allocate( vsic1_realspace(nnrx,nbspx), vsic2(nnrx,nbspx) )
+      allocate( vsic1_realspace(nnrx,nbspx), vsic2_realspace(nnrx,nbspx) )
       call init_twin(bec1, lgam)
       call allocate_twin(bec1,nkb,nbsp,lgam)
       call init_twin(bec2,lgam)
@@ -5460,7 +5460,7 @@ end subroutine nksic_rot_emin_cg_new
 !        if(ninner.ge.15) dalpha = spasso*passo*0.00001
 !$$
         call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, &
-                               Omat2tot, bec2, vsic2, pink2, enever, lgam)
+                               Omat2tot, bec2, vsic2_realspace, pink2, enever, lgam)
 
 #ifdef __DEBUG
         if(ionode) then
@@ -5491,14 +5491,14 @@ end subroutine nksic_rot_emin_cg_new
                signalpha=signalpha*(-0.717d0)
                dalpha = spasso*passo*signalpha
                !
-               call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2, pink2, enever, lgam)
+               call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2_realspace, pink2, enever, lgam)
                !
             enddo
 
             IF(enever.lt.ene0) THEN
                !
                pink(:)   = pink2(:)
-               vsic(:,:) = vsic2(:,:)
+               vsic(:,:) = vsic2_realspace(:,:)
                c0(:,:)   = wfc_ctmp2(:,:)
                call copy_twin(bec,bec2)
    !             bec%rvec(:,:)  = bec2(:,:)
@@ -5538,7 +5538,7 @@ end subroutine nksic_rot_emin_cg_new
         else if( ene1 >= enever ) then !found minimum
             !
             pink(:)   = pink2(:)
-            vsic(:,:) = vsic2(:,:)
+            vsic(:,:) = vsic2_realspace(:,:)
             c0(:,:)   = wfc_ctmp2(:,:)
             call copy_twin(bec,bec2)
 !             bec%rvec(:,:)  = bec2(:,:)
@@ -5622,7 +5622,7 @@ end subroutine nksic_rot_emin_cg_new
       deallocate( hi )
       deallocate( gi )
       deallocate( pink1, pink2 )
-      deallocate( vsic1_realspace, vsic2 )
+      deallocate( vsic1_realspace, vsic2_realspace )
       call deallocate_twin(bec1)
       call deallocate_twin(bec2)
 !       deallocate( bec1, bec2 )
@@ -5702,7 +5702,7 @@ end subroutine nksic_rot_emin_cg
       complex(dp), allocatable :: Umat(:,:)
       real(dp),    allocatable :: Heig(:)
       complex(dp),    allocatable :: vsicah(:,:)
-      real(dp),    allocatable :: vsic1_realspace(:,:), vsic2(:,:)
+      real(dp),    allocatable :: vsic1_realspace(:,:), vsic2_realspace(:,:)
       type(twin_matrix)       :: bec1,bec2
       real(dp),    allocatable :: pink1(:), pink2(:)
 
@@ -5726,7 +5726,7 @@ end subroutine nksic_rot_emin_cg
       allocate( hi(nbsp,nbsp) )
       allocate( gi(nbsp,nbsp) )
       allocate( pink1(nbspx), pink2(nbspx) )
-      allocate( vsic1_realspace(nnrx,nbspx), vsic2(nnrx,nbspx) )
+      allocate( vsic1_realspace(nnrx,nbspx), vsic2_realspace(nnrx,nbspx) )
       call init_twin(bec1, lgam)
       call allocate_twin(bec1,nkb,nbsp,lgam)
       call init_twin(bec2,lgam)
@@ -5969,7 +5969,7 @@ end subroutine nksic_rot_emin_cg
 !        if(ninner.ge.15) dalpha = spasso*passo*0.00001
 !$$
         call nksic_getOmattot( dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, &
-                               Omat2tot, bec2, vsic2, pink2, enever, lgam)
+                               Omat2tot, bec2, vsic2_realspace, pink2, enever, lgam)
 
 #ifdef __DEBUG
         if(ionode) then
@@ -6005,7 +6005,7 @@ end subroutine nksic_rot_emin_cg
         if( ene1 >= enever ) then
             !
             pink(:)   = pink2(:)
-            vsic(:,:) = vsic2(:,:)
+            vsic(:,:) = vsic2_realspace(:,:)
             c0(:,:)   = wfc_ctmp2(:,:)
             call copy_twin(bec,bec2)
 !             bec%rvec(:,:)  = bec2(:,:)
@@ -6076,7 +6076,7 @@ end subroutine nksic_rot_emin_cg
       deallocate( hi )
       deallocate( gi )
       deallocate( pink1, pink2 )
-      deallocate( vsic1_realspace, vsic2 )
+      deallocate( vsic1_realspace, vsic2_realspace )
       call deallocate_twin(bec1)
       call deallocate_twin(bec2)
 !       deallocate( bec1, bec2 )
