@@ -358,7 +358,7 @@ module nksic
   real(dp),    allocatable :: odd_alpha_emp(:) !added:giovanni for alpha renormalization
   real(dp),    allocatable :: vxc_sic(:,:)
   real(dp),    allocatable :: wxdsic_realspace(:,:)
-  complex(dp),    allocatable :: wxdsic_reciprocal(:,:)
+  complex(dp), allocatable :: wxdsic_reciprocal(:,:)
   real(dp),    allocatable :: orb_rhor(:,:)
   real(dp),    allocatable :: rhoref(:,:)
   real(dp),    allocatable :: rhobar(:,:)

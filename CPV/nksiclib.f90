@@ -279,7 +279,8 @@
                !
                call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                          rhor, rhoref, rhobar, rhobarg, grhobar, &
-                             vsic_realspace(:, i), vsic_reciprocal(:, i), wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
+                             vsic_realspace(:, i), vsic_reciprocal(:, i), wxdsic_realspace, &
+                             wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
                !
                ! here information is accumulated over states
                ! (wtot_realspace is added in the next loop)
@@ -1605,7 +1606,8 @@
 
 !---------------------------------------------------------------
    subroutine nksic_get_pzfactor_potential(f, nspin, ispin, rhor, orb_rhor, &
-                                         pink, taukin, tauw, edens, upsilonkin, upsilonw, vsic_realspace, vsic_reciprocal, alpha, ibnd, kfact)
+                                         pink, taukin, tauw, edens, upsilonkin, &
+                                         upsilonw, vsic_realspace, vsic_reciprocal, alpha, ibnd, kfact)
 !---------------------------------------------------------------
 !
 ! ... sum up the kinetic energy-density taukin ... this works both for summing
@@ -2714,7 +2716,8 @@
 
          dalpha = passoprod/dmaxeig
          !
-         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, dtmp, lgam)
+         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, &
+                               vsic1_realspace, vsic_reciprocal1, pink1, dtmp, lgam)
 
          !
          ! deal with non-variational functionals,
@@ -2915,7 +2918,8 @@
             dalpha = 0.d0
          end if
 
-         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, esic)
+         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, &
+                               bec1, vsic1_realspace, vsic_reciprocal1, pink1, esic)
 
          if (ionode) write (nfile, '(5F24.13,2I10)') dalpha/3.141592*dmaxeig, dmaxeig, etot, esic, deigrms, ninner, nouter
 
@@ -3339,7 +3343,8 @@
                signalpha = signalpha*(-0.717d0)
                dalpha = spasso*passo*signalpha
                !
-        call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
+        call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, &
+                              vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
                !
             end do
 
@@ -3888,7 +3893,8 @@
                signalpha = signalpha*(-0.717d0)
                dalpha = spasso*passo*signalpha
                !
-        call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
+        call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp2, Omat2tot, bec2, &
+                              vsic2_realspace, vsic_reciprocal2, pink2, enever, lgam)
                !
             end do
 
@@ -4604,7 +4610,8 @@
       pink1(:) = 0.d0
       !
       call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                      ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, pink1, nudx, wfc_centers, &
+                           ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, &
+                           wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, pink1, nudx, wfc_centers, &
                            wfc_spreads, icompute_spread, is_empty)
       !
       ene1 = sum(pink1(:))
@@ -4621,7 +4628,9 @@
 !---------------------------------------------------------------
 
 !---------------------------------------------------------------
-   subroutine nksic_getOmattot(dalpha, Heigbig, Umatbig, wfc0, wfc1, Omat1tot, bec1, vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam)!warning:giovanni bec1 here needs to be a twin!
+   subroutine nksic_getOmattot(dalpha, Heigbig, Umatbig, wfc0, wfc1, Omat1tot, bec1, &
+                               vsic1_realspace, vsic_reciprocal1, pink1, ene1, lgam)
+   !warning:giovanni bec1 here needs to be a twin!
 !---------------------------------------------------------------
 !
 ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
@@ -4743,7 +4752,8 @@
       !
       !
       call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-              ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
+                           ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, &
+                           wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
                            wfc_spreads, icompute_spread, .false.)
       !
       ene1 = sum(pink1(:))
@@ -6076,9 +6086,9 @@
    subroutine nksic_potential_non_ortho(nbsp, nx, c, cdual, f_diag, &
                                         bec, becdual, becsum, &
                                         deeq_sic, ispin, iupdwn, nupdwn, &
-                                        rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic_realspace, vsic_reciprocal, do_wxd_, pink, nudx, &
-                                        wfc_centers, wfc_spreads, &
-                                        icompute_spread)
+                                        rhor, rhoc, wtot_realspace, wtot_reciprocal, &
+                                        vsic_realspace, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                        wfc_centers, wfc_spreads, icompute_spread)
 !-----------------------------------------------------------------------
 !
 ! ....calculate orbital dependent potentials,

@@ -506,7 +506,8 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot_realspace, wtot_reciprocal, vsic_emp_realspace, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
+                                    wtot_realspace, wtot_reciprocal, vsic_emp_realspace, &
+                                    vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !

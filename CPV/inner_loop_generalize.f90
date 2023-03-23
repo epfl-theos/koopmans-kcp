@@ -1,7 +1,7 @@
 subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold, lgam, &
                                      nbsp, nbspx, nudx, iupdwn, nupdwn, ispin, c0, becsum, bec, rhor, rhoc, &
-                                     vsic_realspace, vsic_reciprocal, pink, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
-                                     wfc_centers, wfc_spreads, is_empty)
+                                     vsic_realspace, vsic_reciprocal, pink, deeq_sic, wtot_realspace, &
+                                     wtot_reciprocal, fsic, do_wxd, wfc_centers, wfc_spreads, is_empty)
    !
    ! ... Finds the orthogonal rotation matrix Omattot that minimizes
    !     the orbital-dependent and hence the total energy, and then

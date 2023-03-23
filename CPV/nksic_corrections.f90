@@ -1173,7 +1173,8 @@ module nksic_corrections
 !---------------------------------------------------------------
    subroutine nksic_correction_nki(f, ispin, orb_rhor, rhor, &
                                    rhoref, rhobar, rhobarg, grhobar, &
-                                   vsic_realspace, vsic_reciprocal, wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink, ibnd, shart, is_empty)
+                                   vsic_realspace, vsic_reciprocal, wxdsic_realspace, &
+                                   wxdsic_reciprocal, do_wxd_, pink, ibnd, shart, is_empty)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans (integrated, NKI)
