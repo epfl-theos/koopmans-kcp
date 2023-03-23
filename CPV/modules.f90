@@ -357,7 +357,7 @@ module nksic
   real(dp),    allocatable :: pink_emp(:)
   real(dp),    allocatable :: odd_alpha_emp(:) !added:giovanni for alpha renormalization
   real(dp),    allocatable :: vxc_sic(:,:)
-  real(dp),    allocatable :: wxdsic(:,:)
+  real(dp),    allocatable :: wxdsic_realspace(:,:)
   complex(dp),    allocatable :: wxdsic_reciprocal(:,:)
   real(dp),    allocatable :: orb_rhor(:,:)
   real(dp),    allocatable :: rhoref(:,:)
@@ -480,10 +480,10 @@ contains
       endif
       !
       if ( do_nk .or. do_nkpz ) then
-          allocate( wxdsic(nnrx,2) )
+          allocate( wxdsic_realspace(nnrx,2) )
           allocate( wrefsic(nnrx) )
       else if ( do_nki .or. do_nkipz) then
-          allocate( wxdsic(nnrx,2) )
+          allocate( wxdsic_realspace(nnrx,2) )
           allocate( wxdsic_reciprocal(nnrx,2) )
       endif
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
@@ -521,7 +521,7 @@ contains
       vsicpsi  = 0.0d0
       !
       !vxc_sic   = 0.0d0
-      !wxdsic   = 0.0d0
+      !wxdsic_realspace   = 0.0d0
       !wrefsic  = 0.0d0
       !orb_rhor = 0.0d0
       !rhobar   = 0.0d0
@@ -542,7 +542,7 @@ contains
       if ( allocated(pink) )            cost = cost + real( size(pink) )            *  8.0_dp 
       if ( allocated(vsicpsi) )         cost = cost + real( size(vsicpsi) )         * 16.0_dp 
       if ( allocated(vxc_sic) )         cost = cost + real( size(vxc_sic) )         *  8.0_dp 
-      if ( allocated(wxdsic) )          cost = cost + real( size(wxdsic) )          *  8.0_dp 
+      if ( allocated(wxdsic_realspace) )          cost = cost + real( size(wxdsic_realspace) )          *  8.0_dp 
       if ( allocated(wxdsic_reciprocal) ) cost = cost + real( size(wxdsic_reciprocal) ) * 16.0_dp 
       if ( allocated(orb_rhor))         cost = cost + real( size(orb_rhor))         *  8.0_dp
       if ( allocated(rhoref) )          cost = cost + real( size(rhoref) )          *  8.0_dp
@@ -570,7 +570,7 @@ contains
       if(allocated(edens))       deallocate(edens)
       if(allocated(upsilonkin))  deallocate(upsilonkin)
       if(allocated(upsilonw))    deallocate(upsilonw)
-      if(allocated(wxdsic))      deallocate(wxdsic)
+      if(allocated(wxdsic_realspace))      deallocate(wxdsic_realspace)
       if(allocated(wxdsic_reciprocal)) deallocate(wxdsic_reciprocal)
       if(allocated(vxc_sic))     deallocate(vxc_sic)
       if(allocated(vsicpsi))     deallocate(vsicpsi)

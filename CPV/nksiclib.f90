@@ -33,7 +33,7 @@
       use grid_dimensions, only: nnrx
       USE electrons_base, ONLY: nspin
       use funct, only: dft_is_gradient
-      use nksic, only: orb_rhor, wxdsic, wxdsic_reciprocal, &
+      use nksic, only: orb_rhor, wxdsic_realspace, wxdsic_reciprocal, &
                        wrefsic, rhoref, rhobar, &
                        do_nk, do_nki, do_pz, do_nkpz, &
                        do_nkipz, do_pz_renorm, &
@@ -221,7 +221,7 @@
                !
                call nksic_correction_nk(focc, ispin(i), orb_rhor(:, jj), &
                                         rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                        vsic(:, i), wxdsic, wrefsic, do_wxd_, &
+                                        vsic(:, i), wxdsic_realspace, wrefsic, do_wxd_, &
                                         pink(i), ibnd, shart)
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -229,12 +229,12 @@
                ! here information is accumulated over states
                ! (wtot_realspace is added in the next loop)
                !
-               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic_realspace(1:nnrx, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
                !
                vsic(1:nnrx, i) = vsic(1:nnrx, i) + wrefsic(1:nnrx) &
-                                 - wxdsic(1:nnrx, ispin(i))
+                                 - wxdsic_realspace(1:nnrx, ispin(i))
                !
             end if
             !
@@ -279,17 +279,17 @@
                !
                call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                          rhor, rhoref, rhobar, rhobarg, grhobar, &
-                             vsic(:, i), vsic_reciprocal(:, i), wxdsic, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
+                             vsic(:, i), vsic_reciprocal(:, i), wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
                !
                ! here information is accumulated over states
                ! (wtot_realspace is added in the next loop)
                !
-               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic_realspace(1:nnrx, 1:2)
                wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic(1:nnrx, ispin(i))
+               vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -330,10 +330,10 @@
                !
                if (nspin == 1) then
                   !
-                  wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic(1:nnrx, 2)
+                  wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic_realspace(1:nnrx, 2)
                   wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
                   !
-                  wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic(1:nnrx, 1)
+                  wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic_realspace(1:nnrx, 1)
                   wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)
                   !
                end if
@@ -6098,7 +6098,7 @@
       use grid_dimensions, only: nnrx
       use electrons_base, only: nspin
       use funct, only: dft_is_gradient
-      use nksic, only: orb_rhor, wxdsic, wxdsic_reciprocal, &
+      use nksic, only: orb_rhor, wxdsic_realspace, wxdsic_reciprocal, &
                        wrefsic, rhoref, rhobar, &
                        do_nk, do_nki, do_pz, do_nkpz, &
                        do_nkipz, grhobar, fion_sic, &
@@ -6261,7 +6261,7 @@
                !
                call nksic_correction_nk(focc, ispin(i), orb_rhor(:, jj), &
                                         rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                        vsic(:, i), wxdsic, wrefsic, do_wxd_, &
+                                        vsic(:, i), wxdsic_realspace, wrefsic, do_wxd_, &
                                         pink(i), ibnd, shart)
                !
                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -6269,12 +6269,12 @@
                ! here information is accumulated over states
                ! (wtot_realspace is added in the next loop)
                !
-               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic_realspace(1:nnrx, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
                !
                vsic(1:nnrx, i) = vsic(1:nnrx, i) + wrefsic(1:nnrx) &
-                                 - wxdsic(1:nnrx, ispin(i))
+                                 - wxdsic_realspace(1:nnrx, ispin(i))
                !
             end if
 
@@ -6318,18 +6318,18 @@
                !
                call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
                                          rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                         vsic(:, i), vsic_reciprocal(:, i), wxdsic, &
+                                         vsic(:, i), vsic_reciprocal(:, i), wxdsic_realspace, &
                                          wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart)
                !
                ! here information is accumulated over states
                ! (wtot_realspace is added in the next loop)
                !
-               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic_realspace(1:nnrx, 1:2)
                wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
                !
-               vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic(1:nnrx, ispin(i))
+               vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
                !
             end if
@@ -6356,8 +6356,8 @@
                !
                if (nspin == 1) then
                   !
-                  wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic(1:nnrx, 2)
-                  wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic(1:nnrx, 1)
+                  wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic_realspace(1:nnrx, 2)
+                  wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic_realspace(1:nnrx, 1)
                   !
                   wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
                   wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)

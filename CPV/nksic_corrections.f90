@@ -21,7 +21,7 @@ module nksic_corrections
 !---------------------------------------------------------------
    subroutine nksic_correction_nk(f, ispin, orb_rhor, rhor, &
                                   rhoref, rhobar, rhobarg, grhobar, &
-                                  vsic, wxdsic, wrefsic, do_wxd_, &
+                                  vsic, wxdsic_realspace, wrefsic, do_wxd_, &
                                   pink, ibnd, shart)
 !---------------------------------------------------------------
 !
@@ -56,7 +56,7 @@ module nksic_corrections
       complex(dp), intent(in)  :: rhobarg(ngm, 2)
       real(dp), intent(in)  :: grhobar(nnrx, 3, 2)
       real(dp), intent(out) :: vsic(nnrx), wrefsic(nnrx)
-      real(dp), intent(out) :: wxdsic(nnrx, 2)
+      real(dp), intent(out) :: wxdsic_realspace(nnrx, 2)
       logical, intent(in)  :: do_wxd_
       real(dp), intent(out) :: pink
       !
@@ -114,7 +114,7 @@ module nksic_corrections
       !
       vsic = 0.0_dp
       wrefsic = 0.0_dp
-      wxdsic = 0.0_dp
+      wxdsic_realspace = 0.0_dp
       pink = 0.0_dp
 
       !
@@ -358,7 +358,7 @@ module nksic_corrections
       !
       CALL start_clock('nk_corr_fxc')
       !
-      wxdsic(:, :) = 0.0d0
+      wxdsic_realspace(:, :) = 0.0d0
       !
       if (do_wref .or. do_wxd_) then
          !
@@ -366,7 +366,7 @@ module nksic_corrections
          ! (and not overwritten) by the next call
          !
          call nksic_dmxc_spin_cp_update(nnrx, rhoref, f, ispin, rhoele, &
-                                        vanishing_rho_w, wrefsic, wxdsic) !modified:linh
+                                        vanishing_rho_w, wrefsic, wxdsic_realspace) !modified:linh
          !
          !
          if (do_wref) then
@@ -383,7 +383,7 @@ module nksic_corrections
          !
          if (do_wxd_) then
             !
-            wxdsic(:, 1:2) = rhobarfact*(wxdsic(:, 1:2) &
+            wxdsic_realspace(:, 1:2) = rhobarfact*(wxdsic_realspace(:, 1:2) &
                                          + vxc0(:, 1:2) - vxc(:, 1:2))
             !
          end if
@@ -400,9 +400,9 @@ module nksic_corrections
       vsic = vsic*nkscalfact
       !
       if (do_wxd_) then
-         wxdsic = wxdsic*nkscalfact
+         wxdsic_realspace = wxdsic_realspace*nkscalfact
       else
-         wxdsic = 0.d0
+         wxdsic_realspace = 0.d0
       end if
       !
       if (do_wref) then
@@ -1156,7 +1156,7 @@ module nksic_corrections
       real(dp), allocatable :: rhoele(:, :)
       real(dp), allocatable :: rhoref(:, :)
       real(dp), allocatable :: vxcref(:, :)
-      real(dp), allocatable :: wxdsic(:, :)
+      real(dp), allocatable :: wxdsic_realspace(:, :)
       real(dp), allocatable :: grhoraux(:, :, :)
       real(dp), allocatable :: haux(:, :, :)
       complex(dp), allocatable :: vhaux(:)
@@ -1172,7 +1172,7 @@ module nksic_corrections
       lgam = gamma_only .and. .not. do_wf_cmplx
       fact = omega/DBLE(nr1*nr2*nr3)
       !
-      allocate (wxdsic(nnrx, 2))
+      allocate (wxdsic_realspace(nnrx, 2))
       allocate (rhoele(nnrx, 2))
       allocate (rhoref(nnrx, 2))
       allocate (rhogaux(ngm, 2))
@@ -1185,7 +1185,7 @@ module nksic_corrections
       !
       vsic = 0.0_dp
       wrefsic = 0.0_dp
-      wxdsic = 0.0_dp
+      wxdsic_realspace = 0.0_dp
       pink = 0.0_dp
       !
       ! compute self-hartree contributions
@@ -1318,7 +1318,7 @@ module nksic_corrections
          ! (and not overwritten) by the next call
          !
          call nksic_dmxc_spin_cp_update(nnrx, rhoref, f, ispin, rhoele, &
-                                        vanishing_rho_w, wrefsic, wxdsic)!modified:linh
+                                        vanishing_rho_w, wrefsic, wxdsic_realspace)!modified:linh
          !
          w2cst = sum(wrefsic(1:nnrx)*rhoele(1:nnrx, ispin))*fact
          !
@@ -1344,7 +1344,7 @@ module nksic_corrections
          wrefsic = 0.d0
       end if
       !
-      deallocate (wxdsic)
+      deallocate (wxdsic_realspace)
       deallocate (vxcref)
       deallocate (rhoele)
       deallocate (rhoref)
@@ -1619,7 +1619,7 @@ module nksic_corrections
 !---------------------------------------------------------------
    subroutine nksic_correction_nki(f, ispin, orb_rhor, rhor, &
                                    rhoref, rhobar, rhobarg, grhobar, &
-                                   vsic, vsic_reciprocal, wxdsic, wxdsic_reciprocal, do_wxd_, pink, ibnd, shart, is_empty)
+                                   vsic, vsic_reciprocal, wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink, ibnd, shart, is_empty)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans (integrated, NKI)
@@ -1659,7 +1659,7 @@ module nksic_corrections
       real(dp), intent(in)  :: grhobar(nnrx, 3, 2)
       real(dp), intent(out) :: vsic(nnrx)
       complex(dp), intent(out) :: vsic_reciprocal(ngm)
-      real(dp), intent(out) :: wxdsic(nnrx, 2)
+      real(dp), intent(out) :: wxdsic_realspace(nnrx, 2)
       complex(dp), intent(out) :: wxdsic_reciprocal(ngm, 2)
       logical, intent(in)  :: do_wxd_
       real(dp), intent(out) :: pink, shart
@@ -1728,7 +1728,7 @@ module nksic_corrections
       !
       vsic = 0.0_dp
       vsic_reciprocal = 0.0_dp
-      wxdsic = 0.0_dp
+      wxdsic_realspace = 0.0_dp
       wxdsic_reciprocal = 0.0_dp
       pink = 0.0_dp
       !
@@ -2000,19 +2000,19 @@ module nksic_corrections
       !
       !   calculate wxd
       !
-      wxdsic(:, :) = 0.0d0
+      wxdsic_realspace(:, :) = 0.0d0
       wxdsic_reciprocal(:, :) = 0.0d0
       !
       if (do_wxd_) then
          !
-         wxdsic(:, 1:2) = (1.0_dp - f)*vxc0(:, 1:2) - vxc(:, 1:2) + f*vxcref(:, 1:2)
+         wxdsic_realspace(:, 1:2) = (1.0_dp - f)*vxc0(:, 1:2) - vxc(:, 1:2) + f*vxcref(:, 1:2)
          !
       end if
       !
-      ! Transform wxdsic to reciprocal space
+      ! Transform wxdsic_realspace to reciprocal space
       !
       allocate (wxdtmp(ngm, 2))
-      wxdtmp = wxdsic(:, :)
+      wxdtmp = wxdsic_realspace(:, :)
       do i = 1, 2
          call fwfft('Dense', wxdtmp(:, i), dfftp)
          call psi2rho('Dense', wxdtmp(:, i), dfftp%nnr, wxdsic_reciprocal(:, i), ngm)
@@ -2029,12 +2029,12 @@ module nksic_corrections
       !
       if (do_wxd_) then
          !
-         wxdsic = wxdsic*nkscalfact
+         wxdsic_realspace = wxdsic_realspace*nkscalfact
          wxdsic_reciprocal = wxdsic_reciprocal*nkscalfact
          !
       else
          !
-         wxdsic = 0.d0
+         wxdsic_realspace = 0.d0
          wxdsic_reciprocal = 0.d0
          !
       end if
@@ -6367,7 +6367,7 @@ module nksic_corrections
 !       use grid_dimensions, only: nnrx
 !       use electrons_base, only: nspin
 !       use funct, only: dft_is_gradient
-!       use nksic, only: orb_rhor, wxdsic, wxdsic_reciprocal, &
+!       use nksic, only: orb_rhor, wxdsic_realspace, wxdsic_reciprocal, &
 !                        wrefsic, rhoref, rhobar, &
 !                        do_nk, do_nki, do_pz, do_nkpz, &
 !                        do_nkipz, grhobar, fion_sic, &
@@ -6527,7 +6527,7 @@ module nksic_corrections
 !                !
 !                call nksic_correction_nk(focc, ispin(i), orb_rhor(:, jj), &
 !                                         rhor, rhoref, rhobar, rhobarg, grhobar, &
-!                                         vsic(:, i), wxdsic, wxdsic, wrefsic, do_wxd_, &
+!                                         vsic(:, i), wxdsic_realspace, wxdsic_realspace, wrefsic, do_wxd_, &
 !                                         pink(i), ibnd, shart)
 !                !
 !                wfc_spreads(ibnd, ispin(i), 2) = shart
@@ -6535,12 +6535,12 @@ module nksic_corrections
 !                ! here information is accumulated over states
 !                ! (wtot_realspace is added in the next loop)
 !                !
-!                wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+!                wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic_realspace(1:nnrx, 1:2)
 !                !
 !                ! ths sic potential is partly updated here to save some memory
 !                !
 !                vsic(1:nnrx, i) = vsic(1:nnrx, i) + wrefsic(1:nnrx) &
-!                                  - wxdsic(1:nnrx, ispin(i))
+!                                  - wxdsic_realspace(1:nnrx, ispin(i))
 !                !
 !             end if
 ! 
@@ -6584,17 +6584,17 @@ module nksic_corrections
 !                !
 !                call nksic_correction_nki(focc, ispin(i), orb_rhor(:, jj), &
 !                                          rhor, rhoref, rhobar, rhobarg, grhobar, &
-!                                          vsic(:, i), vsic_reciprocal(:, i), wxdsic, wxdsic_reciprocal, do_wxd_, pink(i), ibnd)
+!                                          vsic(:, i), vsic_reciprocal(:, i), wxdsic_realspace, wxdsic_reciprocal, do_wxd_, pink(i), ibnd)
 !                !
 !                ! here information is accumulated over states
 !                ! (wtot_realspace is added in the next loop)
 !                !
-!                wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+!                wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic_realspace(1:nnrx, 1:2)
 !                wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
 !                !
 !                ! ths sic potential is partly updated here to save some memory
 !                !
-!                vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic(1:nnrx, ispin(i))
+!                vsic(1:nnrx, i) = vsic(1:nnrx, i) - wxdsic_realspace(1:nnrx, ispin(i))
 !                vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) - wxdsic_reciprocal(1:ngm, ispin(i))
 !                !
 !             end if
@@ -6621,8 +6621,8 @@ module nksic_corrections
 !                !
 !                if (nspin == 1) then
 !                   !
-!                   wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic(1:nnrx, 2)
-!                   wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic(1:nnrx, 1)
+!                   wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic_realspace(1:nnrx, 2)
+!                   wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic_realspace(1:nnrx, 1)
 !                   !
 !                   wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
 !                   wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)
