@@ -16,7 +16,7 @@
 !-----------------------------------------------------------------------
       subroutine nksic_potential( nbsp, nx, c, f_diag, bec, becsum, &
                                   deeq_sic, ispin, iupdwn, nupdwn, &
-                                  rhor, rhoc, wtot, sizwtot, vsic, do_wxd_, pink, nudx, &
+                                  rhor, rhoc, wtot_realspace, sizwtot_realspace, vsic, do_wxd_, pink, nudx, &
                                   wfc_centers, wfc_spreads, &
                                   icompute_spread, is_empty)
 !-----------------------------------------------------------------------
@@ -127,7 +127,7 @@
 
       ! in/out vars
       !
-      integer,     intent(in)  :: nbsp, nx, nudx, sizwtot
+      integer,     intent(in)  :: nbsp, nx, nudx, sizwtot_realspace
       complex(dp), intent(in)  :: c(ngw,nx)
       type(twin_matrix),    intent(in)  :: bec!(nkb,nbsp) !modified:giovanni
       real(dp),    intent(in)  :: becsum( nhm*(nhm+1)/2, nat, nspin)
@@ -136,7 +136,7 @@
       real(dp),    intent(in)  :: f_diag(nx)
       real(dp)                 :: rhor(nnrx,nspin)
       real(dp),    intent(in)  :: rhoc(nnrx)
-      real(dp),    intent(out) :: vsic(nnrx,nx), wtot(sizwtot,2)
+      real(dp),    intent(out) :: vsic(nnrx,nx), wtot_realspace(sizwtot_realspace,2)
       real(dp),    intent(out) :: deeq_sic(nhm,nhm,nat,nx)
       logical,     intent(in)  :: do_wxd_
       real(dp),    intent(out) :: pink(nx)
@@ -181,7 +181,7 @@
       endif
       !
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz ) then
-          wtot=0.0_dp
+          wtot_realspace=0.0_dp
       endif
       !
       if ( do_nkpz .or. do_nkipz) then
@@ -292,9 +292,9 @@
              wfc_spreads(ibnd, ispin(i), 2) = shart
              !
              ! here information is accumulated over states
-             ! (wtot is added in the next loop)
+             ! (wtot_realspace is added in the next loop)
              !
-             wtot(1:nnrx,1:2) = wtot(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
+             wtot_realspace(1:nnrx,1:2) = wtot_realspace(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
              !
              ! ths sic potential is partly updated here to save some memory
              !
@@ -347,9 +347,9 @@
                                         vsic(:,i), wxdsic, do_wxd_, pink(i), ibnd, shart, is_empty_)
              !
              ! here information is accumulated over states
-             ! (wtot is added in the next loop)
+             ! (wtot_realspace is added in the next loop)
              !
-             wtot(1:nnrx,1:2) = wtot(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
+             wtot_realspace(1:nnrx,1:2) = wtot_realspace(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
              !
              ! ths sic potential is partly updated here to save some memory
              !
@@ -392,9 +392,9 @@
              !
              if ( nspin== 1 ) then
                 !
-                wtot(1:nnrx,1) = wtot(1:nnrx,1) + wxdsic(1:nnrx,2)
+                wtot_realspace(1:nnrx,1) = wtot_realspace(1:nnrx,1) + wxdsic(1:nnrx,2)
                 ! 
-                wtot(1:nnrx,2) = wtot(1:nnrx,2) + wxdsic(1:nnrx,1)
+                wtot_realspace(1:nnrx,2) = wtot_realspace(1:nnrx,2) + wxdsic(1:nnrx,1)
                 !
              endif
              !
@@ -412,13 +412,13 @@
          !
       ENDIF
       !
-      ! now wtot is completely built and can be added to vsic
+      ! now wtot_realspace is completely built and can be added to vsic
       !
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz ) then
          !
          do i = 1, nbsp
             !
-            vsic(1:nnrx,i) = vsic(1:nnrx,i) + wtot( 1:nnrx, ispin(i) )
+            vsic(1:nnrx,i) = vsic(1:nnrx,i) + wtot_realspace( 1:nnrx, ispin(i) )
             !
          enddo
          !
@@ -6106,7 +6106,7 @@ end subroutine nksic_rot_emin_cg_descla
       use ions_base,                  only : nsp
       use uspp,                       only : becsum,nkb
       use cp_main_variables,          only : eigr, rhor
-      use nksic,                      only : deeq_sic, wtot, fsic, sizwtot
+      use nksic,                      only : deeq_sic, wtot_realspace, fsic, sizwtot_realspace
       use control_flags,         only : gamma_only, do_wf_cmplx
       use twin_types
       use electrons_module,        only : icompute_spread
@@ -6201,7 +6201,7 @@ end subroutine nksic_rot_emin_cg_descla
       pink1(:) = 0.d0
       !
       call nksic_potential( nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot, sizwtot, vsic1_realspace, pink1, nudx, wfc_centers, &
+                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, sizwtot_realspace, vsic1_realspace, pink1, nudx, wfc_centers, &
                  wfc_spreads, icompute_spread, is_empty )
       !
       ene1=sum(pink1(:))
@@ -6234,7 +6234,7 @@ end subroutine nksic_getOmattot_new
       use ions_base,                  only : nsp
       use uspp,                       only : becsum,nkb
       use cp_main_variables,          only : eigr, rhor
-      use nksic,                      only : deeq_sic, wtot, fsic, sizwtot, do_wxd, &
+      use nksic,                      only : deeq_sic, wtot_realspace, fsic, sizwtot_realspace, do_wxd, &
                                              valpsi, odd_alpha
       use control_flags,              only : gamma_only, do_wf_cmplx
       use twin_types
@@ -6337,7 +6337,7 @@ end subroutine nksic_getOmattot_new
       !
       !
       call nksic_potential( nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot, sizwtot, vsic1_realspace, do_wxd, pink1, nudx, wfc_centers, &
+                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, sizwtot_realspace, vsic1_realspace, do_wxd, pink1, nudx, wfc_centers, &
                  wfc_spreads, icompute_spread, .false. )
       !
       ene1=sum(pink1(:))
@@ -7870,7 +7870,7 @@ END subroutine compute_complexification_index
       subroutine nksic_potential_non_ortho( nbsp, nx, c, cdual, f_diag, &
                                   bec, becdual, becsum, &
                                   deeq_sic, ispin, iupdwn, nupdwn, &
-                                  rhor, rhoc, wtot, sizwtot, vsic, do_wxd_, pink, nudx, &
+                                  rhor, rhoc, wtot_realspace, sizwtot_realspace, vsic, do_wxd_, pink, nudx, &
                                   wfc_centers, wfc_spreads, &
                                   icompute_spread)
 !-----------------------------------------------------------------------
@@ -7985,7 +7985,7 @@ END subroutine compute_complexification_index
       !
       ! in/out vars
       !
-      integer,     intent(in)  :: nbsp, nx, nudx, sizwtot
+      integer,     intent(in)  :: nbsp, nx, nudx, sizwtot_realspace
       complex(dp), intent(in)  :: c(ngw,nx), cdual(ngw,nx)
       type(twin_matrix),    intent(in)  :: bec, becdual!(nkb,nbsp) !modified:giovanni
       real(dp),    intent(in)  :: becsum( nhm*(nhm+1)/2, nat, nspin)
@@ -7994,7 +7994,7 @@ END subroutine compute_complexification_index
       real(dp),    intent(in)  :: f_diag(nx)
       real(dp),    intent(in)  :: rhor(nnrx,nspin)
       real(dp),    intent(in)  :: rhoc(nnrx)
-      real(dp),    intent(out) :: vsic(nnrx,nx), wtot(sizwtot,2)
+      real(dp),    intent(out) :: vsic(nnrx,nx), wtot_realspace(sizwtot_realspace,2)
       real(dp),    intent(out) :: deeq_sic(nhm,nhm,nat,nx)
       logical,     intent(in)  :: do_wxd_
       real(dp),    intent(out) :: pink(nx)
@@ -8027,7 +8027,7 @@ END subroutine compute_complexification_index
       endif
 
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz ) then
-          wtot=0.0_dp
+          wtot_realspace=0.0_dp
       endif
       !
       if ( do_nkpz .or. do_nkipz) then
@@ -8128,9 +8128,9 @@ END subroutine compute_complexification_index
               wfc_spreads(ibnd, ispin(i), 2) = shart
               !
               ! here information is accumulated over states
-              ! (wtot is added in the next loop)
+              ! (wtot_realspace is added in the next loop)
               !
-              wtot(1:nnrx,1:2) = wtot(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
+              wtot_realspace(1:nnrx,1:2) = wtot_realspace(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
               !
               ! ths sic potential is partly updated here to save some memory
               !
@@ -8183,9 +8183,9 @@ END subroutine compute_complexification_index
                                          vsic(:,i), wxdsic, do_wxd_, pink(i), ibnd)
               !
               ! here information is accumulated over states
-              ! (wtot is added in the next loop)
+              ! (wtot_realspace is added in the next loop)
               !
-              wtot(1:nnrx,1:2) = wtot(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
+              wtot_realspace(1:nnrx,1:2) = wtot_realspace(1:nnrx,1:2) + wxdsic(1:nnrx,1:2)
               !
               ! ths sic potential is partly updated here to save some memory
               !
@@ -8214,8 +8214,8 @@ END subroutine compute_complexification_index
               !
               if( nspin== 1 ) then
                   !
-                  wtot(1:nnrx,1) = wtot(1:nnrx,1) + wxdsic(1:nnrx,2)
-                  wtot(1:nnrx,2) = wtot(1:nnrx,2) + wxdsic(1:nnrx,1)
+                  wtot_realspace(1:nnrx,1) = wtot_realspace(1:nnrx,1) + wxdsic(1:nnrx,2)
+                  wtot_realspace(1:nnrx,2) = wtot_realspace(1:nnrx,2) + wxdsic(1:nnrx,1)
                   !
               endif
               !
@@ -8234,13 +8234,13 @@ END subroutine compute_complexification_index
          !
       ENDIF
       !
-      ! now wtot is completely built and can be added to vsic
+      ! now wtot_realspace is completely built and can be added to vsic
       !
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz ) then
           !
           do i = 1, nbsp
               !
-              vsic(1:nnrx,i) = vsic(1:nnrx,i) + wtot( 1:nnrx, ispin(i) )
+              vsic(1:nnrx,i) = vsic(1:nnrx,i) + wtot_realspace( 1:nnrx, ispin(i) )
               !
           enddo
           !

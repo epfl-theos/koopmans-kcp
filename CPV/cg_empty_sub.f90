@@ -54,7 +54,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
    use twin_types !added:giovanni
    use printout_base, only: printout_base_open, printout_base_unit, &
                             printout_base_close
-   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, wtot_reciprocal, vsicpsi, &
+   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot_realspace, wtot_reciprocal, vsicpsi, &
                     do_innerloop_empty, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     innerloop_until, do_bare_eigs, fsic_emp, &
@@ -275,7 +275,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
             call nksic_potential(n_emps, n_empx, c0_emp, fsic_emp, &
                                  bec_emp, rhovan_emp, deeq_sic_emp, &
                                  ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                 wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                 wtot_realspace, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                  wfc_centers_emp, wfc_spreads_emp, &
                                  icompute_spread, .true.)
             !
@@ -299,8 +299,8 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
             !
             do i = 1, n_emps
                !
-               ! Here wxd_emp <-> wtot that computed from nksic_potential of occupied states.
-               ! wtot is scaled with nkscalfact constant, we thus need to rescaled it here with
+               ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of occupied states.
+               ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
                ! odd_alpha
                !
                if (odd_nkscalfact_empty) wxd_emp(:, :) = wxd_emp(:, :)*odd_alpha(i)/nkscalfact
@@ -668,7 +668,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot_realspace, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -737,7 +737,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                              wtot_realspace, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -808,7 +808,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                               becm, rhovan_emp, deeq_sic_emp, &
                               ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                              wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                              wtot_realspace, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                               wfc_centers_emp, wfc_spreads_emp, &
                               icompute_spread, .true.)
          !
@@ -821,9 +821,9 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          !
          do i = 1, n_emps
             !
-            ! Here wxd_emp <-> wtot that computed from nksic_potential of
+            ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of
             ! occupied states.
-            ! wtot is scaled with nkscalfact constant, we thus need to
+            ! wtot_realspace is scaled with nkscalfact constant, we thus need to
             ! rescaled it here with
             ! odd_alpha
             !
@@ -963,7 +963,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                call nksic_potential(n_emps, n_empx, cm_emp, fsic_emp, &
                                     becm, rhovan_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                    wtot_realspace, wtot_reciprocal, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .true.)
                !
@@ -1262,7 +1262,7 @@ contains
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot_emp, deltae*innerloop_cg_ratio, lgam, &
                                         n_emps, n_empx, nudx_emp, iupdwn_emp, nupdwn_emp, ispin_emp, &
                                         c0_emp, rhovan_emp, bec_emp, rhor, rhoc, vsic_emp, vsic_reciprocal_emp, pink_emp, &
-                                        deeq_sic_emp, wtot, wtot_reciprocal, fsic_emp, .false., wfc_centers_emp, &
+                                        deeq_sic_emp, wtot_realspace, wtot_reciprocal, fsic_emp, .false., wfc_centers_emp, &
                                         wfc_spreads_emp, .true.)
          !
       end if

@@ -1,6 +1,6 @@
 subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold, lgam, &
                                      nbsp, nbspx, nudx, iupdwn, nupdwn, ispin, c0, becsum, bec, rhor, rhoc, &
-                                     vsic, vsic_reciprocal, pink, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                     vsic, vsic_reciprocal, pink, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                                      wfc_centers, wfc_spreads, is_empty)
    !
    ! ... Finds the orthogonal rotation matrix Omattot that minimizes
@@ -42,7 +42,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    real(dp), intent(in)  :: fsic(nbspx)
    real(dp)                 :: rhor(nnrx, nspin)
    real(dp), intent(in)  :: rhoc(nnrx)
-   real(dp), intent(out) :: vsic(nnrx, nbspx), wtot(nnrx, 2)
+   real(dp), intent(out) :: vsic(nnrx, nbspx), wtot_realspace(nnrx, 2)
    complex(dp), intent(out) :: vsic_reciprocal(ngm, nbspx)
    complex(dp), intent(out) :: wtot_reciprocal(ngm, 2)
    real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nbspx)
@@ -367,7 +367,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                           iupdwn, nupdwn, wfc_centers, wfc_spreads, &
                                           dalpha, Heigbig, Umatbig, &
                                           c0, wfc_ctmp, Omat1tot, bec1, rhor, rhoc, &
-                                          becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                          becsum, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                                           vsic1_realspace, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
             if (i == 1) odd_test1 = ene1
             if (i == 2) odd_test2 = ene1
@@ -385,7 +385,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                     iupdwn, nupdwn, wfc_centers, wfc_spreads, &
                                     dalpha, Heigbig, Umatbig, &
                                     c0, wfc_ctmp, Omat1tot, bec1, rhor, rhoc, &
-                                    becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                    becsum, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                                     vsic1_realspace, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
       !
       call minparabola(ene0, spasso*dene0, ene1, passof, passo, enesti)
@@ -410,7 +410,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                     iupdwn, nupdwn, wfc_centers, wfc_spreads, &
                                     dalpha, Heigbig, Umatbig, &
                                     c0, wfc_ctmp2, Omat2tot, bec2, rhor, rhoc, &
-                                    becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                    becsum, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                                     vsic2_realspace, vsic2_reciprocal, pink2, enever, lgam, is_empty)
       !
       if (ene0 < ene1 .and. ene0 < enever) then !missed minimum case 3
@@ -433,7 +433,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                           iupdwn, nupdwn, wfc_centers, wfc_spreads, &
                                           dalpha, Heigbig, Umatbig, &
                                           c0, wfc_ctmp2, Omat2tot, bec2, rhor, rhoc, &
-                                          becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                          becsum, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                                           vsic2_realspace, vsic2_reciprocal, pink2, enever, lgam, is_empty)
             !
          end do
@@ -709,7 +709,7 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
                                     iupdwn, nupdwn, wfc_centers, wfc_spreads, &
                                     dalpha, Heigbig, Umatbig, &
                                     wfc0, wfc1, Omat1tot, bec1, rhor, rhoc, &
-                                    becsum, deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+                                    becsum, deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                                     vsic1_realspace, vsic1_reciprocal, pink1, ene1, lgam, is_empty)
    !
    ! ... This routine rotates the wavefunction wfc0 into wfc1 according to
@@ -750,7 +750,7 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    real(dp)                       :: ene1
    real(dp), intent(in) :: becsum(nhm*(nhm + 1)/2, nat, nspin)
    real(dp), intent(in) :: deeq_sic(nhm, nhm, nat, nbspx)
-   real(dp), intent(in) :: wtot(nnrx, 2)
+   real(dp), intent(in) :: wtot_realspace(nnrx, 2)
    complex(dp), intent(in) :: wtot_reciprocal(ngm, 2)
    real(dp), intent(in) :: fsic(nbspx)
    real(dp), intent(in) :: rhor(nnrx, nspin)
@@ -831,7 +831,7 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    pink1(:) = 0.d0
    !
    call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                        ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, &
+                        ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, wtot_reciprocal, &
                         vsic1_realspace, vsic1_reciprocal, do_wxd, pink1, nudx, wfc_centers, &
                         wfc_spreads, icompute_spread, is_empty)
    !

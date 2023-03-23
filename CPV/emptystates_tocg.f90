@@ -46,7 +46,7 @@
                                        bec_csv, reademptyc0, writeemptyc0
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm, me_image
-      USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot, wtot_reciprocal, &
+      USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot_realspace, wtot_reciprocal, &
                                        odd_alpha, valpsi, nkscalfact
       USE nksic,                ONLY : do_spinsym, pink_emp, allocate_nksic_empty, deallocate_nksic_empty
       USE hfmod,                ONLY : do_hf, vxxpsi
@@ -354,8 +354,8 @@
       !
       ! init xd potential
       !
-      ! we need to use wtot from previous calls with occupied states
-      ! we save here wtot in wxd_emp
+      ! we need to use wtot_realspace from previous calls with occupied states
+      ! we save here wtot_realspace in wxd_emp
       !
       IF ( do_orbdep ) THEN
           !
@@ -364,7 +364,7 @@
           !
           IF ( do_wxd .AND. .NOT. do_pz ) THEN
               !
-              wxd_emp(:,:) = wtot(:,:)
+              wxd_emp(:,:) = wtot_realspace(:,:)
               wxd_reciprocal_emp(:,:) = wtot_reciprocal(:,:)
               !
           ENDIF
@@ -426,7 +426,7 @@
                 call nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                                       bec_emp, becsum_emp, deeq_sic_emp, &
                                       ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                      wtot, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
+                                      wtot_realspace, vsic_emp, vsic_reciprocal_emp, .false., pink_emp, nudx_emp, &
                                       wfc_centers_emp, wfc_spreads_emp, &
                                       icompute_spread, .false.)
                 !write(6,*) "checkbounds", ubound(wfc_centers_emp), ubound(wfc_spreads_emp), nudx_emp, nspin
@@ -436,8 +436,8 @@
                 !
                 DO i = 1, n_emps
                     !  
-                    ! Here wxd_emp <-> wtot that computed from nksic_potential of occupied states.
-                    ! wtot is scaled with nkscalfact constant, we thus need to rescaled it here with
+                    ! Here wxd_emp <-> wtot_realspace that computed from nksic_potential of occupied states.
+                    ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
                     ! odd_alpha
                     !
                     IF(odd_nkscalfact) wxd_emp(:,:) = wxd_emp(:,:)*odd_alpha(i)/nkscalfact 

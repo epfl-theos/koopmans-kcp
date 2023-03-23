@@ -364,7 +364,7 @@ module nksic
   real(dp),    allocatable :: rhobar(:,:)
   real(dp),    allocatable :: grhobar(:,:,:)
   real(dp),    allocatable :: wrefsic(:)
-  real(dp),    allocatable :: wtot(:,:)
+  real(dp),    allocatable :: wtot_realspace(:,:)
   complex(dp), allocatable :: wtot_reciprocal(:,:)
   !
   real(dp), allocatable :: fsic_emp(:)
@@ -487,8 +487,8 @@ contains
           allocate( wxdsic_reciprocal(nnrx,2) )
       endif
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
-          allocate(wtot(nnrx,2))
-          wtot=0.0_dp
+          allocate(wtot_realspace(nnrx,2))
+          wtot_realspace=0.0_dp
           allocate(wtot_reciprocal(ngm,2))
           wtot_reciprocal=0.0_dp
       endif
@@ -549,7 +549,7 @@ contains
       if ( allocated(rhobar) )          cost = cost + real( size(rhobar) )          *  8.0_dp
       if ( allocated(grhobar) )         cost = cost + real( size(grhobar) )         *  8.0_dp
       if ( allocated(wrefsic) )         cost = cost + real( size(wrefsic) )         *  8.0_dp
-      if ( allocated(wtot) )            cost = cost + real( size(wtot) )            *  8.0_dp
+      if ( allocated(wtot_realspace) )            cost = cost + real( size(wtot_realspace) )            *  8.0_dp
       if ( allocated(wtot_reciprocal) ) cost = cost + real( size(wtot_reciprocal) ) * 16.0_dp
       !
       nksic_memusage = cost / 1000000.0_dp
@@ -575,7 +575,7 @@ contains
       if(allocated(vxc_sic))     deallocate(vxc_sic)
       if(allocated(vsicpsi))     deallocate(vsicpsi)
       if(allocated(wrefsic))     deallocate(wrefsic)
-      if(allocated(wtot))        deallocate(wtot)
+      if(allocated(wtot_realspace))        deallocate(wtot_realspace)
       if(allocated(wtot_reciprocal)) deallocate(wtot_reciprocal)
       if(allocated(orb_rhor))    deallocate(orb_rhor)
       if(allocated(grhobar))     deallocate(grhobar)

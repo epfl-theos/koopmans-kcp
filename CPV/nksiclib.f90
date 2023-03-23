@@ -16,7 +16,7 @@
 !-----------------------------------------------------------------------
    subroutine nksic_potential(nbsp, nx, c, f_diag, bec, becsum, &
                               deeq_sic, ispin, iupdwn, nupdwn, &
-                              rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                              rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
                               wfc_centers, wfc_spreads, &
                               icompute_spread, is_empty)
 !-----------------------------------------------------------------------
@@ -65,7 +65,7 @@
       real(dp), intent(in)  :: f_diag(nx)
       real(dp)                 :: rhor(nnrx, nspin)
       real(dp), intent(in)  :: rhoc(nnrx)
-      real(dp), intent(out) :: vsic(nnrx, nx), wtot(nnrx, 2)
+      real(dp), intent(out) :: vsic(nnrx, nx), wtot_realspace(nnrx, 2)
       complex(dp), intent(out) :: vsic_reciprocal(ngm, nx), wtot_reciprocal(ngm, 2)
       real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
       logical, intent(in)  :: do_wxd_
@@ -112,7 +112,7 @@
       end if
       !
       if (do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
-         wtot = 0.0_dp
+         wtot_realspace = 0.0_dp
          wtot_reciprocal = 0.0_dp
       end if
       !
@@ -227,9 +227,9 @@
                wfc_spreads(ibnd, ispin(i), 2) = shart
                !
                ! here information is accumulated over states
-               ! (wtot is added in the next loop)
+               ! (wtot_realspace is added in the next loop)
                !
-               wtot(1:nnrx, 1:2) = wtot(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
                !
@@ -282,9 +282,9 @@
                              vsic(:, i), vsic_reciprocal(:, i), wxdsic, wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart, is_empty_)
                !
                ! here information is accumulated over states
-               ! (wtot is added in the next loop)
+               ! (wtot_realspace is added in the next loop)
                !
-               wtot(1:nnrx, 1:2) = wtot(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
                wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
@@ -330,10 +330,10 @@
                !
                if (nspin == 1) then
                   !
-                  wtot(1:nnrx, 1) = wtot(1:nnrx, 1) + wxdsic(1:nnrx, 2)
+                  wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic(1:nnrx, 2)
                   wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
                   !
-                  wtot(1:nnrx, 2) = wtot(1:nnrx, 2) + wxdsic(1:nnrx, 1)
+                  wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic(1:nnrx, 1)
                   wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)
                   !
                end if
@@ -352,13 +352,13 @@
          !
       END IF
       !
-      ! now wtot is completely built and can be added to vsic
+      ! now wtot_realspace is completely built and can be added to vsic
       !
       if (do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
          !
          do i = 1, nbsp
             !
-            vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot(1:nnrx, ispin(i))
+            vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot_realspace(1:nnrx, ispin(i))
             vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + wtot_reciprocal(1:ngm, ispin(i))
             !
          end do
@@ -4507,7 +4507,7 @@
       use ions_base, only: nsp
       use uspp, only: becsum
       use cp_main_variables, only: eigr, rhor
-      use nksic, only: deeq_sic, wtot, wtot_reciprocal, fsic
+      use nksic, only: deeq_sic, wtot_realspace, wtot_reciprocal, fsic
       use control_flags, only: gamma_only, do_wf_cmplx
       use twin_types
       use electrons_module, only: icompute_spread
@@ -4604,7 +4604,7 @@
       pink1(:) = 0.d0
       !
       call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                      ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, pink1, nudx, wfc_centers, &
+                      ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, pink1, nudx, wfc_centers, &
                            wfc_spreads, icompute_spread, is_empty)
       !
       ene1 = sum(pink1(:))
@@ -4638,7 +4638,7 @@
       use ions_base, only: nsp
       use uspp, only: becsum
       use cp_main_variables, only: eigr, rhor
-      use nksic, only: deeq_sic, wtot, wtot_reciprocal, fsic, do_wxd, &
+      use nksic, only: deeq_sic, wtot_realspace, wtot_reciprocal, fsic, do_wxd, &
                        valpsi, odd_alpha
       use control_flags, only: gamma_only, do_wf_cmplx
       use twin_types
@@ -4743,7 +4743,7 @@
       !
       !
       call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-              ispin, iupdwn, nupdwn, rhor, rhoc, wtot, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
+              ispin, iupdwn, nupdwn, rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic1_realspace, vsic_reciprocal1, do_wxd, pink1, nudx, wfc_centers, &
                            wfc_spreads, icompute_spread, .false.)
       !
       ene1 = sum(pink1(:))
@@ -6076,7 +6076,7 @@
    subroutine nksic_potential_non_ortho(nbsp, nx, c, cdual, f_diag, &
                                         bec, becdual, becsum, &
                                         deeq_sic, ispin, iupdwn, nupdwn, &
-                                        rhor, rhoc, wtot, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
+                                        rhor, rhoc, wtot_realspace, wtot_reciprocal, vsic, vsic_reciprocal, do_wxd_, pink, nudx, &
                                         wfc_centers, wfc_spreads, &
                                         icompute_spread)
 !-----------------------------------------------------------------------
@@ -6129,7 +6129,7 @@
       real(dp), intent(in)  :: f_diag(nx)
       real(dp), intent(in)  :: rhor(nnrx, nspin)
       real(dp), intent(in)  :: rhoc(nnrx)
-      real(dp), intent(out) :: vsic(nnrx, nx), wtot(nnrx, 2)
+      real(dp), intent(out) :: vsic(nnrx, nx), wtot_realspace(nnrx, 2)
       complex(dp), intent(out) :: vsic_reciprocal(ngm, nx), wtot_reciprocal(ngm, 2)
       real(dp), intent(out) :: deeq_sic(nhm, nhm, nat, nx)
       logical, intent(in)  :: do_wxd_
@@ -6163,7 +6163,7 @@
       end if
 
       if (do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
-         wtot = 0.0_dp
+         wtot_realspace = 0.0_dp
          wtot_reciprocal = 0.0_dp
       end if
       !
@@ -6267,9 +6267,9 @@
                wfc_spreads(ibnd, ispin(i), 2) = shart
                !
                ! here information is accumulated over states
-               ! (wtot is added in the next loop)
+               ! (wtot_realspace is added in the next loop)
                !
-               wtot(1:nnrx, 1:2) = wtot(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
                !
@@ -6322,9 +6322,9 @@
                                          wxdsic_reciprocal, do_wxd_, pink(i), ibnd, shart)
                !
                ! here information is accumulated over states
-               ! (wtot is added in the next loop)
+               ! (wtot_realspace is added in the next loop)
                !
-               wtot(1:nnrx, 1:2) = wtot(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
+               wtot_realspace(1:nnrx, 1:2) = wtot_realspace(1:nnrx, 1:2) + wxdsic(1:nnrx, 1:2)
                wtot_reciprocal(1:ngm, 1:2) = wtot_reciprocal(1:ngm, 1:2) + wxdsic_reciprocal(1:ngm, 1:2)
                !
                ! ths sic potential is partly updated here to save some memory
@@ -6356,8 +6356,8 @@
                !
                if (nspin == 1) then
                   !
-                  wtot(1:nnrx, 1) = wtot(1:nnrx, 1) + wxdsic(1:nnrx, 2)
-                  wtot(1:nnrx, 2) = wtot(1:nnrx, 2) + wxdsic(1:nnrx, 1)
+                  wtot_realspace(1:nnrx, 1) = wtot_realspace(1:nnrx, 1) + wxdsic(1:nnrx, 2)
+                  wtot_realspace(1:nnrx, 2) = wtot_realspace(1:nnrx, 2) + wxdsic(1:nnrx, 1)
                   !
                   wtot_reciprocal(1:ngm, 1) = wtot_reciprocal(1:ngm, 1) + wxdsic_reciprocal(1:ngm, 2)
                   wtot_reciprocal(1:ngm, 2) = wtot_reciprocal(1:ngm, 2) + wxdsic_reciprocal(1:ngm, 1)
@@ -6378,13 +6378,13 @@
          !
       END IF
       !
-      ! now wtot is completely built and can be added to vsic
+      ! now wtot_realspace is completely built and can be added to vsic
       !
       if (do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
          !
          do i = 1, nbsp
             !
-            vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot(1:nnrx, ispin(i))
+            vsic(1:nnrx, i) = vsic(1:nnrx, i) + wtot_realspace(1:nnrx, ispin(i))
             vsic_reciprocal(1:ngm, i) = vsic_reciprocal(1:ngm, i) + wtot_reciprocal(1:ngm, ispin(i))
             !
          end do
