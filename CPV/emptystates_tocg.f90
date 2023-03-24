@@ -373,7 +373,7 @@
             stop
 !          call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, n_empx,&
 !                           n_emps, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-!                           max_emp, wxd_emp_realspace, vsic_emp_realspace, sizvsic_emp_realspace, pink_emp, becsum_emp, &
+!                           max_emp, wxd_emp, vsic_emp, sizvsic_emp, pink_emp, becsum_emp, &
 !                           deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, v, &
 !                           nfi, .true., eigr, bec, irb, eigrb, &
 !                           rhor, ema0bg, desc_emp)
