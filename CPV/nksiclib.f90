@@ -3366,7 +3366,7 @@
             !
 ! =======
 !           pink(:) = pink1(:)
-!           vsic_realspace(:,:) = vsic1_realspace(:,:)
+!           vsic(:,:) = vsic1(:,:)
 !           c0(:,:) = wfn_ctmp(:,:)
 !           bec%rvec(:,:) = bec1(:,:)
 !           Omattot = MATMUL(Omattot,Omat1tot)
@@ -3816,7 +3816,7 @@
             !
 ! =======
 !           pink(:) = pink1(:)
-!           vsic_realspace(:,:) = vsic1_realspace(:,:)
+!           vsic(:,:) = vsic1(:,:)
 !           c0(:,:) = wfn_ctmp(:,:)
 !           bec%rvec(:,:) = bec1(:,:)
 !           Omattot = MATMUL(Omattot,Omat1tot)
