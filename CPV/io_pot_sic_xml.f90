@@ -20,12 +20,12 @@ MODULE io_pot_sic_xml
 
    INTERFACE write_pot_sic
       MODULE PROCEDURE write_pot_sic_realspace
-      MODULE PROCEDURE write_pot_sic
+      MODULE PROCEDURE write_pot_sic_reciprocal
    END INTERFACE
 
    INTERFACE read_pot_sic
       MODULE PROCEDURE read_pot_sic_realspace
-      MODULE PROCEDURE read_pot_sic
+      MODULE PROCEDURE read_pot_sic_reciprocal
    END INTERFACE
 
 CONTAINS
