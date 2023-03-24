@@ -47,9 +47,9 @@
                                write_hamiltonian, ortho_check, symm_wannier
       USE mp, ONLY: mp_comm_split, mp_comm_free, mp_sum
       USE mp_global, ONLY: intra_image_comm, me_image
-      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot_realspace, wtot_reciprocal, &
-                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp_realspace, wxd_emp_reciprocal, &
-                       fsic_emp, deeq_sic_emp, vsic_emp_realspace, vsic_emp_reciprocal, &
+      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot_reciprocal, &
+                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, wxd_emp_reciprocal, &
+                       fsic_emp, deeq_sic_emp, vsic_emp_reciprocal, &
                        do_spinsym, allocate_nksic_empty, deallocate_nksic_empty, &
                        pink_emp
       USE hfmod, ONLY: do_hf
@@ -104,7 +104,6 @@
       LOGICAL :: lgam !added:giovanni
       LOGICAL :: done_extra !added:giovanni
       COMPLEX(DP), PARAMETER :: c_zero = CMPLX(0.d0, 0.d0)
-      INTEGER :: sizvsic_emp_realspace
       INTEGER :: ndr_loc, ndw_loc
       !
       LOGICAL :: odd_nkscalfact_old
@@ -412,17 +411,15 @@
       !
       ! init xd potential
       !
-      ! we need to use wtot_realspace from previous calls with occupied states
-      ! we save here wtot_realspace in wxd_emp_realspace
+      ! we need to use wtot from previous calls with occupied states
+      ! we save here wtot in wxd_emp
       !
       IF (do_orbdep .and. (.not. wo_odd_in_empty_run)) THEN
          !
-         wxd_emp_realspace(:, :) = 0.0_DP
          wxd_emp_reciprocal(:, :) = 0.0_DP
          !
          IF (do_wxd .AND. .NOT. do_pz) THEN
             !
-            wxd_emp_realspace(:, :) = wtot_realspace(:, :)
             wxd_emp_reciprocal(:, :) = wtot_reciprocal(:, :)
             !
          END IF
@@ -506,8 +503,7 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot_realspace, wtot_reciprocal, vsic_emp_realspace, &
-                                    vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
+                                    wtot_reciprocal, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !
@@ -523,14 +519,12 @@
                !
                DO i = 1, nbsp_emp
                   !
-                  ! Here wxd_emp_realspace <-> wtot_realspace that computed from nksic_potential of occupied states.
-                  ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
+                  ! Here wxd_emp <-> wtot that computed from nksic_potential of occupied states.
+                  ! wtot is scaled with nkscalfact constant, we thus need to rescaled it here with
                   ! odd_alpha
                   !
-                  IF (odd_nkscalfact_empty) wxd_emp_realspace(:, :) = wxd_emp_realspace(:, :)*odd_alpha(i)/nkscalfact
                   IF (odd_nkscalfact_empty) wxd_emp_reciprocal(:, :) = wxd_emp_reciprocal(:, :)*odd_alpha(i)/nkscalfact
                   !
-                  vsic_emp_realspace(:, i) = vsic_emp_realspace(:, i) + wxd_emp_realspace(:, ispin_emp(i))
                   vsic_emp_reciprocal(:, i) = vsic_emp_reciprocal(:, i) + wxd_emp_reciprocal(:, ispin_emp(i))
                   !
                END DO
@@ -567,7 +561,7 @@
                      !
                   END IF
                   !
-                  CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp_realspace, vsic_emp_reciprocal, deeq_sic_emp, bec_emp, ngw, &
+                  CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp_reciprocal, deeq_sic_emp, bec_emp, ngw, &
                                     c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, lgam)
                   !
                   c2(:) = c2(:) - vsicpsi(:, 1)*f_aux(i)

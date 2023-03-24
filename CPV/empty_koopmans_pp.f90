@@ -33,9 +33,9 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       USE cp_interfaces,        ONLY : readempty_twin, writeempty_twin, nlsm1, readempty
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm
-      USE nksic,                ONLY : do_pz, do_wxd, vsicpsi, wtot_realspace, wtot_reciprocal, &
+      USE nksic,                ONLY : do_pz, do_wxd, vsicpsi, wtot_reciprocal, &
                                        odd_alpha, valpsi, nkscalfact, odd_alpha_emp, &
-                                       fsic_emp, vsic_emp_realspace, vsic_emp_reciprocal, wxd_emp_realspace, wxd_emp_reciprocal, &
+                                       fsic_emp, vsic_emp_reciprocal, wxd_emp_reciprocal, &
                                        deeq_sic_emp, allocate_nksic_empty, deallocate_nksic_empty
       USE input_parameters,     ONLY : odd_nkscalfact_empty, odd_nkscalfact, aux_empty_nbnd 
       USE electrons_module,     ONLY : ei_emp 
@@ -150,15 +150,13 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       !  
       ! init xd potential
       !
-      ! we need to use wtot_realspace from previous calls with occupied states
-      ! we save here wtot_realspace in wxd_emp_realspace
+      ! we need to use wtot from previous calls with occupied states
+      ! we save here wtot in wxd_emp
       !
-      wxd_emp_realspace(:,:) = 0.0_DP
       wxd_emp_reciprocal(:,:) = 0.0_DP
       !
       IF ( do_wxd .AND. .NOT. do_pz ) THEN
          !
-         wxd_emp_realspace(:,:) = wtot_realspace(:,:)
          wxd_emp_reciprocal(:,:) = wtot_reciprocal(:,:)
          !
       ENDIF
@@ -210,7 +208,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       CALL nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                             bec_emp, becsum_emp, deeq_sic_emp, &
                             ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                            wtot_realspace, wtot_reciprocal, vsic_emp_realspace, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
+                            wtot_reciprocal, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
                             wfc_centers_emp, wfc_spreads_emp, &
                             icompute_spread, .true.)
       !
@@ -228,14 +226,12 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       !
       DO i = 1, n_emps
          !  
-         ! Here wxd_emp_realspace <-> wtot_realspace that computed from nksic_potential of occupied states.
-         ! wtot_realspace is scaled with nkscalfact constant, we thus need to rescaled it here with
+         ! Here wxd_emp <-> wtot that computed from nksic_potential of occupied states.
+         ! wtot is scaled with nkscalfact constant, we thus need to rescaled it here with
          ! odd_alpha
          !
-         IF(odd_nkscalfact_empty) wxd_emp_realspace(:, ispin_emp(i)) = wxd_emp_realspace(:, ispin_emp(i))*odd_alpha(i)/nkscalfact 
          IF(odd_nkscalfact_empty) wxd_emp_reciprocal(:, ispin_emp(i)) = wxd_emp_reciprocal(:, ispin_emp(i))*odd_alpha(i)/nkscalfact 
          !  
-         vsic_emp_realspace(:,i) = vsic_emp_realspace(:,i) + wxd_emp_realspace(:, ispin_emp(i))
          vsic_emp_reciprocal(:,i) = vsic_emp_reciprocal(:,i) + wxd_emp_reciprocal(:, ispin_emp(i))
          !
       ENDDO
@@ -257,7 +253,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
             !
          ENDIF
          !   
-         CALL nksic_eforce( i, n_emps, n_empx, vsic_emp_realspace, vsic_emp_reciprocal, deeq_sic_emp, bec_emp, ngw, &
+         CALL nksic_eforce( i, n_emps, n_empx, vsic_emp_reciprocal, deeq_sic_emp, bec_emp, ngw, &
                             c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )
          !
          c2(:) = c2(:) + vsicpsi(:,1) 

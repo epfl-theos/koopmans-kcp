@@ -43,7 +43,7 @@
       USE task_groups,         ONLY : tg_gather
       USE ldaU,                ONLY : vupsi, lda_plus_u
       use hfmod,               only : do_hf, vxxpsi
-      use nksic,               only : do_orbdep, vsic_realspace, vsic_reciprocal, vsicpsi, deeq_sic, & 
+      use nksic,               only : do_orbdep, vsic_reciprocal, vsicpsi, deeq_sic, & 
                                       f_cutoff, valpsi
       use ensemble_dft,        only : tens, tsmear
       use twin_types !added:giovanni
@@ -271,7 +271,7 @@
                !
                ! faux takes into account spin multiplicity.
                !
-               CALL nksic_eforce( i, n, nx, vsic_realspace, vsic_reciprocal, deeq_sic, bec, ngw, c0(:,i), c0(:,i+1), vsicpsi, lgam )
+               CALL nksic_eforce( i, n, nx, vsic_reciprocal, deeq_sic, bec, ngw, c0(:,i), c0(:,i+1), vsicpsi, lgam )
                !
                IF ( tens .OR. tsmear ) THEN
                    !
