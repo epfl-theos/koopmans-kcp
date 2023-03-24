@@ -46,9 +46,9 @@
                                        bec_csv, reademptyc0, writeemptyc0
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm, me_image
-      USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot_reciprocal, &
-                                       odd_alpha, valpsi, nkscalfact, fsic_emp, vsic_emp_reciprocal, &
-                                       wxd_emp_reciprocal, deeq_sic_emp, do_spinsym, pink_emp, &
+      USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot, &
+                                       odd_alpha, valpsi, nkscalfact, fsic_emp, vsic_emp, &
+                                       wxd_emp, deeq_sic_emp, do_spinsym, pink_emp, &
                                        allocate_nksic_empty, deallocate_nksic_empty
       USE hfmod,                ONLY : do_hf, vxxpsi
       USE twin_types !added:giovanni
@@ -353,11 +353,11 @@
       !
       IF ( do_orbdep ) THEN
           !
-          wxd_emp_reciprocal(:,:) = 0.0_DP
+          wxd_emp(:,:) = 0.0_DP
           !
           IF ( do_wxd .AND. .NOT. do_pz ) THEN
               !
-              wxd_emp_reciprocal(:,:) = wtot_reciprocal(:,:)
+              wxd_emp(:,:) = wtot(:,:)
               !
           ENDIF
       ENDIF
@@ -418,7 +418,7 @@
                 call nksic_potential( n_emps, n_empx, c0_emp, fsic_emp, &
                                       bec_emp, becsum_emp, deeq_sic_emp, &
                                       ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                      wtot_reciprocal, vsic_emp_reciprocal, .false., pink_emp, nudx_emp, &
+                                      wtot, vsic_emp, .false., pink_emp, nudx_emp, &
                                       wfc_centers_emp, wfc_spreads_emp, &
                                       icompute_spread, .false.)
                 !write(6,*) "checkbounds", ubound(wfc_centers_emp), ubound(wfc_spreads_emp), nudx_emp, nspin
@@ -432,9 +432,9 @@
                     ! wtot is scaled with nkscalfact constant, we thus need to rescaled it here with
                     ! odd_alpha
                     !
-                    IF(odd_nkscalfact) wxd_emp_reciprocal(:,:) = wxd_emp_reciprocal(:,:)*odd_alpha(i)/nkscalfact 
+                    IF(odd_nkscalfact) wxd_emp(:,:) = wxd_emp(:,:)*odd_alpha(i)/nkscalfact 
                     !  
-                    vsic_emp_reciprocal(:,i) = vsic_emp_reciprocal(:,i) + wxd_emp_reciprocal(:, ispin_reciprocal_emp(i))
+                    vsic_emp(:,i) = vsic_emp(:,i) + wxd_emp(:, ispin_emp(i))
                     !
                 ENDDO
                 !
@@ -470,7 +470,7 @@
                        !
                     ENDIF
                     !   
-                    CALL nksic_eforce( i, n_emps, n_empx, vsic_emp_reciprocal, deeq_sic_emp, bec_emp, ngw, &
+                    CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
                                        c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )
                     !
                     c2(:) = c2(:) - vsicpsi(:,1) * f_emp(i)

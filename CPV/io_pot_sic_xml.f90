@@ -20,12 +20,12 @@ MODULE io_pot_sic_xml
 
    INTERFACE write_pot_sic
       MODULE PROCEDURE write_pot_sic_realspace
-      MODULE PROCEDURE write_pot_sic_reciprocal
+      MODULE PROCEDURE write_pot_sic
    END INTERFACE
 
    INTERFACE read_pot_sic
       MODULE PROCEDURE read_pot_sic_realspace
-      MODULE PROCEDURE read_pot_sic_reciprocal
+      MODULE PROCEDURE read_pot_sic
    END INTERFACE
 
 CONTAINS
@@ -78,7 +78,7 @@ CONTAINS
       !
    END SUBROUTINE write_pot_sic_realspace
    !
-   SUBROUTINE write_pot_sic_reciprocal(pot, extension, field_specifier)
+   SUBROUTINE write_pot_sic(pot, extension, field_specifier)
 
       ! This routine writes a potential (stored in reciprocal space) to file (in real space)
 
@@ -105,7 +105,7 @@ CONTAINS
       ! Write to file
       call write_pot_sic_realspace(realpot, extension, field_specifier)
 
-   END SUBROUTINE write_pot_sic_reciprocal
+   END SUBROUTINE write_pot_sic
 
    !------------------------------------------------------------------------
    SUBROUTINE read_pot_sic_realspace(pot, extension)
@@ -144,7 +144,7 @@ CONTAINS
       !
    END SUBROUTINE read_pot_sic_realspace
    !
-   SUBROUTINE read_pot_sic_reciprocal(pot, extension)
+   SUBROUTINE read_pot_sic(pot, extension)
 
       ! This routine reads a potential from file (in real space) and stores it (in reciprocal space)
 
@@ -170,6 +170,6 @@ CONTAINS
       call fwfft('Dense', psi, dfftp)
       call psi2rho('Dense', psi, dfftp%nnr, pot, ngm)
 
-   END SUBROUTINE read_pot_sic_reciprocal
+   END SUBROUTINE read_pot_sic
 
 END MODULE io_pot_sic_xml

@@ -20,7 +20,7 @@ module nksic_corrections
 contains
 !---------------------------------------------------------------
    subroutine nksic_correction_pz(f, ispin, orb_rhor, &
-                                  vsic_reciprocal, pink, pzalpha, ibnd, shart)
+                                  vsic, pink, pzalpha, ibnd, shart)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans potential from the orbital density
@@ -46,7 +46,7 @@ contains
       implicit none
       integer, intent(in)  :: ispin, ibnd
       real(dp), intent(in)  :: f, orb_rhor(nnrx), pzalpha
-      complex(dp), intent(out) :: vsic_reciprocal(ngm)
+      complex(dp), intent(out) :: vsic(ngm)
       real(dp), intent(out) :: pink, shart
       !
       !character(19) :: subname='nksic_correction_pz'
@@ -69,7 +69,7 @@ contains
       !==================
       !
       lgam = gamma_only .and. .not. do_wf_cmplx
-      vsic_reciprocal = 0.0_dp
+      vsic = 0.0_dp
       pink = 0.0_dp
       !
       if (ibnd > nknmax .and. nknmax .ge. 0) return
@@ -252,7 +252,7 @@ contains
       ! Store the vsic potential in reciprocal space
       vtmp = vsic_realspace(:)
       call fwfft('Dense', vtmp, dfftp)
-      call psi2rho('Dense', vtmp, dfftp%nnr, vsic_reciprocal, ngm)
+      call psi2rho('Dense', vtmp, dfftp%nnr, vsic, ngm)
       deallocate(vsic_realspace, vtmp)
       !
       return
@@ -263,7 +263,7 @@ contains
 
 !---------------------------------------------------------------
    subroutine nksic_correction_nkipz(f, ispin, orb_rhor, &
-                                     vsic_reciprocal, pink, ibnd, shart, is_empty)
+                                     vsic, pink, ibnd, shart, is_empty)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans potential from the orbital density
@@ -287,7 +287,7 @@ contains
       implicit none
       integer, intent(in)  :: ispin, ibnd
       real(dp), intent(in)  :: f, orb_rhor(nnrx)
-      complex(dp), intent(out) :: vsic_reciprocal(ngm)
+      complex(dp), intent(out) :: vsic(ngm)
       real(dp), intent(out) :: pink, shart
       logical, optional, intent(in) :: is_empty
       !
@@ -330,7 +330,7 @@ contains
          !
       END IF
       !
-      vsic_reciprocal = 0.0_dp
+      vsic = 0.0_dp
       pink = 0.0_dp
       !
       if (ibnd > nknmax .and. nknmax .ge. 0) return
@@ -513,7 +513,7 @@ contains
       allocate(psi(nnrx))
       psi = vsic_realspace(:)
       call fwfft('Dense', psi, dfftp)
-      call psi2rho('Dense', psi, dfftp%nnr, vsic_reciprocal, ngm)
+      call psi2rho('Dense', psi, dfftp%nnr, vsic, ngm)
       deallocate(vsic_realspace, psi)
       !
       return
@@ -524,7 +524,7 @@ contains
 
 !---------------------------------------------------------------
    subroutine nksic_correction_nki(f, ispin, orb_rhor, rhor, rhoref, rhobar, rhobarg, grhobar, &
-                                   vsic_reciprocal, wxdsic_reciprocal, do_wxd_, pink, ibnd, shart, is_empty)
+                                   vsic, wxdsic, do_wxd_, pink, ibnd, shart, is_empty)
 !---------------------------------------------------------------
 !
 ! ... calculate the non-Koopmans (integrated, NKI)
@@ -562,8 +562,8 @@ contains
       real(dp), intent(in)  :: rhobar(nnrx, 2)
       complex(dp), intent(in)  :: rhobarg(ngm, 2)
       real(dp), intent(in)  :: grhobar(nnrx, 3, 2)
-      complex(dp), intent(out) :: vsic_reciprocal(ngm)
-      complex(dp), intent(out) :: wxdsic_reciprocal(ngm, 2)
+      complex(dp), intent(out) :: vsic(ngm)
+      complex(dp), intent(out) :: wxdsic(ngm, 2)
       logical, intent(in)  :: do_wxd_
       real(dp), intent(out) :: pink, shart
       logical, optional, intent(in) :: is_empty
@@ -632,9 +632,9 @@ contains
       rhoele(:, ispin) = orb_rhor(:)
       !
       allocate(vsic_realspace(nnrx), source=0.0_dp)
-      vsic_reciprocal = 0.0_dp
+      vsic = 0.0_dp
       allocate(wxdsic_realspace(nnrx, 2), source=0.0_dp)
-      wxdsic_reciprocal = 0.0_dp
+      wxdsic = 0.0_dp
       pink = 0.0_dp
       !
       ! Compute self-hartree contributions
@@ -914,11 +914,11 @@ contains
          do i = 1, 2
             psi = wxdsic_realspace(:, i)
             call fwfft('Dense', psi, dfftp)
-            call psi2rho('Dense', psi, dfftp%nnr, wxdsic_reciprocal(:, i), ngm)
+            call psi2rho('Dense', psi, dfftp%nnr, wxdsic(:, i), ngm)
          end do
          deallocate (psi)
       else
-         wxdsic_reciprocal(:, :) = 0.0d0
+         wxdsic(:, :) = 0.0d0
       end if
       !
       call stop_clock('nk_corr_vxc')
@@ -931,11 +931,11 @@ contains
       !
       if (do_wxd_) then
          !
-         wxdsic_reciprocal = wxdsic_reciprocal*nkscalfact
+         wxdsic = wxdsic*nkscalfact
          !
       else
          !
-         wxdsic_reciprocal = 0.d0
+         wxdsic = 0.d0
          !
       end if
       !
@@ -943,7 +943,7 @@ contains
       allocate (psi(nnrx))
       psi = vsic_realspace(:)
       call fwfft('Dense', psi, dfftp)
-      call psi2rho('Dense', psi, dfftp%nnr, vsic_reciprocal, ngm)
+      call psi2rho('Dense', psi, dfftp%nnr, vsic, ngm)
       deallocate(psi, vsic_realspace)
       !
       deallocate (vxc0)

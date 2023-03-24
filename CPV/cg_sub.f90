@@ -60,7 +60,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    !
    use nksic, only: do_orbdep, do_innerloop, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
-                    vsicpsi, vsic_reciprocal, wtot_reciprocal, fsic, deeq_sic, f_cutoff, &
+                    vsicpsi, vsic, wtot, fsic, deeq_sic, f_cutoff, &
                     pink, do_wxd, do_bare_eigs, innerloop_until, &
                     valpsi, odd_alpha
    use hfmod, only: do_hf, vxxpsi, exx
@@ -275,8 +275,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
             fsic = f
             !
             call nksic_potential(nbsp, nbspx, c0, fsic, bec, rhovan, deeq_sic, &
-                                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot_reciprocal, &
-                                 vsic_reciprocal, do_wxd, pink, nudx, wfc_centers, &
+                                 ispin, iupdwn, nupdwn, rhor, rhoc, wtot, &
+                                 vsic, do_wxd, pink, nudx, wfc_centers, &
                                  wfc_spreads, icompute_spread, .false.)
             !
             eodd = sum(pink(1:nbsp))
@@ -729,8 +729,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                ! with ultrasoft!!
                !
                call nksic_potential(nbsp, nbspx, cm, fsic, becm, rhovan, deeq_sic, &
-                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot_reciprocal, &
-                                    vsic_reciprocal, do_wxd, pink, nudx, &
+                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, &
+                                    vsic, do_wxd, pink, nudx, &
                                     wfc_centers, wfc_spreads, &
                                     icompute_spread, .false.)
                !
@@ -832,7 +832,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          call nksic_potential(nbsp, nbspx, cm, fsic, becm, rhovan, deeq_sic, &
                               ispin, iupdwn, nupdwn, rhor, rhoc, &
-                              wtot_reciprocal, vsic_reciprocal, do_wxd, pink, nudx, &
+                              wtot, vsic, do_wxd, pink, nudx, &
                               wfc_centers, wfc_spreads, &
                               icompute_spread, .false.)
          !
@@ -927,7 +927,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          call nksic_potential(nbsp, nbspx, cm, fsic, becm, rhovan, deeq_sic, &
                               ispin, iupdwn, nupdwn, rhor, rhoc, &
-                              wtot_reciprocal, vsic_reciprocal, do_wxd, pink, nudx, &
+                              wtot, vsic, do_wxd, pink, nudx, &
                               wfc_centers, wfc_spreads, &
                               icompute_spread, .false.)
          eodd = sum(pink(1:nbsp))
@@ -1084,8 +1084,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                ! warning:giovanni don't we need becm down here??? otherwise problems with ultrasoft
                !
                call nksic_potential(nbsp, nbspx, cm, fsic, becm, rhovan, deeq_sic, &
-                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot_reciprocal, &
-                                    vsic_reciprocal, do_wxd, pink, nudx, &
+                                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, &
+                                    vsic, do_wxd, pink, nudx, &
                                     wfc_centers, wfc_spreads, &
                                     icompute_spread, .false.)
                !
@@ -1252,7 +1252,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          call nksic_potential(nbsp, nbspx, c0, fsic, bec, rhovan, deeq_sic, &
                               ispin, iupdwn, nupdwn, rhor, rhoc, &
-                              wtot_reciprocal, vsic_reciprocal, do_wxd, pink, nudx, &
+                              wtot, vsic, do_wxd, pink, nudx, &
                               wfc_centers, wfc_spreads, &
                               icompute_spread, .false.)
          !
@@ -1371,7 +1371,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          ! faux takes into account spin multiplicity.
          !
-         CALL nksic_eforce(i, nbsp, nbspx, vsic_reciprocal, deeq_sic, bec, &
+         CALL nksic_eforce(i, nbsp, nbspx, vsic, deeq_sic, bec, &
                            ngw, c0(:, i), c0(:, i + 1), vsicpsi, lgam)
          !
          !
@@ -1620,7 +1620,7 @@ contains
          !call nksic_rot_emin_cg(itercg,innerloop_init_n,ninner,etot,Omattot,deltae*innerloop_cg_ratio,lgam)
          call nksic_rot_emin_cg_general(itercg, innerloop_init_n, ninner, etot, deltae*innerloop_cg_ratio, lgam, &
                                         nbsp, nbspx, nudx, iupdwn, nupdwn, ispin, c0, rhovan, bec, rhor, rhoc, &
-                                        vsic_reciprocal, pink, deeq_sic, wtot_reciprocal, &
+                                        vsic, pink, deeq_sic, wtot, &
                                         fsic, do_wxd, wfc_centers, wfc_spreads, .false.)
          !
       end if
@@ -1788,7 +1788,7 @@ contains
             !
             ! faux takes into account spin multiplicity.
             !
-            CALL nksic_eforce(i, nbsp, nbspx, vsic_reciprocal, deeq_sic, bec, ngw, &
+            CALL nksic_eforce(i, nbsp, nbspx, vsic, deeq_sic, bec, ngw, &
                               c0(:, i), c0(:, i + 1), vsicpsi, lgam)
             !
             !
