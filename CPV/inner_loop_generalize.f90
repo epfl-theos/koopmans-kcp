@@ -73,7 +73,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    !
    real(dp), allocatable :: Heigbig(:)
    real(dp), allocatable :: Heig(:)
-   complex(dp), allocatable :: vsic1(:, :), vsic2(:, :)
+   complex(dp), allocatable :: vsic_tmp(:, :)
    real(dp), allocatable :: pink1(:), pink2(:)
    !
    complex(dp), allocatable :: Umatbig(:, :)
@@ -132,7 +132,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    allocate (hi(nbsp, nbsp))
    allocate (gi(nbsp, nbsp))
    allocate (pink1(nbspx), pink2(nbspx))
-   allocate (vsic1(ngm, nbspx), vsic2(ngm, nbspx))
+   allocate (vsic_tmp(ngm, nbspx))
    !
    call init_twin(bec1, lgam)
    call allocate_twin(bec1, nkb, nbsp, lgam)
@@ -365,7 +365,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                           dalpha, Heigbig, Umatbig, &
                                           c0, wfc_ctmp, Omat1tot, bec1, rhor, rhoc, &
                                           becsum, deeq_sic, wtot, fsic, do_wxd, &
-                                          vsic1, pink1, ene1, lgam, is_empty)
+                                          vsic, pink1, ene1, lgam, is_empty)
             if (i == 1) odd_test1 = ene1
             if (i == 2) odd_test2 = ene1
          end do
@@ -383,7 +383,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                     dalpha, Heigbig, Umatbig, &
                                     c0, wfc_ctmp, Omat1tot, bec1, rhor, rhoc, &
                                     becsum, deeq_sic, wtot, fsic, do_wxd, &
-                                    vsic1, pink1, ene1, lgam, is_empty)
+                                    vsic, pink1, ene1, lgam, is_empty)
       !
       call minparabola(ene0, spasso*dene0, ene1, passof, passo, enesti)
       !
@@ -408,7 +408,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                     dalpha, Heigbig, Umatbig, &
                                     c0, wfc_ctmp2, Omat2tot, bec2, rhor, rhoc, &
                                     becsum, deeq_sic, wtot, fsic, do_wxd, &
-                                    vsic2, pink2, enever, lgam, is_empty)
+                                    vsic_tmp, pink2, enever, lgam, is_empty)
       !
       if (ene0 < ene1 .and. ene0 < enever) then !missed minimum case 3
          !
@@ -431,14 +431,14 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
                                           dalpha, Heigbig, Umatbig, &
                                           c0, wfc_ctmp2, Omat2tot, bec2, rhor, rhoc, &
                                           becsum, deeq_sic, wtot, fsic, do_wxd, &
-                                          vsic2, pink2, enever, lgam, is_empty)
+                                          vsic_tmp, pink2, enever, lgam, is_empty)
             !
          end do
          !
          if (enever .lt. ene0) then
             !
             pink(:) = pink2(:)
-            vsic(:, :) = vsic2(:, :)
+            vsic(:, :) = vsic_tmp(:, :)
             c0(:, :) = wfc_ctmp2(:, :)
             call copy_twin(bec, bec2)
             Omattot = MATMUL(Omattot, Omat2tot)
@@ -468,7 +468,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
       elseif (ene1 >= enever) then !found minimum
          !
          pink(:) = pink2(:)
-         vsic(:, :) = vsic2(:, :)
+         vsic(:, :) = vsic_tmp(:, :)
          c0(:, :) = wfc_ctmp2(:, :)
          call copy_twin(bec, bec2)
          Omattot = MATMUL(Omattot, Omat2tot)
@@ -480,7 +480,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
          write (stdout, '("# WARNING: innerloop missed minimum case 1 or 2",/)')
          !
          pink(:) = pink1(:)
-         vsic(:, :) = vsic1(:, :)
+         ! vsic(:, :) = vsic1(:, :) in this case vsic was already updated
          c0(:, :) = wfc_ctmp(:, :)
          call copy_twin(bec, bec1)
          Omattot = MATMUL(Omattot, Omat1tot)
@@ -515,7 +515,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    deallocate (hi)
    deallocate (gi)
    deallocate (pink1, pink2)
-   deallocate (vsic1, vsic2)
+   deallocate (vsic_tmp)
    call deallocate_twin(bec1)
    call deallocate_twin(bec2)
    call stop_clock('nk_rot_emin')
