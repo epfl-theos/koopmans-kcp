@@ -34,7 +34,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm
       USE nksic,                ONLY : do_pz, do_wxd, vsicpsi, wtot, &
-                                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp, &
+                                       odd_alpha, nkscalfact, odd_alpha_emp, &
                                        fsic_emp, vsic_emp, wxd_emp, &
                                        deeq_sic_emp, allocate_nksic_empty, deallocate_nksic_empty
       USE input_parameters,     ONLY : odd_nkscalfact_empty, odd_nkscalfact, aux_empty_nbnd 
@@ -167,17 +167,14 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
          old_odd_alpha(:) = odd_alpha(:)
          ! here, deallocate the memory of odd_alpha for occupied states
          if(allocated(odd_alpha)) deallocate(odd_alpha)
-         if(allocated(valpsi)) deallocate(valpsi)
          !
          ! reallocate the memory of odd_alpha for empty states
          allocate (odd_alpha(n_emps))
-         allocate (valpsi(n_emps, ngw))
          !
       ENDIF
       ! 
       IF (odd_nkscalfact_empty) THEN
          !
-         valpsi(:,:)  = (0.0_DP, 0.0_DP)
          odd_alpha(:) =  0.0_DP
          !
          CALL odd_alpha_routine(c0_emp, n_emps, n_empx, lgam, .true.)
@@ -245,13 +242,6 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
          ! 
          c2(:) = cmplx(0.0d0, 0.0d0)
          c3(:) = cmplx(0.0d0, 0.0d0)
-         !
-         IF ( odd_nkscalfact_empty ) THEN
-            !
-            c2(:) = c2(:) + valpsi(i, :)
-            c3(:) = c3(:) + valpsi(i+1, :)
-            !
-         ENDIF
          !   
          CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
                             c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )

@@ -39,7 +39,7 @@
                        do_nkipz, do_pz_renorm, &
                        grhobar, fion_sic, pzalpha => odd_alpha, &
                        kfact, upsilonkin, upsilonw, edens, &
-                       taukin, tauw, valpsi, odd_alpha, nkscalfact
+                       taukin, tauw, odd_alpha, nkscalfact
       use nksic, only: epsi2 => epsi2_cutoff_renorm
       use nksic_corrections, only: nksic_correction_nki, nksic_correction_nkipz, &
                                    nksic_correction_pz
@@ -328,8 +328,6 @@
                if (i > nbsp) exit inner_loop_odd_alpha
                !
                vsic(:, i) = vsic(:, i)*odd_alpha(i)/nkscalfact
-               !
-               valpsi(i, :) = valpsi(i, :)*pink(i)/nkscalfact
                !
                pink(i) = pink(i)*odd_alpha(i)/nkscalfact
                !
@@ -4027,7 +4025,7 @@
       use uspp, only: becsum
       use cp_main_variables, only: eigr, rhor
       use nksic, only: deeq_sic, wtot, fsic, do_wxd, &
-                       valpsi, odd_alpha
+                       odd_alpha
       use control_flags, only: gamma_only, do_wf_cmplx
       use twin_types
       use electrons_module, only: wfc_centers, wfc_spreads, &
@@ -4117,7 +4115,6 @@
       !
       if (odd_nkscalfact) then
          !
-         valpsi(:, :) = (0.0_DP, 0.0_DP)
          odd_alpha(:) = 0.0_DP
          !
          call odd_alpha_routine(nbspx, .false.)
@@ -4771,8 +4768,7 @@
       use mp_global, only: intra_image_comm
       use electrons_base, only: nspin, iupdwn, nupdwn, nbsp, nbspx
       use cp_interfaces, only: invfft
-      use nksic, only: vsic, vsicpsi, &
-                       valpsi, deeq_sic  ! to be passed directly
+      use nksic, only: vsic, vsicpsi, deeq_sic  ! to be passed directly
       use wavefunctions_module, only: c0
       use cp_main_variables, only: bec  ! to be passed directly
       use input_parameters, only: odd_nkscalfact
@@ -4821,12 +4817,6 @@
             do nbnd2 = 1, nupdwn(isp)
                !
                j2 = nbnd2 + iupdwn(isp) - 1
-               !
-               IF (odd_nkscalfact) THEN
-                  !
-                  vsicpsi(:, jj1) = vsicpsi(:, jj1) + valpsi(nbnd1 + jj1 - 1, :)
-                  !
-               END IF
                !
                IF (lgam) THEN
                   hmat(nbnd2, nbnd1 + jj1 - 1) = 2.d0*DBLE(DOT_PRODUCT(c0(:, j2), vsicpsi(:, jj1)))

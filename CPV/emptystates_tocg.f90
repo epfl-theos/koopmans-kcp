@@ -47,7 +47,7 @@
       USE mp,                   ONLY : mp_comm_split, mp_comm_free, mp_sum
       USE mp_global,            ONLY : intra_image_comm, me_image
       USE nksic,                ONLY : do_orbdep, do_pz, do_wxd, vsicpsi, wtot, &
-                                       odd_alpha, valpsi, nkscalfact, fsic_emp, vsic_emp, &
+                                       odd_alpha, nkscalfact, fsic_emp, vsic_emp, &
                                        wxd_emp, deeq_sic_emp, do_spinsym, pink_emp, &
                                        allocate_nksic_empty, deallocate_nksic_empty
       USE hfmod,                ONLY : do_hf, vxxpsi
@@ -388,7 +388,6 @@
                 !
                 IF (odd_nkscalfact) THEN
                    !
-                   valpsi(:,:) = (0.0_DP, 0.0_DP)
                    odd_alpha(:) = 0.0_DP
                    !
                    CALL odd_alpha_routine(n_empx)
@@ -462,13 +461,6 @@
                 ! ODD terms
                 !
                 IF ( do_orbdep ) THEN
-                    !
-                    IF ( odd_nkscalfact ) THEN
-                       !
-                       c2(:) = c2(:) - valpsi(i, :)   * f_emp(i)
-                       c3(:) = c3(:) - valpsi(i+1, :) * f_emp(i+1)
-                       !
-                    ENDIF
                     !   
                     CALL nksic_eforce( i, n_emps, n_empx, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
                                        c0_emp(:,i), c0_emp(:,i+1), vsicpsi, lgam )

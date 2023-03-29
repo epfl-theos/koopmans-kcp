@@ -62,7 +62,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     vsicpsi, vsic, wtot, fsic, deeq_sic, f_cutoff, &
                     pink, do_wxd, do_bare_eigs, innerloop_until, &
-                    valpsi, odd_alpha
+                    odd_alpha
    use hfmod, only: do_hf, vxxpsi, exx
    use twin_types !added:giovanni
    use cp_main_variables, only: becstart
@@ -265,7 +265,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
             !
             if (odd_nkscalfact) then
                !
-               valpsi(:, :) = (0.0_DP, 0.0_DP)
                odd_alpha(:) = 0.0_DP
                !
                call odd_alpha_routine(nbspx, .false.)
@@ -717,7 +716,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                !
                if (odd_nkscalfact) then
                   !
-                  valpsi(:, :) = (0.0_DP, 0.0_DP)
                   odd_alpha(:) = 0.0_DP
                   !
                   call odd_alpha_routine(nbspx, .false.)
@@ -821,7 +819,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          if (odd_nkscalfact) then
             !
-            valpsi(:, :) = (0.0_DP, 0.0_DP)
             odd_alpha(:) = 0.0_DP
             !
             call odd_alpha_routine(nbspx, .false.)
@@ -916,7 +913,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          if (odd_nkscalfact) then
             !
-            valpsi(:, :) = (0.0_DP, 0.0_DP)
             odd_alpha(:) = 0.0_DP
             !
             call odd_alpha_routine(nbspx, .false.)
@@ -1074,7 +1070,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                !
                if (odd_nkscalfact) then
                   !
-                  valpsi(:, :) = (0.0_DP, 0.0_DP)
                   odd_alpha(:) = 0.0_DP
                   !
                   call odd_alpha_routine(nbspx, .false.)
@@ -1243,7 +1238,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          if (odd_nkscalfact) then
             !
-            valpsi(:, :) = (0.0_DP, 0.0_DP)
             odd_alpha(:) = 0.0_DP
             !
             call odd_alpha_routine(nbspx, .false.)
@@ -1360,16 +1354,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
       end if
 
       if (do_orbdep) then
-         !
-         IF (odd_nkscalfact) THEN
-            !
-            c2(:) = c2(:) - valpsi(i, :)*faux(i)
-            !
-            if (i + 1 <= nbsp) c3(:) = c3(:) - valpsi(i + 1, :)*faux(i + 1)
-            !
-         END IF
-         !
-         ! faux takes into account spin multiplicity.
          !
          CALL nksic_eforce(i, nbsp, nbspx, vsic, deeq_sic, bec, &
                            ngw, c0(:, i), c0(:, i + 1), vsicpsi, lgam)
@@ -1777,16 +1761,6 @@ contains
 
 !$$
          if (do_orbdep) then
-            !
-            IF (odd_nkscalfact) THEN
-               !
-               c2(:) = c2(:) - valpsi(i, :)*faux(i)
-               !
-               if (i + 1 <= nbsp) c3(:) = c3(:) - valpsi(i + 1, :)*faux(i + 1)
-               !
-            END IF
-            !
-            ! faux takes into account spin multiplicity.
             !
             CALL nksic_eforce(i, nbsp, nbspx, vsic, deeq_sic, bec, ngw, &
                               c0(:, i), c0(:, i + 1), vsicpsi, lgam)

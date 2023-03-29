@@ -372,7 +372,6 @@ module nksic
   complex(dp), allocatable :: vsicpsi(:,:)
   complex(dp) :: complexification_index
   !
-  complex(dp), allocatable :: valpsi(:,:)
   real(dp), allocatable :: alpha0_ref(:)
   real(dp), allocatable :: alpha0_ref_emp(:)
   complex(dp), allocatable :: swfc_fixed(:,:)
@@ -488,8 +487,6 @@ contains
       allocate( odd_alpha(nx) )
       odd_alpha(:)= 0.d0
       !
-      if (odd_nkscalfact) allocate(valpsi(nx,ngw) )
-      !
       IF( do_pz_renorm) THEN
          allocate(taukin(nnrx,nspin))
          allocate(tauw(nnrx,nspin))
@@ -562,7 +559,6 @@ contains
       if(allocated(pink_emp))    deallocate(pink_emp)
       if(allocated(odd_alpha_emp))   deallocate(odd_alpha_emp)
       if (odd_nkscalfact) then
-         if (allocated(valpsi)) deallocate(valpsi)
          if (allocated(alpha0_ref)) deallocate(alpha0_ref)
          if (allocated(alpha0_ref_emp)) deallocate(alpha0_ref_emp)
          if (allocated(swfc_fixed)) deallocate(swfc_fixed)

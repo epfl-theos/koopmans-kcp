@@ -54,7 +54,7 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
    use twin_types !added:giovanni
    use printout_base, only: printout_base_open, printout_base_unit, &
                             printout_base_close
-   use nksic, only: odd_alpha, valpsi, nkscalfact, do_orbdep, wtot, vsicpsi, &
+   use nksic, only: odd_alpha, nkscalfact, do_orbdep, wtot, vsicpsi, &
                     do_innerloop_empty, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     innerloop_until, do_bare_eigs, fsic_emp, &
@@ -225,7 +225,6 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
             !
             if (odd_nkscalfact_empty) then
                !
-               valpsi(:, :) = (0.0_DP, 0.0_DP)
                odd_alpha(:) = 0.0_DP
                !
                CALL odd_alpha_routine(n_empx, .true.)
@@ -645,7 +644,6 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                !
                if (odd_nkscalfact_empty) then
                   !
-                  valpsi(:, :) = (0.0_DP, 0.0_DP)
                   odd_alpha(:) = 0.0_DP
                   !
                   CALL odd_alpha_routine(n_empx, .true.)
@@ -714,7 +712,6 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          !
          if (odd_nkscalfact_empty) then
             !
-            valpsi(:, :) = (0.0_DP, 0.0_DP)
             odd_alpha(:) = 0.0_DP
             !
             CALL odd_alpha_routine(n_empx, .true.)
@@ -784,7 +781,6 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
          !
          if (odd_nkscalfact_empty) then
             !
-            valpsi(:, :) = (0.0_DP, 0.0_DP)
             odd_alpha(:) = 0.0_DP
             !
             CALL odd_alpha_routine(n_empx, .true.)
@@ -937,7 +933,6 @@ subroutine runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, n_empx, &
                !
                if (odd_nkscalfact_empty) then
                   !
-                  valpsi(:, :) = (0.0_DP, 0.0_DP)
                   odd_alpha(:) = 0.0_DP
                   !
                   call odd_alpha_routine(n_empx, .true.)

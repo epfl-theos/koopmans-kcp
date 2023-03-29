@@ -44,7 +44,7 @@
       USE ldaU,                ONLY : vupsi, lda_plus_u
       use hfmod,               only : do_hf, vxxpsi
       use nksic,               only : do_orbdep, vsic, vsicpsi, deeq_sic, & 
-                                      f_cutoff, valpsi
+                                      f_cutoff
       use ensemble_dft,        only : tens, tsmear
       use twin_types !added:giovanni
       use input_parameters,    only : odd_nkscalfact 
@@ -252,24 +252,6 @@
            ENDIF
            !
            IF ( do_orbdep ) THEN
-               !
-               IF ( odd_nkscalfact ) THEN
-                   !
-                   IF ( tens .OR. tsmear ) THEN
-                      !
-                      c2(:) = c2(:) - valpsi(i, :)
-                      c3(:) = c3(:) - valpsi(i+1, :)
-                      !
-                   ELSE
-                      !
-                      c2(:) = c2(:) - valpsi(i,:)   * faux(i)
-                      c3(:) = c3(:) - valpsi(i+1, :) * faux(i+1)
-                      !
-                   ENDIF
-                   !
-               ENDIF
-               !
-               ! faux takes into account spin multiplicity.
                !
                CALL nksic_eforce( i, n, nx, vsic, deeq_sic, bec, ngw, c0(:,i), c0(:,i+1), vsicpsi, lgam )
                !
