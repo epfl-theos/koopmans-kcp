@@ -218,9 +218,6 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    main_loop: DO
       !
       CALL start_clock('total_time')
-!$$ For CG calculation, one minimization is enough
-      if (tcg) tlast = .true.
-!$$
       !
       nfi = nfi + 1
       tlast = (nfi == nomore) .OR. tlast
