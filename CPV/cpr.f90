@@ -167,9 +167,6 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    LOGICAL :: lgam
    COMPLEX(DP), PARAMETER :: c_zero = CMPLX(0.d0, 0.d0)
 
-!$$
-   LOGICAL :: ttest
-!$$
    iter = 0
    lgam = gamma_only .and. .not. do_wf_cmplx
    !
@@ -953,8 +950,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       !
       delta_etot = ABS(epre - enow)
       !
-      ttest = check_stop_now()
-      tstop = ttest .OR. tlast
+      tstop = check_stop_now() .OR. tlast
       !
       tconv = .FALSE.
       !
