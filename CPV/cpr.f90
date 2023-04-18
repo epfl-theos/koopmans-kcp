@@ -953,8 +953,6 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       !
       delta_etot = ABS(epre - enow)
       !
-      tstop = check_stop_now() .OR. tlast
-      !
       ttest = check_stop_now()
       tstop = ttest .OR. tlast
       !
