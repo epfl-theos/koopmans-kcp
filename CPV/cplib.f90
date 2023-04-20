@@ -4669,10 +4669,6 @@ subroutine nksic_init
       ! do nothing
    CASE ("hf", "b3lyp", "pbe0")
       do_hybrid = .TRUE.
-   CASE ("nk0")
-      do_nk = .TRUE.
-      do_wref = .FALSE.
-      do_wxd = .FALSE.
    CASE ("nki")
       do_nki = .TRUE.
       do_wxd = .TRUE.
