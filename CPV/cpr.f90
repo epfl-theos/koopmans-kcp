@@ -19,7 +19,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
                             lneb, lcoarsegrained, nomore, &
                             tsde, tortho, tnosee, tnosep, &
                             tsdp, tcp, tcap, tnoseh, tolp, &
-                            tprojwfc, textfor, non_ortho
+                            tprojwfc, textfor, non_ortho, tstress
    USE core, ONLY: nlcc_any
    USE cvan, ONLY: nvb
    USE uspp, ONLY: nkb, vkb, okvan
@@ -221,6 +221,9 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       ttprint = (MOD(nfi, iprint) == 0) .OR. tlast
       tfile = (MOD(nfi, iprint) == 0)
       tstdout = (MOD(nfi, iprint_stdout) == 0) .OR. tlast
+      !
+      if ( ( tstress .or. thdyn ).and. do_wf_cmplx ) &
+         call errore('cprmain', ' stress tensor for complex wave functions is not implemented yet ', 1)
       !
       IF (abivol) THEN
          IF (pvar) THEN
