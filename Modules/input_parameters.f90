@@ -548,8 +548,8 @@ MODULE input_parameters
         !
         ! This variable overwrites the ones above
         CHARACTER(80)     :: which_orbdep=" "
-        CHARACTER(LEN=80) :: which_orbdep_allowed(14)
-        CHARACTER(LEN=80) :: which_orbdep_allowed_cmplx(9)
+        CHARACTER(LEN=80) :: which_orbdep_allowed(9)
+        CHARACTER(LEN=80) :: which_orbdep_allowed_cmplx(6)
         !
         DATA which_orbdep_allowed &
           / "none", "nki", "perdew-zunger", "pz", "nkipz", "pznki", &
