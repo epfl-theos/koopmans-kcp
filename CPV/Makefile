@@ -97,7 +97,6 @@ vanderwaals.o \
 vol_clu.o \
 wannier_base.o \
 wannier.o \
-waveinit.o \
 wave.o \
 wave_types.o \
 wf.o \
