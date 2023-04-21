@@ -120,7 +120,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    USE small_box, ONLY: ainvb
    USE descriptors, ONLY: descla_siz_
    USE twin_types
-   USE input_parameters, ONLY: fixed_state, fixed_band
+   USE input_parameters, ONLY: calculation, fixed_state, fixed_band
    !
    IMPLICIT NONE
    !
@@ -176,7 +176,11 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    enow = 1.D9
    !
    tfirst = .TRUE.
-   tlast = .FALSE.
+   if (calculation == 'scf') then
+      tlast = .true.
+   else
+      tlast = .false.
+   endif
    nacc = 5
    !
    nspin_sub = nspin
