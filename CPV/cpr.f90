@@ -175,12 +175,8 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    etot_out = 0.D0
    enow = 1.D9
    !
-   tfirst = .TRUE.
-   if (calculation == 'scf') then
-      tlast = .true.
-   else
-      tlast = .false.
-   endif
+   tfirst = .true.
+   tlast = .false.
    nacc = 5
    !
    nspin_sub = nspin
