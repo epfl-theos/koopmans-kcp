@@ -894,6 +894,7 @@ io_pot_sic_xml.o : ../Modules/io_global.o
 io_pot_sic_xml.o : ../Modules/kind.o
 io_pot_sic_xml.o : ../Modules/mp_global.o
 io_pot_sic_xml.o : ../Modules/xml_io_base.o
+io_pot_sic_xml.o : cp_interfaces.o
 ksstates.o : cp_interfaces.o
 ksstates.o : electrons.o
 ksstates.o : ../Modules/electrons_base.o
