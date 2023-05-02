@@ -4616,6 +4616,7 @@ subroutine nksic_init
    USE io_global, ONLY: meta_ionode, stdout
    use electrons_base, ONLY: nspin, nbspx
    use gvecw, ONLY: ngw
+   use gvecp, only: ngm
    use grid_dimensions, ONLY: nnrx
    USE ions_base, ONLY: nat
    !
@@ -4668,22 +4669,12 @@ subroutine nksic_init
       ! do nothing
    CASE ("hf", "b3lyp", "pbe0")
       do_hybrid = .TRUE.
-   CASE ("nk", "non-koopmans")
-      do_nk = .TRUE.
-      do_wref = .TRUE.
-      do_wxd = .TRUE.
-   CASE ("nk0")
-      do_nk = .TRUE.
-      do_wref = .FALSE.
-      do_wxd = .FALSE.
    CASE ("nki")
       do_nki = .TRUE.
       do_wxd = .TRUE.
       fref = 1.0
    CASE ("pz", "perdew-zunger")
       do_pz = .TRUE.
-   CASE ("nkpz", "pznk")
-      do_nkpz = .TRUE.
    CASE ("nkipz", "pznki")
       do_nkipz = .TRUE.
       do_wxd = .TRUE.
@@ -4744,7 +4735,7 @@ subroutine nksic_init
    !
    ! call readfile_refalpha()
    !
-   if (do_orbdep .and. .not. do_hybrid) call allocate_nksic(nnrx, ngw, nspin, nbspx, nat)
+   if (do_orbdep .and. .not. do_hybrid) call allocate_nksic(nnrx, ngw, ngm, nspin, nbspx, nat)
    !
    if (do_orbdep) odd_alpha(:) = 1.d0
    !

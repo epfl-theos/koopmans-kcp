@@ -75,11 +75,9 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
   USE mp,                   ONLY : mp_sum, mp_bcast
   USE efield_mod,           ONLY : do_efield
   USE hfmod,                ONLY : do_hf, vxxpsi, exx
-  USE nksic,                ONLY : do_orbdep, vsic, wtot, fsic, fion_sic, deeq_sic, pink, do_wxd, sizwtot, &
-                                   valpsi, odd_alpha 
-  !
-  USE nksic,                ONLY : do_innerloop,do_innerloop_cg, innerloop_dd_nstep, &
-                                   innerloop_init_n
+  USE nksic,                ONLY : do_orbdep, vsic, wtot, fsic, fion_sic, &
+                                   deeq_sic, pink, do_wxd, odd_alpha, do_innerloop, do_innerloop_cg, &
+                                   innerloop_dd_nstep, innerloop_init_n
   use ions_base,            only : nsp
   use electrons_module,     ONLY : icompute_spread, wfc_centers, wfc_spreads
   use cp_main_variables,    ONLY : becdual
@@ -185,7 +183,6 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
          !
          if (odd_nkscalfact) then
             !
-            valpsi(:,:) = (0.0_DP, 0.0_DP)
             odd_alpha(:) = 0.0_DP
             !
             call odd_alpha_routine(nbspx,.false.)
@@ -207,7 +204,8 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
          ENDIF
          !
          call nksic_potential( nbsp, nbspx, c0, fsic, bec, becsum, deeq_sic, &
-                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, sizwtot, vsic, do_wxd, pink, nudx, &
+                    ispin, iupdwn, nupdwn, rhor, rhoc, wtot, &
+                    vsic, do_wxd, pink, nudx, &
                     wfc_centers, wfc_spreads, icompute_spread, .false.)
          !
 !$$ We should update etot only once at the end of this do_orbdep routine

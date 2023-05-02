@@ -894,6 +894,7 @@ io_pot_sic_xml.o : ../Modules/io_global.o
 io_pot_sic_xml.o : ../Modules/kind.o
 io_pot_sic_xml.o : ../Modules/mp_global.o
 io_pot_sic_xml.o : ../Modules/xml_io_base.o
+io_pot_sic_xml.o : cp_interfaces.o
 ksstates.o : cp_interfaces.o
 ksstates.o : electrons.o
 ksstates.o : ../Modules/electrons_base.o
@@ -1039,6 +1040,20 @@ move_electrons.o : ../Modules/recvec.o
 move_electrons.o : ../Modules/uspp.o
 move_electrons.o : ../Modules/wavefunctions.o
 move_electrons.o : ../include/f_defs.h
+nksic_corrections.o : cp_interfaces.o
+nksic_corrections.o : modules.o
+nksic_corrections.o : ../Modules/cell_base.o
+nksic_corrections.o : ../Modules/constants.o
+nksic_corrections.o : ../Modules/control_flags.o
+nksic_corrections.o : ../Modules/electrons_base.o
+nksic_corrections.o : ../Modules/fft_base.o
+nksic_corrections.o : ../Modules/functionals.o
+nksic_corrections.o : ../Modules/griddim.o
+nksic_corrections.o : ../Modules/kind.o
+nksic_corrections.o : ../Modules/mp.o
+nksic_corrections.o : ../Modules/mp_global.o
+nksic_corrections.o : ../Modules/recvec.o
+nksic_corrections.o : ../include/f_defs.h
 nksiclib.o : cg.o
 nksiclib.o : cp_interfaces.o
 nksiclib.o : electrons.o
@@ -1046,6 +1061,7 @@ nksiclib.o : ions_positions.o
 nksiclib.o : io_pot_sic_xml.o
 nksiclib.o : mainvar.o
 nksiclib.o : modules.o
+nksiclib.o : nksic_corrections.o
 nksiclib.o : ../Modules/cell_base.o
 nksiclib.o : ../Modules/constants.o
 nksiclib.o : ../Modules/control_flags.o

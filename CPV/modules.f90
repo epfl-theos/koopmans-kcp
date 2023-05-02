@@ -343,7 +343,7 @@ module nksic
   real(dp) :: etxc_sic
   !
   real(dp),    allocatable :: fsic(:)
-  real(dp),    allocatable :: vsic(:,:)
+  complex(dp), allocatable :: vsic(:,:)
   real(dp),    allocatable :: fion_sic(:,:)
   real(dp),    allocatable :: deeq_sic(:,:,:,:)
   real(dp),    allocatable :: pink(:)
@@ -356,18 +356,22 @@ module nksic
   real(dp),    allocatable :: pink_emp(:)
   real(dp),    allocatable :: odd_alpha_emp(:) !added:giovanni for alpha renormalization
   real(dp),    allocatable :: vxc_sic(:,:)
-  real(dp),    allocatable :: wxdsic(:,:)
+  complex(dp), allocatable :: wxdsic(:,:)
   real(dp),    allocatable :: orb_rhor(:,:)
   real(dp),    allocatable :: rhoref(:,:)
   real(dp),    allocatable :: rhobar(:,:)
   real(dp),    allocatable :: grhobar(:,:,:)
   real(dp),    allocatable :: wrefsic(:)
-  real(dp),    allocatable :: wtot(:,:)
+  complex(dp), allocatable :: wtot(:,:)
+  !
+  real(dp), allocatable :: fsic_emp(:)
+  complex(dp), allocatable :: vsic_emp(:, :)
+  complex(dp), allocatable :: wxd_emp(:, :)
+  real(dp), allocatable :: deeq_sic_emp(:, :, :, :)
   !
   complex(dp), allocatable :: vsicpsi(:,:)
   complex(dp) :: complexification_index
   !
-  complex(dp), allocatable :: valpsi(:,:)
   real(dp), allocatable :: alpha0_ref(:)
   real(dp), allocatable :: alpha0_ref_emp(:)
   complex(dp), allocatable :: swfc_fixed(:,:)
@@ -401,13 +405,23 @@ module nksic
   integer :: innerloop_until
   real(DP) :: innerloop_cg_ratio
 !$$
-  integer :: sizwtot
 
 contains
   !
-  subroutine allocate_nksic_empty( n_emps)
+  subroutine allocate_nksic_empty(nnrx, ngm, n_emps, nat, nhm)
 
-  integer :: n_emps
+  implicit none
+
+  integer, intent(in) :: nnrx, ngm, n_emps, nat, nhm
+
+  ALLOCATE (fsic_emp(n_emps))
+  ALLOCATE (vsic_emp(ngm, n_emps))
+  ALLOCATE (wxd_emp(ngm, 2))
+  ALLOCATE (deeq_sic_emp(nhm, nhm, nat, n_emps))
+  !
+  fsic_emp = 0.0d0
+  vsic_emp = 0.0d0
+  wxd_emp = 0.0d0
   
   IF(.not.allocated(pink_emp)) THEN
      !
@@ -424,7 +438,7 @@ contains
   
   end subroutine allocate_nksic_empty
   
-  subroutine allocate_nksic( nnrx, ngw, nspin, nx, nat)
+  subroutine allocate_nksic( nnrx, ngw, ngm, nspin, nx, nat)
       !
       use funct,          only : dft_is_gradient
       use uspp_param,     only : nhm
@@ -433,11 +447,12 @@ contains
       implicit none
       integer, intent(in):: nx, nspin
       integer, intent(in):: nat
+      integer, intent(in):: ngm
       integer, intent(in):: ngw
       integer, intent(in):: nnrx
       !
       allocate( fsic(nx) )
-      allocate( vsic(nnrx,nx) )
+      allocate( vsic(ngm,nx) )
       allocate( fion_sic(3,nat) )
       !
       allocate( pink(nx) )
@@ -454,19 +469,14 @@ contains
       endif
       !
       if ( do_nk .or. do_nkpz ) then
-          allocate( wxdsic(nnrx,2) )
           allocate( wrefsic(nnrx) )
       else if ( do_nki .or. do_nkipz) then
           allocate( wxdsic(nnrx,2) )
       endif
       if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
-          allocate(wtot(nnrx,2))
-          sizwtot=nnrx
-      else
-          allocate(wtot(1,2))
-          sizwtot=1
+          allocate(wtot(ngm,2))
+          wtot=0.0_dp
       endif
-      wtot=0.0_dp
       !
       if ( dft_is_gradient() ) then 
           allocate( grhobar(nnrx,3,2) )
@@ -476,8 +486,6 @@ contains
       !
       allocate( odd_alpha(nx) )
       odd_alpha(:)= 0.d0
-      !
-      if (odd_nkscalfact) allocate(valpsi(nx,ngw) )
       !
       IF( do_pz_renorm) THEN
          allocate(taukin(nnrx,nspin))
@@ -490,12 +498,11 @@ contains
       !
       fsic     = 0.0d0
       pink     = 0.0d0
-      vsic     = 0.0d0
+      vsic = 0.0d0
       deeq_sic = 0.0d0
       vsicpsi  = 0.0d0
       !
       !vxc_sic   = 0.0d0
-      !wxdsic   = 0.0d0
       !wrefsic  = 0.0d0
       !orb_rhor = 0.0d0
       !rhobar   = 0.0d0
@@ -508,20 +515,20 @@ contains
       real(dp) :: cost
       !
       cost = 0.0_dp
-      if ( allocated(fsic) )       cost = cost + real( size(fsic) )       *  8.0_dp 
-      if ( allocated(vsic) )       cost = cost + real( size(vsic) )       *  8.0_dp 
-      if ( allocated(fion_sic) )   cost = cost + real( size(fion_sic) )   *  8.0_dp 
-      if ( allocated(deeq_sic) )   cost = cost + real( size(deeq_sic) )   *  8.0_dp 
-      if ( allocated(pink) )       cost = cost + real( size(pink) )       *  8.0_dp 
-      if ( allocated(vsicpsi) )    cost = cost + real( size(vsicpsi) )    * 16.0_dp 
-      if ( allocated(vxc_sic) )    cost = cost + real( size(vxc_sic) )    *  8.0_dp 
-      if ( allocated(wxdsic) )     cost = cost + real( size(wxdsic) )     *  8.0_dp 
-      if ( allocated(orb_rhor))    cost = cost + real( size(orb_rhor))    *  8.0_dp
-      if ( allocated(rhoref) )     cost = cost + real( size(rhoref) )     *  8.0_dp
-      if ( allocated(rhobar) )     cost = cost + real( size(rhobar) )     *  8.0_dp
-      if ( allocated(grhobar) )    cost = cost + real( size(grhobar) )    *  8.0_dp
-      if ( allocated(wrefsic) )    cost = cost + real( size(wrefsic) )    *  8.0_dp
-      if ( allocated(wtot) )       cost = cost + real( size(wtot) )       *  8.0_dp
+      if ( allocated(fsic) )            cost = cost + real( size(fsic) )            *  8.0_dp 
+      if ( allocated(vsic) ) cost = cost + real( size(vsic) ) * 16.0_dp 
+      if ( allocated(fion_sic) )        cost = cost + real( size(fion_sic) )        *  8.0_dp 
+      if ( allocated(deeq_sic) )        cost = cost + real( size(deeq_sic) )        *  8.0_dp 
+      if ( allocated(pink) )            cost = cost + real( size(pink) )            *  8.0_dp 
+      if ( allocated(vsicpsi) )         cost = cost + real( size(vsicpsi) )         * 16.0_dp 
+      if ( allocated(vxc_sic) )         cost = cost + real( size(vxc_sic) )         *  8.0_dp 
+      if ( allocated(wxdsic) ) cost = cost + real( size(wxdsic) ) * 16.0_dp 
+      if ( allocated(orb_rhor))         cost = cost + real( size(orb_rhor))         *  8.0_dp
+      if ( allocated(rhoref) )          cost = cost + real( size(rhoref) )          *  8.0_dp
+      if ( allocated(rhobar) )          cost = cost + real( size(rhobar) )          *  8.0_dp
+      if ( allocated(grhobar) )         cost = cost + real( size(grhobar) )         *  8.0_dp
+      if ( allocated(wrefsic) )         cost = cost + real( size(wrefsic) )         *  8.0_dp
+      if ( allocated(wtot) ) cost = cost + real( size(wtot) ) * 16.0_dp
       !
       nksic_memusage = cost / 1000000.0_dp
       !   
@@ -530,7 +537,7 @@ contains
   subroutine deallocate_nksic
       !
       use input_parameters, only: odd_nkscalfact
-      if(allocated(vsic))        deallocate(vsic)
+      if(allocated(vsic)) deallocate(vsic)
       if(allocated(fion_sic))    deallocate(fion_sic)
       if(allocated(deeq_sic))    deallocate(deeq_sic)
       if(allocated(pink))        deallocate(pink)
@@ -540,11 +547,11 @@ contains
       if(allocated(edens))       deallocate(edens)
       if(allocated(upsilonkin))  deallocate(upsilonkin)
       if(allocated(upsilonw))    deallocate(upsilonw)
-      if(allocated(wxdsic))      deallocate(wxdsic)
+      if(allocated(wxdsic)) deallocate(wxdsic)
       if(allocated(vxc_sic))     deallocate(vxc_sic)
       if(allocated(vsicpsi))     deallocate(vsicpsi)
       if(allocated(wrefsic))     deallocate(wrefsic)
-      if(allocated(wtot))        deallocate(wtot)
+      if(allocated(wtot)) deallocate(wtot)
       if(allocated(orb_rhor))    deallocate(orb_rhor)
       if(allocated(grhobar))     deallocate(grhobar)
       if(allocated(rhobar))      deallocate(rhobar)
@@ -552,7 +559,6 @@ contains
       if(allocated(pink_emp))    deallocate(pink_emp)
       if(allocated(odd_alpha_emp))   deallocate(odd_alpha_emp)
       if (odd_nkscalfact) then
-         if (allocated(valpsi)) deallocate(valpsi)
          if (allocated(alpha0_ref)) deallocate(alpha0_ref)
          if (allocated(alpha0_ref_emp)) deallocate(alpha0_ref_emp)
          if (allocated(swfc_fixed)) deallocate(swfc_fixed)
@@ -561,6 +567,15 @@ contains
       !
   end subroutine deallocate_nksic
   !
+  subroutine deallocate_nksic_empty
+
+      if(allocated(fsic_emp)) DEALLOCATE(fsic_emp)
+      if(allocated(vsic_emp)) DEALLOCATE(vsic_emp)
+      if(allocated(wxd_emp)) DEALLOCATE(wxd_emp)
+      if(allocated(deeq_sic_emp)) DEALLOCATE(deeq_sic_emp)
+
+  end subroutine
+
 end module nksic
 
 
