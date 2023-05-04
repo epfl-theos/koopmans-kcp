@@ -327,7 +327,7 @@
         
                   DEALLOCATE( becps )
                 !
-              ELSE IF(.not.lgam) THEN
+              ELSE
 
                 CALL mp_sum( becps_c, intra_image_comm )
         
@@ -1736,8 +1736,6 @@ subroutine dennl( bec, dbec, drhovan, denl )
   drhovan=0.0d0
 
   IF( la_proc ) THEN
-
-
   do is=1,nsp
      do iv=1,nh(is)
         do jv=iv,nh(is)

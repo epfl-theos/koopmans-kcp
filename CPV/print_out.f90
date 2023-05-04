@@ -77,7 +77,7 @@
       ! avoid double printing to files by refering to nprint_nfi
       !
       tfile   = tfilei .and. ( nfi .gt. nprint_nfi )
-      tstdout = tstdouti .or. ( MOD( nfi, iprint_stdout ) == 0 )
+      tstdout = tstdouti .or. ( MOD( nfi, iprint ) == 0 )
       !
       CALL memstat( kilobytes )
       !
@@ -432,7 +432,7 @@
       ! avoid double printing to files by refering to nprint_nfi
       !
       tfile   = tfilei .and. ( nfi .gt. nprint_nfi )
-      tstdout = tstdouti .or. ( MOD( nfi, iprint_stdout ) == 0 )
+      tstdout = tstdouti .or. ( MOD( nfi, iprint ) == 0 )
       !
       CALL memstat( kilobytes )
       !

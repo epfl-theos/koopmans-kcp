@@ -19,7 +19,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
                             lneb, lcoarsegrained, nomore, &
                             tsde, tortho, tnosee, tnosep, &
                             tsdp, tcp, tcap, tnoseh, tolp, &
-                            tprojwfc, textfor, non_ortho
+                            tprojwfc, textfor, non_ortho, tstress
    USE core, ONLY: nlcc_any
    USE cvan, ONLY: nvb
    USE uspp, ONLY: nkb, vkb, okvan
@@ -120,7 +120,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    USE small_box, ONLY: ainvb
    USE descriptors, ONLY: descla_siz_
    USE twin_types
-   USE input_parameters, ONLY: fixed_state, fixed_band
+   USE input_parameters, ONLY: calculation, fixed_state, fixed_band
    !
    IMPLICIT NONE
    !
@@ -167,9 +167,6 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    LOGICAL :: lgam
    COMPLEX(DP), PARAMETER :: c_zero = CMPLX(0.d0, 0.d0)
 
-!$$
-   LOGICAL :: ttest
-!$$
    iter = 0
    lgam = gamma_only .and. .not. do_wf_cmplx
    !
@@ -178,8 +175,8 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    etot_out = 0.D0
    enow = 1.D9
    !
-   tfirst = .TRUE.
-   tlast = .FALSE.
+   tfirst = .true.
+   tlast = .false.
    nacc = 5
    !
    nspin_sub = nspin
@@ -218,15 +215,15 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    main_loop: DO
       !
       CALL start_clock('total_time')
-!$$ For CG calculation, one minimization is enough
-      if (tcg) tlast = .true.
-!$$
       !
       nfi = nfi + 1
       tlast = (nfi == nomore) .OR. tlast
       ttprint = (MOD(nfi, iprint) == 0) .OR. tlast
       tfile = (MOD(nfi, iprint) == 0)
       tstdout = (MOD(nfi, iprint_stdout) == 0) .OR. tlast
+      !
+      if ( ( tstress .or. thdyn ).and. do_wf_cmplx ) &
+         call errore('cprmain', ' stress tensor for complex wave functions is not implemented yet ', 1)
       !
       IF (abivol) THEN
          IF (pvar) THEN
@@ -957,9 +954,6 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       delta_etot = ABS(epre - enow)
       !
       tstop = check_stop_now() .OR. tlast
-      !
-      ttest = check_stop_now()
-      tstop = ttest .OR. tlast
       !
       tconv = .FALSE.
       !
