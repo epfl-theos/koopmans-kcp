@@ -31,6 +31,7 @@
                                   max_emp, ethr_emp, etot_emp, eodd_emp, &
                                   nudx_emp, nbsp_emp, nbspx_emp
       USE ions_base, ONLY: nat, nsp
+      USE gvecp, ONLY: ngm
       USE gvecw, ONLY: ngw
       USE orthogonalize_base, ONLY: calphi, updatc
       USE reciprocal_vectors, ONLY: gzero, gstart
@@ -46,9 +47,11 @@
                                write_hamiltonian, ortho_check, symm_wannier
       USE mp, ONLY: mp_comm_split, mp_comm_free, mp_sum
       USE mp_global, ONLY: intra_image_comm, me_image
-      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, sizwtot, &
-                       odd_alpha, valpsi, nkscalfact, odd_alpha_emp
-      USE nksic, ONLY: do_spinsym, pink_emp, allocate_nksic_empty
+      USE nksic, ONLY: do_orbdep, do_pz, do_wxd, vsicpsi, wtot, &
+                       odd_alpha, nkscalfact, odd_alpha_emp, wxd_emp, &
+                       fsic_emp, deeq_sic_emp, vsic_emp, &
+                       do_spinsym, allocate_nksic_empty, deallocate_nksic_empty, &
+                       pink_emp
       USE hfmod, ONLY: do_hf
       USE twin_types !added:giovanni
       USE control_flags, ONLY: tatomicwfc, ndr, ndw
@@ -91,10 +94,6 @@
       REAL(DP), ALLOCATABLE :: lambda_rep(:, :)
       COMPLEX(DP), ALLOCATABLE :: lambda_rep_c(:, :)
       INTEGER, ALLOCATABLE :: ispin_emp(:)
-      REAL(DP), ALLOCATABLE :: fsic_emp(:)
-      REAL(DP), ALLOCATABLE :: vsic_emp(:, :)
-      REAL(DP), ALLOCATABLE :: wxd_emp(:, :)
-      REAL(DP), ALLOCATABLE :: deeq_sic_emp(:, :, :, :)
       COMPLEX(DP), ALLOCATABLE :: vxxpsi_emp(:, :)
       REAL(DP), ALLOCATABLE :: exx_emp(:)
       REAL(DP), ALLOCATABLE :: old_odd_alpha(:)
@@ -105,7 +104,6 @@
       LOGICAL :: lgam !added:giovanni
       LOGICAL :: done_extra !added:giovanni
       COMPLEX(DP), PARAMETER :: c_zero = CMPLX(0.d0, 0.d0)
-      INTEGER :: sizvsic_emp
       INTEGER :: ndr_loc, ndw_loc
       !
       LOGICAL :: odd_nkscalfact_old
@@ -226,34 +224,9 @@
       ispin_emp(1:nupdwn_emp(1)) = 1
       IF (nspin == 2) ispin_emp(iupdwn_emp(2):) = 2
       !
-      IF (do_orbdep) THEN
-         !
-         ALLOCATE (fsic_emp(nbspx_emp))
-         ! n_empx_odd=n_empx
-         ALLOCATE (vsic_emp(nnrx, nbspx_emp))
-         ALLOCATE (wxd_emp(nnrx, 2))
-         ALLOCATE (deeq_sic_emp(nhm, nhm, nat, nbspx_emp))
-         ALLOCATE (becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
-         CALL allocate_nksic_empty(nbspx_emp)
-         sizvsic_emp = nnrx
-         !
-         fsic_emp = 0.0d0
-         vsic_emp = 0.0d0
-         wxd_emp = 0.0d0
-         !
-      ELSE
-         !
-         ALLOCATE (fsic_emp(nbspx_emp))
-         ! n_empx_odd=1
-         ALLOCATE (vsic_emp(1, nbspx_emp))
-         ALLOCATE (wxd_emp(1, 2))
-         ALLOCATE (deeq_sic_emp(nhm, nhm, nat, nbspx_emp))
-         ALLOCATE (becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
-         !
-         call allocate_nksic_empty(nbspx_emp)
-         sizvsic_emp = 1
-         !
-      END IF
+      allocate(becsum_emp(nhm*(nhm + 1)/2, nat, nspin))
+      !
+      if (do_orbdep) CALL allocate_nksic_empty(nnrx, ngm, nbspx_emp, nat, nhm)
       !
       IF (do_hf) THEN
          !
@@ -460,11 +433,9 @@
             old_odd_alpha(:) = odd_alpha(:)
             ! here, deallocate the memory of odd_alpha for occupied states
             if (allocated(odd_alpha)) deallocate (odd_alpha)
-            if (allocated(valpsi)) deallocate (valpsi)
             !
             ! reallocate the memory of odd_alpha for empty states
             allocate (odd_alpha(nbspx_emp))
-            allocate (valpsi(nbspx_emp, ngw))
             !
          END IF
          !
@@ -477,10 +448,10 @@
       !
       IF (tcg_) THEN ! compute empty states with conjugate gradient
          !
-         call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, fsic_emp, nbspx_emp, &
+         call runcg_uspp_emp(c0_emp, cm_emp, bec_emp, f_emp, nbspx_emp, &
                              nbsp_emp, ispin_emp, iupdwn_emp, nupdwn_emp, phi_emp, lambda_emp, &
-                             max_emp, wxd_emp, vsic_emp, sizvsic_emp, pink_emp, becsum_emp, &
-                             deeq_sic_emp, nudx_emp, eodd_emp, etot_emp, v, &
+                             max_emp, becsum_emp, &
+                             nudx_emp, eodd_emp, etot_emp, v, &
                              nfi, .true., eigr, bec, irb, eigrb, &
                              rhor, rhoc, ema0bg, desc_emp)     !!! Added rhoc NICOLA
          !
@@ -494,7 +465,6 @@
                !
                IF (odd_nkscalfact_empty) THEN
                   !
-                  valpsi(:, :) = (0.0_DP, 0.0_DP)
                   odd_alpha(:) = 0.0_DP
                   !
                   CALL odd_alpha_routine(c0_emp, nbsp_emp, nbspx_emp, lgam, .true.)
@@ -517,8 +487,6 @@
                ! Instead, wxd from all occupied states is already computed
                ! by the previous calls to nksic_potentials, and stored wxe_emp
                !
-               fsic_emp(:) = 0.0
-               !
                ! the two lines below were removed by Giovanni, passing do_wxd as input to nksic_potential
                !do_wxd_ = do_wxd
                !do_wxd  = .FALSE.
@@ -532,7 +500,7 @@
                call nksic_potential(nbsp_emp, nbspx_emp, c0_emp, fsic_emp, &
                                     bec_emp, becsum_emp, deeq_sic_emp, &
                                     ispin_emp, iupdwn_emp, nupdwn_emp, rhor, rhoc, &
-                                    wtot, sizwtot, vsic_emp, .false., pink_emp, nudx_emp, &
+                                    wtot, vsic_emp, .false., pink_emp, nudx_emp, &
                                     wfc_centers_emp, wfc_spreads_emp, &
                                     icompute_spread, .false.)
                !
@@ -582,13 +550,6 @@
                ! ODD terms
                !
                IF (do_orbdep .and. (.not. wo_odd_in_empty_run)) THEN
-                  !
-                  IF (odd_nkscalfact_empty) THEN
-                     !
-                     c2(:) = c2(:) - valpsi(i, :)*f_aux(i)
-                     c3(:) = c3(:) - valpsi(i + 1, :)*f_aux(i + 1)
-                     !
-                  END IF
                   !
                   CALL nksic_eforce(i, nbsp_emp, nbspx_emp, vsic_emp, deeq_sic_emp, bec_emp, ngw, &
                                     c0_emp(:, i), c0_emp(:, i + 1), vsicpsi, lgam)
@@ -863,12 +824,8 @@
          CALL deallocate_twin(lambda_emp(iss))
       END DO
       !
-      DEALLOCATE (fsic_emp)
-      !
-      DEALLOCATE (vsic_emp)
-      DEALLOCATE (wxd_emp)
-      DEALLOCATE (deeq_sic_emp)
       DEALLOCATE (becsum_emp)
+      call deallocate_nksic_empty()
       !
       IF (do_hf) THEN
          DEALLOCATE (vxxpsi_emp)

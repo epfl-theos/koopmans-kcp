@@ -548,16 +548,14 @@ MODULE input_parameters
         !
         ! This variable overwrites the ones above
         CHARACTER(80)     :: which_orbdep=" "
-        CHARACTER(LEN=80) :: which_orbdep_allowed(14)
-        CHARACTER(LEN=80) :: which_orbdep_allowed_cmplx(9)
+        CHARACTER(LEN=80) :: which_orbdep_allowed(9)
+        CHARACTER(LEN=80) :: which_orbdep_allowed_cmplx(6)
         !
         DATA which_orbdep_allowed &
-          / "none", "nk", "non-koopmans", "nk0", "nki", &
-            "perdew-zunger", "pz", "pznk", "nkpz" ,"nkipz", "pznki", &
+          / "none", "nki", "perdew-zunger", "pz", "nkipz", "pznki", &
             "hf", "b3lyp", "pbe0" /
         DATA which_orbdep_allowed_cmplx &
-          / "none", "nk", "non-koopmans", "nk0", "nki", &
-            "perdew-zunger", "pz", "nkipz", "pznki"/
+          / "none", "nki", "perdew-zunger", "pz", "nkipz", "pznki"/
         !
         ! 
         ! ---------------- 

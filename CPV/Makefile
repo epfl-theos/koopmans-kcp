@@ -62,6 +62,7 @@ metaxc.o \
 modules.o \
 move_electrons.o \
 nksiclib.o \
+nksic_corrections.o \
 hflib.o \
 nl_base.o \
 nlcc.o \

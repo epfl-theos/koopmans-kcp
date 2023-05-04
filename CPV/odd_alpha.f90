@@ -2,20 +2,12 @@
 subroutine odd_alpha_routine( nbndx, is_empty)
 !--------------------------------------------------------------
       !
-      ! alpha_v = (\sum (I,l) {alpha0_I <c_v|chi(I,l)><chi(I,l)|c_v>}) / (\sum (I,l) {<c_v|chi(I,l)><chi(I,l)|c_v>}),
-      ! where chi(I,l) is orthornormal pseudo atomic wfc
-      ! input: evc_wfc
-      ! out: odd_alpha, valpsi >>> pass to sharing variable
-      ! full valpsi  will be complete in nksiclib routine 
-      !
-      !
       use kinds,              ONLY: DP        
       USE mp_global,          ONLY: intra_image_comm
       USE mp,                 ONLY: mp_bcast, mp_sum
       USE io_global,          ONLY: ionode, ionode_id
       use orthogonalize_base, ONLY: calphi
-      USE nksic,              ONLY: odd_alpha, valpsi, &
-                                    call_index_emp, call_index, &
+      USE nksic,              ONLY: odd_alpha, call_index_emp, call_index, &
                                     alpha0_ref_emp, alpha0_ref 
       USE twin_types
       !
@@ -151,8 +143,6 @@ subroutine odd_alpha_routine( nbndx, is_empty)
          !
       endif
       !   
-      valpsi(:,:)  = (0.0_DP, 0.0_DP)
-      !
       return
       !  
 end subroutine odd_alpha_routine

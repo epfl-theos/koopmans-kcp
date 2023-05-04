@@ -41,7 +41,7 @@ Written and maintained by Edward Linscott, Riccardo De Gennaro, and Nicola Colon
 
 For help and feedback email edward.linscott@gmail.com
 
-.. |GH Actions| image:: https://img.shields.io/github/workflow/status/epfl-theos/koopmans-kcp/Make/master?label=master&logo=github
+.. |GH Actions| image:: https://img.shields.io/github/actions/workflow/status/epfl-theos/koopmans-kcp/make.yml
    :target: https://github.com/epfl-theos/koopmans-kcp/actions?query=branch%3Amaster
 .. |GPL License| image:: https://img.shields.io/badge/license-GPL-blue
    :target: https://github.com/epfl-theos/koopmans-kcp/blob/master/LICENSE
