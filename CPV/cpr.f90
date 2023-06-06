@@ -120,7 +120,8 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
    USE small_box, ONLY: ainvb
    USE descriptors, ONLY: descla_siz_
    USE twin_types
-   USE input_parameters, ONLY: fixed_state, fixed_band
+   USE input_parameters, ONLY: fixed_state, fixed_band, print_real_space_density
+   use print_real_space_orbital_density, only: print_orbr
    !
    IMPLICIT NONE
    !
@@ -1019,6 +1020,12 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       IF (tstop) EXIT main_loop
       !
    END DO main_loop
+   !
+   ! Nsc 06/06/2023 >>>
+   if (print_real_space_density) then
+      call print_orbr(bec, nbsp, ispin, lgam, .False., c0) 
+   end if
+   ! Nsc <<<
    !
    !===================== end of main loop of molecular dynamics ===============
    !
