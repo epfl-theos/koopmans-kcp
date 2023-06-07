@@ -61,8 +61,9 @@
                                   restart_from_wannier_cp, wannier_empty_only, &
                                   fixed_band, print_wfc_anion, wo_odd_in_empty_run, &
                                   odd_nkscalfact, index_empty_to_save, write_hr, &
-                                  impose_bloch_symm
+                                  impose_bloch_symm, print_real_space_density
       USE wavefunctions_module, ONLY: c0fixed_emp
+      USE print_real_space_orbital_density,       only: print_orbr 
       !
       IMPLICIT NONE
       !
@@ -666,6 +667,12 @@
             !
          END DO ITERATIONS
          !
+         ! Nsc 06/06/2023 >>>
+         if (print_real_space_density) then
+            call print_orbr(bec, nbsp_emp, ispin_emp, lgam, .True., c0_emp) 
+         end if
+         ! Nsc <<<
+         ! 
       END IF !if clause to choose between cg and damped dynamics
       !
       IF (ionode) WRITE (stdout, "()")
@@ -802,6 +809,7 @@
          END IF
          !
       END IF
+      !
       !
       DEALLOCATE (ispin_emp)
       DEALLOCATE (f_emp)

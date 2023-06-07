@@ -678,6 +678,14 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       !
       IF (MOD(nfi, iprint) == 0 .OR. tlast) THEN
          !
+         ! Nsc 06/06/2023 >>>
+         ! if tcg the orbitals are printed inside gc_sub.f90
+         ! we avoid printing these twice. 
+         if (print_real_space_density .AND. .NOT. tcg) then
+           call print_orbr(bec, nbsp, ispin, lgam, .False., c0) 
+         end if
+         ! Nsc <<<
+         !
          ! In order to calculate the eigenvalues for CG case
          !
          IF (tortho .or. tcg) THEN
@@ -1021,11 +1029,6 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
       !
    END DO main_loop
    !
-   ! Nsc 06/06/2023 >>>
-   if (print_real_space_density) then
-      call print_orbr(bec, nbsp, ispin, lgam, .False., c0) 
-   end if
-   ! Nsc <<<
    !
    !===================== end of main loop of molecular dynamics ===============
    !
