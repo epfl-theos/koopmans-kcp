@@ -667,11 +667,9 @@
             !
          END DO ITERATIONS
          !
-         ! Nsc 06/06/2023 >>>
          if (print_real_space_density) then
             call print_orbr(bec, nbsp_emp, ispin_emp, lgam, .True., c0_emp) 
          end if
-         ! Nsc <<<
          ! 
       END IF !if clause to choose between cg and damped dynamics
       !
