@@ -13,48 +13,48 @@ PROGRAM n2npm1
   CHARACTER(LEN=256)   :: filename
   INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
   COMPLEX(DP), ALLOCATABLE :: evc(:,:,:)
-  INTEGER :: ngw, nbnd(2), ispin, nspin
+  INTEGER :: ngw, nbnd(2), ispin, nspin, igwx
   LOGICAL :: is_cmplx
   !
   ngw = 0; nbnd=0; nspin=0
   filename='evc01.dat' ! FIXME this will be dependent on the input path
   !
-  CALL read_sizes (filename, ngw, nbnd(1), nspin, is_cmplx)
+  CALL read_sizes (filename, ngw, nbnd(1), nspin, is_cmplx, igwx)
   !
   IF (nspin==2) THEN
      filename='evc02.dat'
-     CALL read_sizes (filename, ngw, nbnd(2), nspin, is_cmplx)
+     CALL read_sizes (filename, ngw, nbnd(2), nspin, is_cmplx, igwx)
   ENDIF
   !
-  WRITE(*,*) ngw, nbnd(:), nspin
-  ALLOCATE (evc(ngw, max(nbnd(1), nbnd(2)), nspin))
+  WRITE(*,*) igwx, ngw, nbnd(:), nspin
+  ALLOCATE (evc(igwx, max(nbnd(1), nbnd(2)), nspin))
   !
   ! reset filename
   filename='evc01.dat'
   DO ispin = 1, nspin
     IF (ispin==2 ) filename="evc02.dat"
     CALL read_wf_occ (filename, evc(:,:,ispin), ngw, nbnd(ispin)) 
-    WRITE(*,*) ispin, evc(1:3,1,ispin) ! check debug
+    WRITE(*,*) ispin, evc(1,1,ispin), evc(igwx,nbnd(ispin),ispin) ! check debug
   ENDDO
   !
   CONTAINS
   !
   !
-  SUBROUTINE read_sizes(filename, ngw, nbnd, nspin, is_cmplx)
+  SUBROUTINE read_sizes(filename, ngw, nbnd, nspin, is_cmplx, igwx)
   !------------------------------------------------------------------------
   !
   USE iotk_module
   !
   IMPLICIT NONE
   CHARACTER(LEN=256), INTENT(IN)   :: filename
-  INTEGER, INTENT(OUT) :: ngw, nbnd,  nspin
+  INTEGER, INTENT(OUT) :: ngw, nbnd,  nspin, igwx
   LOGICAL, INTENT(OUT) :: is_cmplx
 
   INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
   CHARACTER(iotk_attlenx)  :: attr
-  INTEGER                  :: j
+  INTEGER                  :: j, ispin
   INTEGER                  :: ierr
-  INTEGER                  :: igwx, ik, nk
+  INTEGER                  :: ik, nk
   INTEGER                  :: iuni
   !
   ierr = 0
@@ -70,16 +70,17 @@ PROGRAM n2npm1
   !
   CALL iotk_scan_empty( iuni, "INFO", attr )
   !
-  WRITE(*,*) "NICOLA", ngw, nbnd, ik, nk, nspin, igwx, is_cmplx
+  !WRITE(*,*) "NICOLA", ngw, nbnd, ik, nk, nspin, igwx, is_cmplx
   CALL iotk_scan_attr( attr, "ngw",          ngw )
   CALL iotk_scan_attr( attr, "nbnd",         nbnd )
   CALL iotk_scan_attr( attr, "ik",           ik )
   CALL iotk_scan_attr( attr, "nk",           nk )
   CALL iotk_scan_attr( attr, "nspin",        nspin )
+  CALL iotk_scan_attr( attr, "ispin",        ispin )
   CALL iotk_scan_attr( attr, "igwx",         igwx )
   CALL iotk_scan_attr( attr, "do_wf_cmplx",  is_cmplx )
   !
-  WRITE(*,*) "NICOLA", ngw, nbnd, ik, nk, nspin, igwx, is_cmplx
+  WRITE(*,*) "NICOLA", ispin, ngw, nbnd, ik, nk, nspin, igwx, is_cmplx
   CALL iotk_close_read( iuni )
   RETURN
   !
@@ -125,7 +126,7 @@ PROGRAM n2npm1
   CALL iotk_scan_attr( attr, "ispin",        ispin )
   CALL iotk_scan_attr( attr, "do_wf_cmplx",  is_cmplx )
   !
-  WRITE(*,*) "NICOLA", ngw_, nbnd_, ispin, igwx, is_cmplx
+  WRITE(*,*) "NICOLA", TRIM(filename), ngw_, nbnd_, ispin, igwx, is_cmplx
   !
   IF (nbnd_ /= nbnd .OR. ngw_ /= ngw) THEN 
      WRITE(*,*) "Size Mismatch. STOP"
