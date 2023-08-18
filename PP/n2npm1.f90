@@ -42,8 +42,8 @@ PROGRAM n2npm1
   !                       ! Requires a way determine which spin channel from input (either explicite input or
   !                       ! inferred from index which should go from 1 to nbnd(1)+nbnd(2)
   !
-  CALL get_command_argument( 1, arg )
-  CALL parse_args( io_files, nrtot, output_exst )
+  !CALL get_command_argument( 1, arg )
+  !CALL parse_args( io_files, nrtot, output_exst )
   !
   ! l_fill determine what to do: remove from an occupied one (l_fill=F)
   ! or add to empty (l_fill=T)
