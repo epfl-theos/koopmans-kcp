@@ -84,13 +84,13 @@ PROGRAM n2npm1
      CALL read_sizes (filename_in, ngw, nbnd(2), nspin, is_cmplx, igwx, scalef, gamma_only)
   ENDIF
   !
-  WRITE(*,'(/, 7X, "SUMMARY: igwx     =", I5)') igwx
-  WRITE(*,'(   7X, "         ngw      =", I5)') ngw
-  WRITE(*,'(   7X, "         nspin    =", I5)') nspin
-  WRITE(*,'(   7X, "         nbnd(1)  =", I5)') nbnd(1)
-  WRITE(*,'(   7X, "         nbnd(2)  =", I5)') nbnd(2)
-  WRITE(*,'(   7X, "         is_cmplx =", L5)') is_cmplx
-  WRITE(*,'(   7X, "         G_trick  =", L5, /)') gamma_only
+  WRITE(*,'(/, 7X, "SUMMARY: igwx     =", I8)') igwx
+  WRITE(*,'(   7X, "         ngw      =", I8)') ngw
+  WRITE(*,'(   7X, "         nspin    =", I8)') nspin
+  WRITE(*,'(   7X, "         nbnd(1)  =", I8)') nbnd(1)
+  WRITE(*,'(   7X, "         nbnd(2)  =", I8)') nbnd(2)
+  WRITE(*,'(   7X, "         is_cmplx =", L8)') is_cmplx
+  WRITE(*,'(   7X, "         G_trick  =", L8, /)') gamma_only
   !
   ALLOCATE (evc(igwx, max(nbnd(1), nbnd(2)), nspin))
   !
@@ -131,9 +131,9 @@ PROGRAM n2npm1
        OPEN (UNIT=iuni, FILE=TRIM(filename_in), status='unknown', FORM='UNFORMATTED')
        READ (iuni) ngw, nbnd_emp(2)
      ENDIF
-     WRITE(*,'(/, 7X, "SUMMARY: ngw      =", I5)') ngw
-     WRITE(*,'(   7X, "         nbnd(1)  =", I5)') nbnd_emp(1)
-     WRITE(*,'(   7X, "         nbnd(2)  =", I5)') nbnd_emp(2)
+     WRITE(*,'(/, 7X, "SUMMARY: ngw      =", I8)') ngw
+     WRITE(*,'(   7X, "         nbnd(1)  =", I8)') nbnd_emp(1)
+     WRITE(*,'(   7X, "         nbnd(2)  =", I8)') nbnd_emp(2)
      ! allocation
      ALLOCATE ( evc_empty (ngw, MAX(nbnd_emp(1), nbnd_emp(2)),nspin) )
      !
@@ -199,13 +199,13 @@ PROGRAM n2npm1
      ENDDO
   ENDIF
   !
-  WRITE(*,'(/, 7X, "SUMMARY: igwx     =", I5)') igwx
-  WRITE(*,'(   7X, "         ngw      =", I5)') ngw
-  WRITE(*,'(   7X, "         nspin    =", I5)') nspin
-  WRITE(*,'(   7X, "         nbnd(1)  =", I5)') MAX(nbnd_out(1),nbnd_out(2))
-  WRITE(*,'(   7X, "         nbnd(2)  =", I5)') MAX(nbnd_out(1),nbnd_out(2))
-  WRITE(*,'(   7X, "         is_cmplx =", L5)') is_cmplx
-  WRITE(*,'(   7X, "         G_trick  =", L5, /)') gamma_only
+  WRITE(*,'(/, 7X, "SUMMARY: igwx     =", I8)') igwx
+  WRITE(*,'(   7X, "         ngw      =", I8)') ngw
+  WRITE(*,'(   7X, "         nspin    =", I8)') nspin
+  WRITE(*,'(   7X, "         nbnd(1)  =", I8)') MAX(nbnd_out(1),nbnd_out(2))
+  WRITE(*,'(   7X, "         nbnd(2)  =", I8)') MAX(nbnd_out(1),nbnd_out(2))
+  WRITE(*,'(   7X, "         is_cmplx =", L8)') is_cmplx
+  WRITE(*,'(   7X, "         G_trick  =", L8, /)') gamma_only
   !
   WRITE(*,'(/ 5X, A)') "Writing new WFCs to disk ..."
   !
@@ -222,6 +222,8 @@ PROGRAM n2npm1
   !----------------------------------------------------------------------
   SUBROUTINE read_command_line (task, index, spin_channel, dir_in, dir_out) 
      !------------------------------------------------------------------
+     !     arg#      1      2      3       4        5
+     ! n2npm1.x --<task> <index> <spin> <dir_in> <dir_out>
      !
      IMPLICIT NONE 
      INTEGER :: index, spin_channel
