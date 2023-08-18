@@ -99,6 +99,8 @@ PROGRAM n2npm1
   DO ispin = 1, nspin
     IF (ispin==2 ) filename_in=TRIM(dir_in)//'evc02.dat'
     CALL read_wf_occ (filename_in, evc(:,:,ispin), ngw, nbnd(ispin)) 
+    ! TODO: if KS state are used at initialization, also empty states are written to evc
+    !       then this countig does not make sense
     CALL check_nele (ngw, nbnd(ispin), evc(:,:,ispin), nel(ispin))
     WRITE(*,'(7X, "CHECK: ispin =", I5, " nel =", F18.12, " INT(nel)=", I5)') &
             ispin, nel(ispin), NINT(nel(ispin))
@@ -175,6 +177,10 @@ PROGRAM n2npm1
   nbnd_out = nbnd
   IF (l_fill) THEN 
      nbnd_out(spin_channel) = nbnd(spin_channel) + 1
+     nel(spin_channel) = nel(spin_channel)+1
+     IF (nel(1) .lt. nel(2)) THEN
+       WRITE(*,*) "nel up must be greater than or equal to nel dw ", NINT(nel(:));  STOP
+     ENDIF
      ALLOCATE (evc_out(igwx, max(nbnd_out(1), nbnd_out(2)), nspin))
      evc_out = CMPLX(0.D0, 0.D0, kind =DP)
      DO ispin = 1, nspin
@@ -186,6 +192,10 @@ PROGRAM n2npm1
      !
   ELSE
      nbnd_out(spin_channel) = nbnd(spin_channel) - 1
+     nel(spin_channel) = nel(spin_channel)-1
+     IF (nel(1) .lt. nel(2)) THEN
+       WRITE(*,*) "nel up must be greater than or equal to nel dw ", NINT(nel(:));  STOP
+    ENDIF
      ALLOCATE (evc_out(igwx, max(nbnd_out(1), nbnd_out(2)), nspin))
      evc_out = CMPLX(0.D0, 0.D0, kind =DP)
      DO ispin = 1, nspin
