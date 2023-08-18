@@ -1,10 +1,11 @@
 ! TO DO:
 ! 1) this is the desired comand with arguments from command line
-!      <binary name> --fill  <index> tmpdir_in tmpdir_out
-!      <binary name> --empty <index> tmpdir_in tmpdir_out
+!      <binary name> --fill  <spin_channel> <index> tmpdir_in tmpdir_out
+!      <binary name> --empty <spin_channel ><index> tmpdir_in tmpdir_out
 !    where <index> is the index of the orbital of the N-electron calculation 
 !    we want to add/remove (NB: need a convention here on how to count empty states
-!    and spin) 
+!    and spin. I think it would be convenient to give the spin channel from input as
+!    we have different evc files for different spin ) 
 ! 2) Add reading routine for empty state (only if --fill) 
 ! 3) Check Makefile and the need of mpif90 wrapper (it loooks like we need it 
 !    as iotk as some dependendence on mpi library. Also we might need a different 
@@ -26,14 +27,23 @@ PROGRAM n2npm1
   CHARACTER(LEN=256)   :: task, dir_in, filename_in
   INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
   COMPLEX(DP), ALLOCATABLE :: evc(:,:,:)
-  INTEGER :: ngw, nbnd(2), ispin, nspin, igwx, ibnd
+  COMPLEX(DP), ALLOCATABLE :: evc_empty(:,:,:)
+  COMPLEX(DP), ALLOCATABLE :: evc_out(:,:,:)
+  INTEGER :: ngw, nbnd(2), ispin, nspin, igwx, ibnd, ibnd_, spin_channel
+  INTEGER :: nbnd_out(2)
   REAL(DP) :: nel(2)
   LOGICAL :: is_cmplx, l_fill
   INTEGER :: index
   !
   task="empty"            ! FIXME this will be dependent on the input  
   index=1                 ! FIXME this will be dependent on the input  
-  dir_in='./' ! FIXME this will be dependent on the input path
+  dir_in='./'             ! FIXME this will be dependent on the input path
+  spin_channel = 1        ! FIXME: this will track on which spin channel we need to add/remove the electron
+  !                       ! Requires a way determine which spin channel from input (either explicite input or
+  !                       ! inferred from index which should go from 1 to nbnd(1)+nbnd(2)
+  !
+  CALL get_command_argument( 1, arg )
+  CALL parse_args( io_files, nrtot, output_exst )
   !
   ! l_fill determine what to do: remove from an occupied one (l_fill=F)
   ! or add to empty (l_fill=T)
@@ -41,7 +51,7 @@ PROGRAM n2npm1
   IF (task=="fill") l_fill=.true.
   !
   IF (l_fill) THEN 
-    WRITE(*, '(/, 3X, A, I5)') "TASK: Going to add one electron from orb ", index
+    WRITE(*, '(/, 3X, A, I5)') "TASK: Going to add one electron taken from orb ", index
   ELSE
     WRITE(*, '(/, 3X, A, I5)') "TASK: Going to remove one electron from orb ", index
   ENDIF
@@ -86,6 +96,33 @@ PROGRAM n2npm1
     ENDIF
   ENDIF
   !
+  ! From now on we reshape the wfc object
+  nbnd_out = nbnd
+  IF (l_fill) THEN 
+     nbnd_out(spin_channel) = nbnd(spin_channel) + 1
+     ALLOCATE (evc_out(igwx, max(nbnd_out(1), nbnd_out(2)), nspin))
+     evc_out = CMPLX(0.D0, 0.D0, kind =DP)
+     DO ispin = 1, nspin
+       DO ibnd = 1,nbnd(ispin)
+         evc_out(:,ibnd,ispin) = evc(:,ibnd,ispin)
+       ENDDO
+     ENDDO
+     evc_out(:,nbnd_out(spin_channel),spin_channel) = evc_empty(:,index,spin_channel) ! 
+     !
+  ELSE
+     nbnd_out(spin_channel) = nbnd(spin_channel) - 1
+     ALLOCATE (evc_out(igwx, max(nbnd_out(1), nbnd_out(2)), nspin))
+     evc_out = CMPLX(0.D0, 0.D0, kind =DP)
+     DO ispin = 1, nspin
+       ibnd_=0
+       DO ibnd = 1,nbnd(ispin)
+         IF (ispin == spin_channel .AND. ibnd == index) CYCLE
+         ibnd_=ibnd_+1
+         evc_out(:,ibnd_,ispin) = evc(:,ibnd,ispin)
+       ENDDO
+       WRITE(*,*) ispin,  evc_out(1,1,ispin), evc_out(igwx,MAX(nbnd_out(1),nbnd_out(2)),ispin)! check debug
+     ENDDO
+  ENDIF
   CONTAINS
   !
   !----------------------------------------------------------------------
@@ -128,8 +165,7 @@ PROGRAM n2npm1
     ierr = 0
     iuni=789
     !
-    CALL iotk_open_read( iuni, FILE = filename, &
-                            BINARY = .TRUE., IERR = ierr )
+    CALL iotk_open_read( iuni, FILE = filename, BINARY = .TRUE., IERR = ierr )
     !
     IF (ierr /= 0) THEN 
        WRITE(*,*) "Something wrong while reading file = ", filename
