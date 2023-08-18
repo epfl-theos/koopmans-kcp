@@ -24,7 +24,7 @@ PROGRAM n2npm1
   !------------------------------------------------------------------------
   !
   IMPLICIT NONE
-  CHARACTER(LEN=256)   :: task, dir_in, filename_in
+  CHARACTER(LEN=256)   :: task, dir_in, filename_in, dir_out, filename_out
   INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
   COMPLEX(DP), ALLOCATABLE :: evc(:,:,:)
   COMPLEX(DP), ALLOCATABLE :: evc_empty(:,:,:)
@@ -32,12 +32,14 @@ PROGRAM n2npm1
   INTEGER :: ngw, nbnd(2), ispin, nspin, igwx, ibnd, ibnd_, spin_channel
   INTEGER :: nbnd_out(2)
   REAL(DP) :: nel(2)
-  LOGICAL :: is_cmplx, l_fill
+  LOGICAL :: is_cmplx, l_fill, gamma_only
   INTEGER :: index
+  REAL(DP) :: scalef
   !
   task="empty"            ! FIXME this will be dependent on the input  
   index=1                 ! FIXME this will be dependent on the input  
   dir_in='./'             ! FIXME this will be dependent on the input path
+  dir_out='./'            ! FIXME this will be dependent on the input path
   spin_channel = 1        ! FIXME: this will track on which spin channel we need to add/remove the electron
   !                       ! Requires a way determine which spin channel from input (either explicite input or
   !                       ! inferred from index which should go from 1 to nbnd(1)+nbnd(2)
@@ -51,20 +53,22 @@ PROGRAM n2npm1
   IF (task=="fill") l_fill=.true.
   !
   IF (l_fill) THEN 
-    WRITE(*, '(/, 3X, A, I5)') "TASK: Going to add one electron taken from orb ", index
+    WRITE(*, '(/, 3X, 2(A, I5))') "TASK: Going to add &
+            one electron taken from empty orbital= ", index, " spin= ", spin_channel
   ELSE
-    WRITE(*, '(/, 3X, A, I5)') "TASK: Going to remove one electron from orb ", index
+    WRITE(*, '(/, 3X, 2(A, I5))') "TASK: Going to remove &
+            one electron from occupied orbital= ", index, " spin= ", spin_channel
   ENDIF
   !
   ngw = 0; nbnd=0; nspin=0; nel=0.D0
   ! READ the shape of the wfc object (# of PW, # spin, complx/real, # bands) 
   filename_in=TRIM(dir_in)//'evc01.dat'
-  CALL read_sizes (filename_in, ngw, nbnd(1), nspin, is_cmplx, igwx)
+  CALL read_sizes (filename_in, ngw, nbnd(1), nspin, is_cmplx, igwx, scalef, gamma_only)
   !
   IF (nspin==2) THEN
      ! If needed READ the shape of the wfc object for spin down
      filename_in=TRIM(dir_in)//'evc02.dat'
-     CALL read_sizes (filename_in, ngw, nbnd(2), nspin, is_cmplx, igwx)
+     CALL read_sizes (filename_in, ngw, nbnd(2), nspin, is_cmplx, igwx, scalef, gamma_only)
   ENDIF
   WRITE(*,*) igwx, ngw, nbnd(:), nspin
   !
@@ -123,7 +127,61 @@ PROGRAM n2npm1
        WRITE(*,*) ispin,  evc_out(1,1,ispin), evc_out(igwx,MAX(nbnd_out(1),nbnd_out(2)),ispin)! check debug
      ENDDO
   ENDIF
+  !
+  filename_out=TRIM(dir_out)//'evc01_.dat'
+  DO ispin = 1, nspin
+    IF (ispin==2 ) filename_out=TRIM(dir_out)//'evc02_.dat'
+    CALL write_wf (filename_out, evc_out(:,:,ispin), nspin, ispin, ngw, igwx, &
+            MAX(nbnd(1), nbnd(2)), is_cmplx, scalef, gamma_only)
+  ENDDO
   CONTAINS
+  !
+  !
+  !----------------------------------------------------------------------
+  SUBROUTINE write_wf(filename, wf, nspin, ispin, ngw, igwx, nbnd, is_cmplx, scalef, gamma_only)
+    !--------------------------------------------------------------------
+    !
+    USE iotk_module
+    !
+    IMPLICIT NONE
+    INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
+    CHARACTER(LEN=256), INTENT(IN)   :: filename
+    COMPLEX(DP) :: wf(ngw, nbnd) 
+    INTEGER, INTENT(IN) :: ngw, nbnd, nspin, igwx, ispin
+    LOGICAL, INTENT(IN) :: is_cmplx, gamma_only
+    REAL(DP), INTENT(IN) :: scalef
+    CHARACTER(iotk_attlenx)  :: attr
+    INTEGER                  :: j
+    COMPLEX(DP), ALLOCATABLE :: wtmp(:)
+    INTEGER                  :: iuni
+    !
+    iuni=789
+    !
+    CALL iotk_open_write( iuni, FILE = TRIM( filename ), ROOT="WFC", BINARY = .TRUE. )
+    !
+    CALL iotk_write_attr( attr, "ngw",          ngw, FIRST = .TRUE. )
+    CALL iotk_write_attr( attr, "igwx",         igwx )
+    CALL iotk_write_attr( attr, "do_wf_cmplx",   is_cmplx ) !added:giovanni
+    CALL iotk_write_attr( attr, "gamma_only",   gamma_only.and..not.is_cmplx )
+    CALL iotk_write_attr( attr, "nbnd",         nbnd )
+    CALL iotk_write_attr( attr, "ik",           ispin )
+    CALL iotk_write_attr( attr, "nk",           nspin )
+    CALL iotk_write_attr( attr, "ispin",        ispin )
+    CALL iotk_write_attr( attr, "nspin",        nspin )
+    CALL iotk_write_attr( attr, "scale_factor", scalef )
+    !
+    CALL iotk_write_empty( iuni, "INFO", attr )
+    !
+    ALLOCATE( wtmp( MAX( igwx, 1 ) ) )
+    wtmp = 0.0_DP
+    DO j = 1, nbnd
+       wtmp(:)=wf(:,j)
+      CALL iotk_write_dat( iuni, "evc" // iotk_index( j ), wtmp(1:igwx) )
+    ENDDO
+    !
+    CALL iotk_close_write( iuni )
+    !
+  END SUBROUTINE
   !
   !----------------------------------------------------------------------
   SUBROUTINE check_nele (ngw, nbnd, evc, nele)
@@ -145,7 +203,7 @@ PROGRAM n2npm1
   END SUBROUTINE 
   !
   !-----------------------------------------------------------------------
-  SUBROUTINE read_sizes(filename, ngw, nbnd, nspin, is_cmplx, igwx)
+  SUBROUTINE read_sizes(filename, ngw, nbnd, nspin, is_cmplx, igwx, scalef, gamma_only)
     !------------------------------------------------------------------------
     !
     USE iotk_module
@@ -153,7 +211,7 @@ PROGRAM n2npm1
     IMPLICIT NONE
     CHARACTER(LEN=256), INTENT(IN)   :: filename
     INTEGER, INTENT(OUT) :: ngw, nbnd,  nspin, igwx
-    LOGICAL, INTENT(OUT) :: is_cmplx
+    LOGICAL, INTENT(OUT) :: is_cmplx, gamma_only
   
     INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
     CHARACTER(iotk_attlenx)  :: attr
@@ -161,6 +219,7 @@ PROGRAM n2npm1
     INTEGER                  :: ierr
     INTEGER                  :: ik, nk
     INTEGER                  :: iuni
+    REAL(DP)                 :: scalef 
     !
     ierr = 0
     iuni=789
@@ -183,8 +242,10 @@ PROGRAM n2npm1
     CALL iotk_scan_attr( attr, "ispin",        ispin )
     CALL iotk_scan_attr( attr, "igwx",         igwx )
     CALL iotk_scan_attr( attr, "do_wf_cmplx",  is_cmplx )
+    CALL iotk_scan_attr( attr, "gamma_only",  gamma_only )
+    CALL iotk_scan_attr( attr, "scale_factor", scalef )
     !
-    WRITE(*,*) "NICOLA", ispin, ngw, nbnd, ik, nk, nspin, igwx, is_cmplx
+    WRITE(*,*) "NICOLA", ispin, ngw, nbnd, ik, nk, nspin, igwx, is_cmplx, scalef
     CALL iotk_close_read( iuni )
     RETURN
     !
