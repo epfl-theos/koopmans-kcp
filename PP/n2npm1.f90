@@ -1,7 +1,7 @@
 ! DONE:
 ! 1) this is the desired comand with arguments from command line
-!      <binary name> --fill  <spin_channel> <index> tmpdir_in tmpdir_out
-!      <binary name> --empty <spin_channel ><index> tmpdir_in tmpdir_out
+!      <binary name> --fill  <index> <spin_channel> tmpdir_in tmpdir_out
+!      <binary name> --empty <index> <spin_channel> tmpdir_in tmpdir_out
 !    where <index> is the index of the orbital of the N-electron calculation 
 !    we want to add/remove (NB: need a convention here on how to count empty states
 !    and spin. I think it would be convenient to give the spin channel from input as
@@ -11,14 +11,10 @@
 ! 3) Check Makefile and the need of mpif90 wrapper (it loooks like we need it 
 !    as iotk as some dependendence on mpi library. Also we might need a different 
 !    rule to compile this program (no need for any precompilation flags like e.g. -D__MPI)
-! RELEVANT observations:
-! 1) for the N-1 it seems to me that no matter what the strcuture of the evc files for N-1
-!    is identical to that of N. This is because the number of bands is determined by the 
-!    majority spin channel (that does not change in structure going from N to N-1). 
-!    It should be possible to restart a N-1 calculation from the N wfcs. Still it would 
-!    be better to correctly initialize the last band in the minority wfc to ZERO (I guess 
-!    this is what the code will do -it will read only N-1 out of N and set to zero the last
-!    one- but better to be safe)
+!    Alternatively, keep mpi and use ionode only to perform operations
+! 4) Add the possibility to initialize the extra electron/hole wfc with a completely delocalzed
+!    state (vector full of 1/npw in G-space). This is to prepare the starting point for the 
+!    calculation of the reference state in a polaron simulation
 !
 !--------------------------------------------------------------------------
 PROGRAM n2npm1 
@@ -48,6 +44,7 @@ PROGRAM n2npm1
   !                       ! Requires a way determine which spin channel from input (either explicite input or
   !                       ! inferred from index which should go from 1 to nbnd(1)+nbnd(2)
   !
+  ! Here read command line
   CALL read_command_line (task, index, spin_channel, dir_in, dir_out)
   !
   ! l_fill determine what to do: remove from an occupied one (l_fill=F)
