@@ -26,13 +26,14 @@ PROGRAM n2npm1
   COMPLEX(DP), ALLOCATABLE :: evc(:,:,:)
   COMPLEX(DP), ALLOCATABLE :: evc_empty(:,:,:)
   COMPLEX(DP), ALLOCATABLE :: evc_out(:,:,:)
-  INTEGER :: ngw, nbnd(2), ispin, nspin, igwx, ibnd, ibnd_, spin_channel, ig
+  INTEGER :: ngw, nbnd(2), ispin, nspin, igwx, ibnd, spin_channel, ig
+  INTEGER :: ngw_, nspin_, igwx_, ibnd_
   INTEGER :: nbnd_emp(2)
   INTEGER :: nbnd_out(2)
   REAL(DP) :: nel(2)
-  LOGICAL :: is_cmplx, l_fill, gamma_only, exst
+  LOGICAL :: is_cmplx, is_cmplx_, l_fill, gamma_only, gamma_only_, exst
   INTEGER :: index
-  REAL(DP) :: scalef
+  REAL(DP) :: scalef, scalef_
   INTEGER :: iuni
   !
   !Defauls
@@ -54,31 +55,32 @@ PROGRAM n2npm1
   !
   IF (l_fill) THEN 
     WRITE(*, '(/, 3X, 2(A, I5))') "TASK: N --> N+1; Adding &
-            one electron taken from empty orbital= ", index, " spin= ", spin_channel
+            & one electron taken from empty orbital= ", index, " spin= ", spin_channel
   ELSE
     WRITE(*, '(/, 3X, 2(A, I5))') "TASK: N --> N-1; Removing &
-            one electron from occupied orbital= ", index, " spin= ", spin_channel
+            & one electron from occupied orbital= ", index, " spin= ", spin_channel
   ENDIF
-    WRITE(*,'(/, 5X, "SUMMARY: task     =", A)')  TRIM(task)
-    WRITE(*,'(   5X, "         index    =", I5)') index
-    WRITE(*,'(   5X, "         spin     =", I5)') spin_channel
-    WRITE(*,'(   5X, "         dir_in   =", A)')  TRIM(dir_in)
-    WRITE(*,'(   5X, "         dir_out  =", A)') TRIM(dir_out)
   !
-  IF (dir_in == dir_out) THEN 
-     WRITE(*,'(3X, 3A)') "ERROR: dir_out = dir_in"
-     STOP
-  ENDIF
   WRITE(*,'(/ 5X, A)') "Reading OCC manifold ..."
+  !
   ngw = 0; nbnd=0; nspin=0; nel=0.D0
   ! READ the shape of the wfc object (# of PW, # spin, complx/real, # bands) 
   filename_in=TRIM(dir_in)//'evc01.dat'
   CALL read_sizes (filename_in, ngw, nbnd(1), nspin, is_cmplx, igwx, scalef, gamma_only)
   !
   IF (nspin==2) THEN
+     !
      ! If needed READ the shape of the wfc object for spin down
      filename_in=TRIM(dir_in)//'evc02.dat'
-     CALL read_sizes (filename_in, ngw, nbnd(2), nspin, is_cmplx, igwx, scalef, gamma_only)
+     CALL read_sizes (filename_in, ngw_, nbnd(2), nspin_, is_cmplx_, igwx_, scalef_, gamma_only_)
+     !
+     ! The following should never happen
+     IF (ngw_ /= ngw)               CALL error("ngw from evc01 and evc02 does not match", ngw, ngw_)
+     IF (igwx_ /= igwx)             CALL error("ngw from evc01 and evc02 does not match", igwx, igwx_)
+     IF (nspin_ /= nspin)           CALL error("nspin from evc01 and evc02 does not match", nspin, nspin_)
+     IF (is_cmplx_ .NEQV.  is_cmplx_)    CALL error("is_cmplx from evc01 and evc02 does not match", -1)
+     IF (gamma_only_ .NEQV. gamma_only) CALL error("gamma_only from evc01 and evc02 does not match", -1)
+     !
   ENDIF
   !
   WRITE(*,'(/, 7X, "SUMMARY: igwx     =", I8)') igwx
@@ -91,48 +93,47 @@ PROGRAM n2npm1
   !
   ALLOCATE (evc(igwx, max(nbnd(1), nbnd(2)), nspin))
   !
-  ! reset filename 
+  ! Read the wfcs 
+  ! Reset filename first
   filename_in=TRIM(dir_in)//'evc01.dat'
   DO ispin = 1, nspin
+    !
     IF (ispin==2 ) filename_in=TRIM(dir_in)//'evc02.dat'
     CALL read_wf_occ (filename_in, evc(:,:,ispin), ngw, nbnd(ispin)) 
-    ! TODO: if KS state are used at initialization, also empty states are written to evc
+    !
+    ! FIXME: if KS state are used at initialization, also empty states are written to evc
     !       then this countig does not make sense
     CALL check_nele (ngw, nbnd(ispin), evc(:,:,ispin), nel(ispin))
+    !
     WRITE(*,'(7X, "CHECK: ispin =", I5, " nel =", F18.12, " INT(nel)=", I5)') &
             ispin, nel(ispin), NINT(nel(ispin))
-    !WRITE(*,) ispin, nel(ispin), NINT(nel(ispin))
+    ! 
   ENDDO
   !
   ! At this stage I read the empty manifold if needed 
   IF (l_fill) THEN
+     !
+     ! If needed we read here empty_state WFCs
      WRITE(*,'(/ 5X, A)') "Reading EMP manifold ..."
-     ! Here we need to read also empty states if needed.
-     ! First the shape of the arrey ngw, nbnd_emp for spin up
+     ! 
+     ! First the shape of the arrray (ngw, nbnd_emp) for spin up
      iuni=789
      filename_in=TRIM(dir_in)//'evc0_empty1.dat'
-     INQUIRE (FILE=TRIM(filename_in), EXIST=EXST)
-     IF (.NOT. exst) THEN 
-        WRITE(*,'(3A)') "File ", TRIM(filename_in), " do not exist"
-        STOP
-     ENDIF
-     OPEN (UNIT=iuni, FILE=TRIM(filename_in), status='unknown', FORM='UNFORMATTED')
-     READ (iuni) ngw, nbnd_emp(1)
+     CALL read_size_emp(filename_in, iuni, ngw_, nbnd_emp(1))
+     !
      ! then for spin down channel
      IF (nspin == 2) THEN 
+       !
        iuni=iuni+1
        filename_in=TRIM(dir_in)//'evc0_empty2.dat'
-       INQUIRE (FILE=TRIM(filename_in), EXIST=EXST)
-       IF (.NOT. exst) THEN
-          WRITE(*,'(3A)') "File ", TRIM(filename_in), " do not exist"
-          STOP
-       ENDIF
-       OPEN (UNIT=iuni, FILE=TRIM(filename_in), status='unknown', FORM='UNFORMATTED')
-       READ (iuni) ngw, nbnd_emp(2)
+       CALL read_size_emp(filename_in, iuni, ngw_, nbnd_emp(2))
+       !
      ENDIF
+     !
      WRITE(*,'(/, 7X, "SUMMARY: ngw      =", I8)') ngw
      WRITE(*,'(   7X, "         nbnd(1)  =", I8)') nbnd_emp(1)
      WRITE(*,'(   7X, "         nbnd(2)  =", I8)') nbnd_emp(2)
+     !
      ! allocation
      ALLOCATE ( evc_empty (ngw, MAX(nbnd_emp(1), nbnd_emp(2)),nspin) )
      !
@@ -147,25 +148,24 @@ PROGRAM n2npm1
        ENDDO
      ENDDO
   ENDIF
+  CLOSE (iuni)
+  IF (nspin==2) CLOSE (iuni+1)
   !
   ! check if the index of the orbital is within a valid range
   IF (l_fill) THEN
     !
-    IF (spin_channel == 1 .AND. index .gt. nbnd_emp(1)) THEN
-       WRITE(*,*) "index out of range ", index, nbnd_emp(1);  STOP
-    ENDIF
-    IF (spin_channel == 2 .AND. index .gt. nbnd_emp(2)) THEN
-       WRITE(*,*) "index out of range ", index, nbnd_emp(2);  STOP
-    ENDIF
+    IF (spin_channel == 1 .AND. index .gt. nbnd_emp(1)) & 
+            & CALL error ("index out of range", index, nbnd_emp(1))
+    !
+    IF (spin_channel == 2 .AND. index .gt. nbnd_emp(2)) &
+            & CALL error ("index out of range", index, nbnd_emp(2))
     !
   ELSE
     !
-    IF (spin_channel == 1 .AND. index .gt. nbnd(1)) THEN
-       WRITE(*,*) "index out of range ", index, nbnd(1);  STOP
-    ENDIF
-    IF (spin_channel == 2 .AND. index .gt. nbnd(2)) THEN
-       WRITE(*,*) "index out of range ", index, nbnd(2);  STOP
-    ENDIF
+    IF (spin_channel == 1 .AND. index .gt. nbnd(1)) &
+            & CALL error ("index out of range", index, nbnd(1))
+    IF (spin_channel == 2 .AND. index .gt. nbnd(2)) &
+            & CALL error ("index out of range", index, nbnd(2))
     !
   ENDIF
   !
@@ -175,9 +175,8 @@ PROGRAM n2npm1
   IF (l_fill) THEN 
      nbnd_out(spin_channel) = nbnd(spin_channel) + 1
      nel(spin_channel) = nel(spin_channel)+1
-     IF (nel(1) .lt. nel(2)) THEN
-       WRITE(*,*) "nel up must be greater than or equal to nel dw ", NINT(nel(:));  STOP
-     ENDIF
+     IF (nel(1) .lt. nel(2)) CALL error("nel up must be greater than or equal to nel dw", &
+             & NINT(nel(1)),NINT(nel(2)))
      ALLOCATE (evc_out(igwx, max(nbnd_out(1), nbnd_out(2)), nspin))
      evc_out = CMPLX(0.D0, 0.D0, kind =DP)
      DO ispin = 1, nspin
@@ -190,9 +189,8 @@ PROGRAM n2npm1
   ELSE
      nbnd_out(spin_channel) = nbnd(spin_channel) - 1
      nel(spin_channel) = nel(spin_channel)-1
-     IF (nel(1) .lt. nel(2)) THEN
-       WRITE(*,*) "nel up must be greater than or equal to nel dw ", NINT(nel(:));  STOP
-    ENDIF
+     IF (nel(1) .lt. nel(2)) CALL error("nel up must be greater than or equal to nel dw", &
+             & NINT(nel(1)),NINT(nel(2)))
      ALLOCATE (evc_out(igwx, max(nbnd_out(1), nbnd_out(2)), nspin))
      evc_out = CMPLX(0.D0, 0.D0, kind =DP)
      DO ispin = 1, nspin
@@ -202,7 +200,7 @@ PROGRAM n2npm1
          ibnd_=ibnd_+1
          evc_out(:,ibnd_,ispin) = evc(:,ibnd,ispin)
        ENDDO
-       WRITE(*,*) ispin,  evc_out(1,1,ispin), evc_out(igwx,MAX(nbnd_out(1),nbnd_out(2)),ispin)! check debug
+       !WRITE(*,*) ispin,  evc_out(1,1,ispin), evc_out(igwx,MAX(nbnd_out(1),nbnd_out(2)),ispin)! check debug
      ENDDO
   ENDIF
   !
@@ -227,6 +225,47 @@ PROGRAM n2npm1
   CONTAINS
   !
   !----------------------------------------------------------------------
+  SUBROUTINE read_size_emp(filename, iuni, ngw, nbnd)
+     !------------------------------------------------------------------
+     IMPLICIT NONE
+     INTEGER, INTENT(IN) :: iuni
+     CHARACTER (256), INTENT(IN):: filename
+     INTEGER, INTENT(OUT) :: ngw, nbnd
+     LOGICAL :: exst
+     !
+     !
+     INQUIRE (FILE=TRIM(filename), EXIST=EXST)
+     IF (.NOT. exst) CALL error ("File not found", -1)
+     !
+     OPEN (UNIT=iuni, FILE=TRIM(filename), status='unknown', FORM='UNFORMATTED')
+     READ (iuni) ngw_, nbnd
+     IF (ngw_ /= ngw) CALL error("ngw from evc0 and evc0_empty does not match", ngw, ngw_)
+     RETURN
+     !
+  END SUBROUTINE
+  !
+  !----------------------------------------------------------------------
+  SUBROUTINE error (mess, ierr, ierr2)
+     !------------------------------------------------------------------
+     !
+     IMPLICIT NONE 
+     CHARACTER (LEN=*), INTENT(IN) :: mess
+     INTEGER, INTENT(IN) :: ierr
+     INTEGER, INTENT(IN), OPTIONAL :: ierr2
+     !
+     IF (PRESENT (ierr2)) THEN 
+        WRITE(*,'(/,3X, 60("%"), /, 5X, 2A, 2I5, /, 3X, 60("%"),/)') "ERROR: ", TRIM(mess), ierr, ierr2
+     ELSE
+        WRITE(*,'(/,3X, 60("%"), /, 5X, 2A, 1I5, /, 3X, 60("%"),/)') "ERROR: ", TRIM(mess), ierr
+     ENDIF
+     !
+     STOP
+     RETURN
+     !
+  END SUBROUTINE
+  !
+  !
+  !----------------------------------------------------------------------
   SUBROUTINE read_command_line (task, index, spin_channel, dir_in, dir_out) 
      !------------------------------------------------------------------
      !     arg#      1      2      3       4        5
@@ -244,6 +283,12 @@ PROGRAM n2npm1
      IF ( nargs /=  5 ) THEN
         WRITE(*,'(/, 5X, A, I5)') "Wrong number of arguments: STOP", nargs
         WRITE(*,'(   5X, A, /)') "Usage: n2npm1.x --<task> <index> <spin_channel> <dir_in> <dir_out>"
+        WRITE(*,'(   5X, A, /)') "    <task>         = fill/empty"
+        WRITE(*,'(   5X, A   )') "    <index>          index of the occ   orbital to remove form the occ manifold (<task>==empty)"
+        WRITE(*,'(   5X, A, /)') "                     index of the empty orbital to add    to   the occ manifold (<task>==fill)"
+        WRITE(*,'(   5X, A, /)') "    <spin_channel> = 1/2"
+        WRITE(*,'(   5X, A, /)') "    <dir_in>         Directory where to read N-electron WFC files"
+        WRITE(*,'(   5X, A, /)') "    <dir_in>         Directory where to write N+1(N-1)-electron WFC files"
         STOP
      ENDIF
      !
@@ -259,8 +304,7 @@ PROGRAM n2npm1
      CASE ( '--empty')
         task="empty"
      CASE DEFAULT
-       WRITE(*,'(A)') 'unrecognised argument option'
-       STOP
+       CALL error('unrecognised argument option', -1)
      END SELECT
      !
      CALL get_command_argument( iarg, arg )
@@ -272,6 +316,18 @@ PROGRAM n2npm1
      CALL get_command_argument( iarg, dir_in )
      iarg = iarg + 1
      CALL get_command_argument( iarg, dir_out )
+     !
+     !
+     WRITE(*,'(/, 3X, A                         )') "INPUT SUMMARY:"
+     WRITE(*,'(   3X, "    task     = ", A )') TRIM(task)
+     WRITE(*,'(   3X, "    index    = ", I5)') index
+     WRITE(*,'(   3X, "    spin     = ", I5)') spin_channel
+     WRITE(*,'(   3X, "    dir_in   = ", A )') TRIM(dir_in)
+     WRITE(*,'(   3X, "    dir_out  = ", A )') TRIM(dir_out)
+     !
+     IF (dir_in == dir_out) CALL error ("dir_out = dir_in", -1)
+     IF (spin_channel >2 .OR. spin_channel < 0) CALL error("spin channel out of range", spin_channel)
+     IF (index < 0 ) CALL error("index out of range", index)
      !
      RETURN
      !
@@ -335,7 +391,7 @@ PROGRAM n2npm1
     !
     nele=0.D0
     DO ibnd = 1, nbnd
-      nele = nele + SUM(evc(:,ibnd)*CONJG(evc(:,ibnd)))
+      nele = nele + REAL(SUM(evc(:,ibnd)*CONJG(evc(:,ibnd))))
       !WRITE(*,'(I5,3x , 2F20.15, 3x, F10.6)') ibnd, SUM(evc(:,ibnd)*CONJG(evc(:,ibnd))), nele
     ENDDO
     RETURN
@@ -355,7 +411,7 @@ PROGRAM n2npm1
   
     INTEGER, PARAMETER   :: DP = selected_real_kind(14,200)
     CHARACTER(iotk_attlenx)  :: attr
-    INTEGER                  :: j, ispin
+    INTEGER                  :: ispin
     INTEGER                  :: ierr
     INTEGER                  :: ik, nk
     INTEGER                  :: iuni
