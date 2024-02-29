@@ -279,7 +279,7 @@
          !IF ( upf(is)%tcoulombp .and. .not.allocated(upf(is)%vloc) ) then
          ! NsC: Not sure about the IF condition on the ASSOCIATED statement...
          IF ( upf(is)%tcoulombp .AND. .NOT. ASSOCIATED(upf(is)%vloc) ) then
-            WRITE(*, '(3x, "COULOMB PSEUDO Z/r; Z =",4I )') INT(zv(is))
+            WRITE(*, '(3x, "COULOMB PSEUDO Z/r; Z =",I4 )') INT(zv(is))
             ! ugly workaround for 1/r potentials
             ALLOCATE(upf(is)%vloc(rgrid(is)%mesh))
             upf(is)%vloc(:) = - 2.0_dp* zv(is) / rgrid(is)%r(:)
