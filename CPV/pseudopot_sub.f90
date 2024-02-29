@@ -274,7 +274,17 @@
 
          CALL allocate_spline( vps_sp(is), mmx, xgmin, xgmax )
          CALL allocate_spline( dvps_sp(is), mmx, xgmin, xgmax )
-
+         !
+         ! See https://gitlab.com/QEF/q-e/-/merge_requests/2264
+         !IF ( upf(is)%tcoulombp .and. .not.allocated(upf(is)%vloc) ) then
+         ! NsC: Not sure about the IF condition on the ASSOCIATED statement...
+         IF ( upf(is)%tcoulombp .AND. .NOT. ASSOCIATED(upf(is)%vloc) ) then
+            WRITE(*, '(3x, "COULOMB PSEUDO Z/r; Z =",4I )') INT(zv(is))
+            ! ugly workaround for 1/r potentials
+            ALLOCATE(upf(is)%vloc(rgrid(is)%mesh))
+            upf(is)%vloc(:) = - 2.0_dp* zv(is) / rgrid(is)%r(:)
+         ENDIF
+         !
          call formfn( rgrid(is)%r, rgrid(is)%rab, &
                       upf(is)%vloc(1:rgrid(is)%mesh), zv(is), rcmax(is), &
                       xgtab, 1.0d0, tpiba2, rgrid(is)%mesh, mmx, oldvan(is),&
