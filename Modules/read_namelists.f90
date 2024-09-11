@@ -1971,13 +1971,13 @@ CONTAINS
       SELECT CASE (TRIM(calculation))
       CASE ('scf')
          IF (prog == 'CP') THEN
-            electron_dynamics = 'damp'
+            electron_dynamics = 'cg'
             ion_dynamics = 'none'
             cell_dynamics = 'none'
          END IF
       CASE ('nscf', 'bands')
          IF (prog == 'CP') occupations = 'bogus'
-         IF (prog == 'CP') electron_dynamics = 'damp'
+         IF (prog == 'CP') electron_dynamics = 'cg'
       CASE ('phonon')
          IF (prog == 'CP') &
             CALL errore(sub_name, ' calculation '//TRIM(calculation)// &
@@ -1995,21 +1995,21 @@ CONTAINS
                        & TRIM(calculation)//' not implemented ', 1)
       CASE ('relax')
          IF (prog == 'CP') THEN
-            electron_dynamics = 'damp'
+            electron_dynamics = 'cg'
             ion_dynamics = 'damp'
          ELSE IF (prog == 'PW') THEN
             ion_dynamics = 'bfgs'
          END IF
       CASE ('md', 'cp')
          IF (prog == 'CP') THEN
-            electron_dynamics = 'verlet'
-            ion_dynamics = 'verlet'
+            electron_dynamics = 'cg'
+            ion_dynamics = 'cg'
          ELSE IF (prog == 'PW') THEN
             ion_dynamics = 'verlet'
          END IF
       CASE ('vc-relax')
          IF (prog == 'CP') THEN
-            electron_dynamics = 'damp'
+            electron_dynamics = 'cg'
             ion_dynamics = 'damp'
             cell_dynamics = 'damp-pr'
          ELSE IF (prog == 'PW') THEN
