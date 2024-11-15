@@ -108,6 +108,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    complex(dp) :: gamma_c  !warning_giovanni, is it real anyway?
    complex(dp), allocatable :: c2(:), c3(:), c2_bare(:), c3_bare(:)
    complex(dp), allocatable :: hpsi(:, :), hpsi0(:, :), gi(:, :), hi(:, :), gi_bare(:, :)
+   complex(dp), allocatable :: hpsi_aux(:, :)
    type(twin_matrix) :: s_minus1!(:,:)    !factors for inverting US S matrix
    type(twin_matrix) :: k_minus1!(:,:)    !factors for inverting US preconditioning matrix
    !
@@ -202,6 +203,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    numok = 0
    !
    allocate (hpsi(ngw, nbsp))
+   allocate (hpsi_aux(ngw, nbsp))
    allocate (hpsi0(ngw, nbsp))
    allocate (gi(ngw, nbsp), hi(ngw, nbsp))
    !
@@ -402,6 +404,13 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
             end if
             !
             call pc3nc(c0, hpsi, lgam)
+            !
+            ! Need to define hpsi_aux (as hpsi is defined) 
+            WRITE(stdout,'("WARNING: special treatment of the orbital=193")') 
+            WRITE(stdout,'("WARNING: exclude mixing with all the other occupied states")') 
+            hpsi_aux = (0.D0, 0.D0) 
+            call pcdaga2(c0, phi, hpsi_aux, lgam)
+            hpsi(:,193) = hpsi_aux(:,193) 
             !
          else
             !
