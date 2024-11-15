@@ -1828,6 +1828,7 @@ contains
       !
       type(twin_matrix) :: becwfc, bec0
       complex(DP) :: wfc(:, :), wfc0(:, :)
+      complex(DP) ::  wfc_aux(ngw,nbsp)
       !
       if (switch .or. (.not. do_orbdep)) then
          !
@@ -1854,6 +1855,12 @@ contains
          if (.not. okvan) then
             !
             call pc3nc(wfc0, wfc, lgam)
+            ! Need to define wfc_aux (as wfc is defined) 
+            WRITE(stdout,'("WARNING: special treatment of the orbital=193 inside orthogonalize")') 
+            WRITE(stdout,'("WARNING: exclude mixing with all the other occupied states")') 
+            wfc_aux=wfc
+            call pc2(wfc0, bec0, wfc_aux, becwfc, lgam)
+            wfc(:,193) = wfc_aux(:,193)
             !
          else
             !
