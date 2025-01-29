@@ -14,3 +14,4 @@ make.sys
 *.a
 bin/
 .vscode
+*__genmod.f90
