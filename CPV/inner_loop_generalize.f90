@@ -554,7 +554,7 @@ subroutine nksic_getvsicah_general(ngw, nbsp, nbspx, c0, bec, &
    real(dp)                 :: vsicah2sum
    complex(dp)                 :: vsic(ngm, nbspx)
    real(dp)                 :: deeq_sic(nhm, nhm, nat, nbspx)
-   complex(dp)              :: vsicah(nupdwn(isp), nupdwn(isp)), c0(ngw, nbsp)
+   complex(dp)              :: vsicah(nupdwn(isp), nupdwn(isp)), c0(ngw, nbspx)
    logical                  :: lgam
    type(twin_matrix)        :: bec
    !
