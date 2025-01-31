@@ -4,8 +4,9 @@
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
+
 !
-subroutine dforceb(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
+subroutine dforceb_array(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
 
 ! this subroutine computes the force for electrons
 ! in case of Berry,s phase like perturbation
@@ -53,8 +54,8 @@ subroutine dforceb(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
   complex(DP) c0(ngw, n), betae(ngw,nhsa), df(ngw),&
        &   gqq(nhm,nhm,nas,nsp),gqqm(nhm,nhm,nas,nsp),&
        &   qmat(nx,nx)
-  real(DP) bec0(nhsa,n),&
-       &   dq2(nat,nhm,nhm,nspin),  gmes
+  real(DP), intent(in) :: bec0(nhsa,n)
+  real(DP) dq2(nat,nhm,nhm,nspin),  gmes
 
   integer i, ipol, ctabin(ngw,2)
 
@@ -250,9 +251,47 @@ subroutine dforceb(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
       
    deallocate( dtemp)
    return
- end subroutine dforceb
+ end subroutine dforceb_array
 
+ subroutine dforceb_twin(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
+   ! Wrap dforceb_array to handle bec0 as a twin_matrix
+   use electrons_base, only : nx => nbspx, n => nbsp, nspin
+   use gvecw, only : ngw
+   use ions_base, only : nat, nas => nax, na, nsp
+   use kinds, only: dp
+   use twin_types, only: twin_matrix
+   use uspp, only : nhsa => nkb
+   use uspp_param, only : nhm
 
+   implicit none
+
+   ! Arguments
+   complex(dp) :: c0(ngw, n)
+   complex(dp) :: betae(ngw,nhsa)
+   complex(dp) :: df(ngw)
+   complex(dp) :: gqq(nhm,nhm,nas,nsp)
+   complex(dp) :: gqqm(nhm,nhm,nas,nsp)
+   complex(dp) :: qmat(nx,nx)
+   real(dp)    :: dq2(nat,nhm,nhm,nspin)
+   real(dp)    :: gmes
+   integer     :: i, ipol, ctabin(ngw,2)
+   type(twin_matrix), intent(in) :: bec0
+
+   ! Local
+   real(dp), allocatable :: bec_array(:,:)
+
+   allocate(bec_array(nhsa,n))
+
+   if (bec0%iscmplx) then
+      bec_array = bec0%cvec%re
+   else
+      bec_array = bec0%rvec
+   end if
+
+   call dforceb_array(c0, i, betae, ipol, bec_array, ctabin, gqq, gqqm, qmat, dq2, df)
+
+   deallocate(bec_array)
+ end subroutine dforceb_twin
 
  subroutine enberry( detq,  ipol, enb)
 

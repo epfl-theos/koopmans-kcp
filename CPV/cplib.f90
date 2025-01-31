@@ -105,7 +105,7 @@ END SUBROUTINE atomic_wfc
 !
 
 !-----------------------------------------------------------------------
-FUNCTION n_atom_wfc_x()
+FUNCTION n_atom_wfc()
 !----------------------------------------------------------------------------
    !
    ! ... Find max number of bands needed
@@ -116,10 +116,10 @@ FUNCTION n_atom_wfc_x()
    !
    IMPLICIT NONE
    !
-   INTEGER  :: n_atom_wfc_x
+   INTEGER  :: n_atom_wfc
    INTEGER  :: is, n
    !
-   n_atom_wfc_x = 0
+   n_atom_wfc = 0
    !
    DO is = 1, nsp
       !
@@ -127,7 +127,7 @@ FUNCTION n_atom_wfc_x()
          !
          IF (upf(is)%oc(n) >= 0.D0) THEN
             !
-            n_atom_wfc_x = n_atom_wfc_x + na(is)*(2*upf(is)%lchi(n) + 1)
+            n_atom_wfc = n_atom_wfc + na(is)*(2*upf(is)%lchi(n) + 1)
             !
          END IF
          !
@@ -2559,13 +2559,13 @@ SUBROUTINE newd(vr, irb, eigrb, rhovan, fion)
 !
                DO iss = 1, nspin
                   deeq(iv, jv, isa, iss) = fac*                        &
-  &                    boxdotgrid(irb(1, isa), 1, qv, vr(1, iss))
+  &                    boxdotgrid(irb(1, isa), 1, [qv%re, qv%im], vr(1, iss))
                   IF (iv .NE. jv)                                      &
   &                    deeq(jv, iv, isa, iss) = deeq(iv, jv, isa, iss)
 !
                   IF (nfft .EQ. 2) THEN
                      deeq(iv, jv, isa + 1, iss) = fac*                    &
-  &                       boxdotgrid(irb(1, isa + 1), 2, qv, vr(1, iss))
+  &                       boxdotgrid(irb(1, isa + 1), 2, [qv%re, qv%im], vr(1, iss))
                      IF (iv .NE. jv)                                   &
   &                       deeq(jv, iv, isa + 1, iss) = deeq(iv, jv, isa + 1, iss)
                   END IF
@@ -2653,10 +2653,10 @@ SUBROUTINE newd(vr, irb, eigrb, rhovan, fion)
                CALL invfft('Box', qv, dfftb, isa)
 !
                fvan(ik, ia, is) =                                      &
-  &                    boxdotgrid(irb(1, isa), 1, qv, vr(1, iss))
+  &                    boxdotgrid(irb(1, isa), 1, [qv%re, qv%im], vr(1, iss))
 !
                IF (nfft .EQ. 2) fvan(ik, ia + 1, is) =                     &
-  &                    boxdotgrid(irb(1, isa + 1), 2, qv, vr(1, iss))
+  &                    boxdotgrid(irb(1, isa + 1), 2, [qv%re, qv%im], vr(1, iss))
             END DO
 20          isa = isa + nfft
          END DO
@@ -2715,8 +2715,8 @@ SUBROUTINE newd(vr, irb, eigrb, rhovan, fion)
                CALL invfft('Box', qv, dfftb, isa)
 !
                fvan(ik, ia, is) =                                      &
-  &                    boxdotgrid(irb(1, isa), isup, qv, vr(1, isup)) + &
-  &                    boxdotgrid(irb(1, isa), isdw, qv, vr(1, isdw))
+  &                    boxdotgrid(irb(1, isa), isup, [qv%re, qv%im], vr(1, isup)) + &
+  &                    boxdotgrid(irb(1, isa), isdw, [qv%re, qv%im], vr(1, isdw))
             END DO
 25          isa = isa + 1
          END DO
@@ -3812,6 +3812,7 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
                        vcorr_fft, ecomp
    USE efield_mod, ONLY: do_efield, efieldpotg
    USE io_global, ONLY: stdout
+   use ieee_arithmetic, only: ieee_is_nan
    IMPLICIT NONE
 !
    LOGICAL :: tlast, tfirst
@@ -3990,6 +3991,9 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
 
    DO is = 1, nsp
 !$omp do
+      write(*, *) 'rhotmp(1)=', rhotmp(1)
+      write(*, *) 'sfac(ig, is)=', sfac(1, is)
+      write(*, *) 'rhops(ig, is)=', rhops(1, is)
       DO ig = 1, ngs
          rhotmp(ig) = rhotmp(ig) + sfac(ig, is)*rhops(ig, is) !JUST-FOR-NOW
          !rhotmp(ig)=rhotmp(ig)
@@ -4068,9 +4072,14 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
    !
    if (do_comp) then
       !
+      write(*, *) 'vcorr_fft(1)=', vcorr_fft(1)
+      write(*, *) 'rhotmp(1)=', rhotmp(1)
       call calc_compensation_potential(vcorr_fft, rhotmp, .false.)
       !
+      write(*, *) 'vcorr_fft(1)=', vcorr_fft(1)
+      write(*, *) 'rhotmp(1)=', rhotmp(1)
       call calc_tcc_energy(ecomp, vcorr_fft, rhotmp, lgam)
+      if (ieee_is_nan(ecomp)) call errore('vofrho','ecomp is NaN', 1)
       !
       aux = 0.0_dp
 
@@ -4149,6 +4158,7 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
       call writetofile(rhotot, nnr, 'rhototx.dat', dfftp, 'ax')
       !
       vtemp = vtemp + vcorr_fft
+      if (ieee_is_nan(ecomp)) call errore('vofrho','ecomp is NaN', 1)
       eh = eh + ecomp/omega
       !
    end if
@@ -4377,13 +4387,26 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
 
    ebac = 0.0d0
    !
+   if (ieee_is_nan(eh)) call errore('vofrho','eh is NaN', 1)
+   if (ieee_is_nan(esr)) call errore('vofrho','esr is NaN', 1)
+   if (ieee_is_nan(eself)) call errore('vofrho','eself is NaN', 1)
+   if (ieee_is_nan(omega)) call errore('vofrho','omega is NaN', 1)
    eht = eh*omega + esr - eself
+
    !
    eextfor = 0.0_DP
    IF (textfor) eextfor = compute_eextfor(tau0)
    !
    !     etot is the total energy ; ekin, enl were calculated in rhoofr
    !
+   if (ieee_is_nan(ekin)) call errore('vofrho','ekin is NaN', 1)
+   if (ieee_is_nan(eht)) call errore('vofrho','eht is NaN', 1)
+   if (ieee_is_nan(epseu)) call errore('vofrho','epseu is NaN', 1)
+   if (ieee_is_nan(enl)) call errore('vofrho','enl is NaN', 1)
+   if (ieee_is_nan(exc)) call errore('vofrho','exc is NaN', 1)
+   if (ieee_is_nan(ebac)) call errore('vofrho','ebac is NaN', 1)
+   if (ieee_is_nan(e_hubbard)) call errore('vofrho','e_hubbard is NaN', 1)
+   if (ieee_is_nan(eextfor)) call errore('vofrho','eextfor is NaN', 1)
    etot = ekin + eht + epseu + enl + exc + ebac + e_hubbard + eextfor
    !
    !     extra contributions
@@ -4949,7 +4972,7 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
    ! It also calculates the contribution of the Hubbard Hamiltonian to the
    ! electronic potential and to the forces acting on ions.
    !
-   use control_flags, ONLY: tfor, tprnfor
+   use control_flags, ONLY: tfor, tprnfor, gamma_only, do_wf_cmplx
    use kinds, ONLY: DP
    use ions_base, only: na, nat, nsp
    use gvecw, only: ngw
@@ -4980,6 +5003,9 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
    integer iv, jv, inl, jnl, alpha, alpha_a, alpha_s, ipol
    integer, allocatable ::  offset(:, :)
    complex(DP) :: tempsi
+   logical :: lgam
+
+   lgam = gamma_only .and. .not. do_wf_cmplx
    allocate (wfc(ngw, n_atomic_wfc))
    allocate (ftemp1(ldmx))
    allocate (ftemp2(ldmx))
@@ -5100,8 +5126,9 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
 !
       call nlsm1(n, 1, nsp, eigr, c, bp)
       call s_wfc(n, bp, betae, c, spsi)
-      call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp)
-      call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb)
+      call errore('new_ns_real', 'not implemented for twin_matrix; to use this uncomment following code and fix', 1)
+      ! call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp, lgam)
+      ! call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb, lgam)
 !
       alpha = 0
       do alpha_s = 1, nsp
@@ -5109,7 +5136,7 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
             alpha = alpha + 1
             do ipol = 1, 3
                call dndtau_real(alpha_a, alpha_s, becwfc, spsi, bp, dbp, wdb,      &
-     &                    offset, c, wfc, eigr, betae, proj, ipol, dns)
+     &                    offset, [c%re, c%im], [wfc%re, wfc%im], [eigr%re, eigr%im], [betae%re, betae%im], proj, ipol, dns)
                iat = 0
                do is = 1, nsp
                   do ia = 1, na(is)
@@ -5373,8 +5400,8 @@ subroutine new_ns_twin(c, eigr, betae, hpsi, hpsi_con, forceh, lgam)
 !
       call nlsm1(n, 1, nsp, eigr, c, bp, 1, lgam)
       call s_wfc(n, bp, betae, c, spsi, lgam)
-      call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp)
-      call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb)
+      call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp, lgam)
+      call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb, lgam)
 !
       alpha = 0
       do alpha_s = 1, nsp
@@ -5383,7 +5410,7 @@ subroutine new_ns_twin(c, eigr, betae, hpsi, hpsi_con, forceh, lgam)
             do ipol = 1, 3
                IF (lgam) THEN
                   call dndtau_real(alpha_a, alpha_s, becwfc%rvec, spsi, bp%rvec, dbp%rvec, wdb%rvec,      &
-     &                    offset, c, wfc, eigr, betae, proj%rvec, ipol, dns)
+     &                    offset, [c%re, c%im], [wfc%re, wfc%im], [eigr%re, eigr%im], [betae%re, betae%im], proj%rvec, ipol, dns)
                ELSE
                   call dndtau_cmplx(alpha_a, alpha_s, becwfc%cvec, spsi, bp%cvec, dbp%cvec, wdb%cvec,      &
      &                    offset, c, wfc, eigr, betae, proj%cvec, ipol, dns_c)
@@ -5690,7 +5717,7 @@ subroutine dndtau_real(alpha_a, alpha_s, becwfc, spsi, bp, dbp, wdb,         &
 !
    dns(:, :, :, :) = 0.d0
 !
-   call dprojdtau_real(c, wfc, becwfc, spsi, bp, dbp, wdb, eigr, alpha_a,     &
+   call dprojdtau_real(cmplx(c(1,:,:), c(2,:,:), kind=dp), wfc, becwfc, spsi, bp, dbp, wdb, cmplx(eigr(1,:,:), eigr(2,:,:), kind=dp), alpha_a,     &
 &                   alpha_s, ipol, offset(alpha_s, alpha_a), dproj)
 !
 ! compute the derivative of occupation numbers (the quantities dn(m1,m2))

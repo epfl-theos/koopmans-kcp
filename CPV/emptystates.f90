@@ -468,7 +468,8 @@
                   !
                   odd_alpha(:) = 0.0_DP
                   !
-                  CALL odd_alpha_routine(c0_emp, nbsp_emp, nbspx_emp, lgam, .true.)
+                  call errore('empty_cp_twin_x', 'The following call was outdated; code needs to be updated to run this', 1)
+                  ! CALL odd_alpha_routine(c0_emp, nbsp_emp, nbspx_emp, lgam, .true.)
                   !
 
                ELSE
@@ -945,13 +946,14 @@
          !
          !
          IF (.NOT. tortho) THEN
-            anorm = cscnorm(bec_emp, nkbx, c_emp, ngwx, i, n_emp)
-            !
-            CALL DSCAL(2*ngw, 1.0d0/anorm, c_emp(1, i), 1)
-            !
-            IF (nvb > 1) THEN
-               CALL DSCAL(nkbx, 1.0d0/anorm, bec_emp(1, i), 1)
-            END IF
+            call errore('gram_empty_real_x', 'Mismatching arguments; need to uncomment following code and fix cscnorm arguments', 1)
+            ! anorm = cscnorm(bec_emp, nkbx, c_emp, ngwx, i, n_emp)
+            ! !
+            ! CALL DSCAL(2*ngw, 1.0d0/anorm, c_emp(1, i), 1)
+            ! !
+            ! IF (nvb > 1) THEN
+            !    CALL DSCAL(nkbx, 1.0d0/anorm, bec_emp(1, i), 1)
+            ! END IF
          END IF
          !
       END DO

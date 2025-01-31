@@ -266,7 +266,7 @@
          END DO
          !
          IF (dft_is_meta()) THEN
-            CALL dforce_meta_new(c(1, i), c(1, i + 1), df, da, psi, psi2, iss1, iss2, fi, fip) !METAGGA !modified:giovanni
+            CALL dforce_meta_new(c(1:ngw, i), c(1:ngw, i + 1), df, da, psi, psi2, iss1, iss2, fi, fip, lgam) !METAGGA !modified:giovanni
          END IF
          !
          IF (nhsa > 0) THEN
@@ -595,7 +595,7 @@
 
          !
          IF (dft_is_meta()) THEN
-            CALL dforce_meta(c(1, i), c(1, i + 1), df, da, psi, iss1, iss2, fi, fip) !METAGGA
+            CALL dforce_meta(c(1:ngw, i), c(1:ngw, i + 1), df, da, psi, iss1, iss2, fi, fip) !METAGGA
          END IF
 
          IF (nhsa > 0) THEN

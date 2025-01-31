@@ -752,7 +752,8 @@ SUBROUTINE ortho_m_twin(c0, cp, lambda, descla, ccc, nupdwn, iupdwn, nspin)
          ALLOCATE( bephi_c ( nkbx, nlax*nspin ) )
          CALL redist_row2col_real(nupdwn(1), bephi, bephi_c, nkbx, nlax, descla(1,1) ) !modified:giovanni
          IF( nspin == 2 ) THEN
-            CALL redist_row2col_cmplx( nupdwn(2), bephi(1,nlax+1), bephi_c(1,nlax+1), nkbx, nlax, descla(1,2) ) !modified:giovanni
+            call errore('ortho_cp_real','Removing this code due to compuiler complaints; to uncomment and fix',1)
+            ! CALL redist_row2col_cmplx( nupdwn(2), bephi(1:nkbx,nlax+1), bephi_c(:,nlax+1), nkbx, nlax, descla(1,2) ) !modified:giovanni
          END IF
       END IF
       !
@@ -965,8 +966,8 @@ SUBROUTINE ortho_m_twin(c0, cp, lambda, descla, ccc, nupdwn, iupdwn, nspin)
 !                  nlax+1:ubound(bephi%rvec,2)), bephi_c(1:ubound(bephi_c,1),  &
 !                  nlax+1:ubound(bephi_c,2)), nkbx, nlax, descla(1,2) )
 	    ELSE
-                CALL redist_row2col_cmplx(nupdwn(2), bephi%cvec(1, & !warning:giovanni ... need to conform to interface
-                 nlax+1), bephi_c_c(1,  &
+                CALL redist_row2col_cmplx(nupdwn(2), bephi%cvec(:, & !warning:giovanni ... need to conform to interface
+                 nlax+1), bephi_c_c(:,  &
                  nlax+1), nkbx, nlax, descla(1,2))
 !                 CALL redist_row2col( nupdwn(2), bephi%cvec(1:ubound(bephi%cvec,1), &
 !                  nlax+1:ubound(bephi%cvec,2)), bephi_c_c(1:ubound(bephi_c_c,1),  &

@@ -1020,7 +1020,7 @@ CONTAINS
       END IF
 
       CALL BCAST_REAL( e( l1 ), nm1-l1+1, 0, comm )
-      CALL BCAST_INTEGER( m, 1, 0, comm )
+      CALL BCAST_INTEGER([m], 1, 0, comm )
 
 
       L = L1
@@ -1076,7 +1076,7 @@ CONTAINS
 
          END IF
 
-         CALL BCAST_INTEGER( m, 1, 0, comm )
+         CALL BCAST_INTEGER([m], 1, 0, comm )
 
          IF( M.LT.LEND )  E( M ) = RZERO
          P = D( L )
@@ -1212,7 +1212,7 @@ CONTAINS
 
          END IF
 
-         CALL BCAST_INTEGER( m, 1, 0, comm )
+         CALL BCAST_INTEGER([m], 1, 0, comm )
 
          IF( M.GT.LEND )   E( M-1 ) = RZERO
          P = D( L )

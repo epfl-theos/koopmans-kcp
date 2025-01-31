@@ -78,7 +78,7 @@ MODULE cp_restart
       USE mp,                       ONLY : mp_sum
       USE fft_base,                 ONLY : dfftp
       USE constants,                ONLY : pi
-      USE cp_interfaces,            ONLY : n_atom_wfc, write_hamiltonian
+      USE cp_interfaces,            ONLY : write_hamiltonian
       USE global_version,           ONLY : version_number
       USE cp_main_variables,        ONLY : collect_lambda, descla, collect_zmat
       USE twin_types !added:giovanni
@@ -166,6 +166,7 @@ MODULE cp_restart
       INTEGER               :: nbnd_
       REAL(DP), ALLOCATABLE :: mrepl(:,:)
       COMPLEX(DP), ALLOCATABLE :: mrepl_c(:,:) !added:giovanni
+      integer, external     :: n_atom_wfc
       !
       write_charge_density = trhow
       !
@@ -1131,7 +1132,7 @@ MODULE cp_restart
       USE mp,                       ONLY : mp_sum
       USE fft_base,                 ONLY : dfftp
       USE constants,                ONLY : pi
-      USE cp_interfaces,            ONLY : n_atom_wfc, write_hamiltonian
+      USE cp_interfaces,            ONLY : write_hamiltonian
       USE global_version,           ONLY : version_number
       USE cp_main_variables,        ONLY : collect_lambda, descla, collect_zmat
       USE input_parameters,         ONLY : print_evc0_occ_empty, write_hr
@@ -1212,6 +1213,7 @@ MODULE cp_restart
       INTEGER               :: nbnd_emp
       INTEGER               :: nbnd_
       REAL(DP), ALLOCATABLE :: mrepl(:,:)
+      integer, external     :: n_atom_wfc
       !
       write_charge_density = trhow
       !

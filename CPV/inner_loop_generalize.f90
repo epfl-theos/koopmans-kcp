@@ -144,6 +144,7 @@ subroutine nksic_rot_emin_cg_general(nouter, init_n, ninner, etot, rot_threshold
    deigrms = 0.d0
    hi(:, :) = 0.d0
    gi(:, :) = 0.d0
+   wtot(:, :) = CMPLX(0.d0, 0.d0)
    !
    Omattot(:, :) = CMPLX(0.d0, 0.d0)
    do nbnd1 = 1, nbspx
@@ -755,6 +756,8 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    complex(dp), allocatable :: Omat1(:, :)
    complex(dp), allocatable :: Umat(:, :)
    real(dp), allocatable :: Heig(:)
+   real(dp) :: deeq_sic_local(nhm, nhm, nat, nbspx)
+   complex(dp) :: wtot_local(ngm, 2)
    !
    call start_clock("nk_getOmattot")
    !
@@ -819,8 +822,10 @@ subroutine nksic_getOmattot_general(nbsp, nbspx, nudx, ispin, &
    vsic1(:, :) = 0.d0
    pink1(:) = 0.d0
    !
-   call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic, &
-                        ispin, iupdwn, nupdwn, rhor, rhoc, wtot, &
+   deeq_sic_local = deeq_sic
+   wtot_local = wtot
+   call nksic_potential(nbsp, nbspx, wfc1, fsic, bec1, becsum, deeq_sic_local, &
+                        ispin, iupdwn, nupdwn, rhor, rhoc, wtot_local, &
                         vsic1, do_wxd, pink1, nudx, wfc_centers, &
                         wfc_spreads, icompute_spread, is_empty)
    !

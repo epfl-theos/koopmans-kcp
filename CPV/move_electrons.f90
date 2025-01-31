@@ -101,6 +101,7 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
 !$$ The following local variables are for the inner-loop, i.e., unitary rotation
   INTEGER :: ninner
   REAL(DP)                   :: Omattot(nbspx,nbspx)
+  COMPLEX(DP)                :: Omattot_c(nbspx,nbspx)
   INTEGER , save             ::  nouter = 0
   LOGICAL :: lgam !added:giovanni
   INTEGER :: iss !added:giovanni
@@ -147,7 +148,8 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
          ! rotates the wavefunctions c0 and the overlaps bec
          ! (the occupation matrix f_ij becomes diagonal f_i)
          !
-         CALL rotate( z0t, c0, bec, c0diag, becdiag, .false. )
+         call errore('move_electrons_x', 'Implementation properly not updated for twin_matrix', 1)
+         ! CALL rotate( z0t, c0, bec, c0diag, becdiag, .false. )
          !
          IF(non_ortho) THEN
             call compute_duals(c0diag,cdual,nbsp,1)
@@ -250,12 +252,14 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
              ! if(do_innerloop .and. nouter.eq.1) then
              ! if(.false.) then
              !
+             Omattot_c = cmplx(Omattot, 0.0_DP)
              if(.not.do_innerloop_cg) then
-                 call nksic_rot_emin(nouter,ninner,etot,Omattot)
+                 call nksic_rot_emin(nouter,ninner,etot,Omattot_c, lgam)
              else
-                 call nksic_rot_emin_cg(nouter, innerloop_init_n, ninner, etot, Omattot, &
+                 call nksic_rot_emin_cg(nouter, innerloop_init_n, ninner, etot, Omattot_c, &
                   esic_conv_thr, lgam)
              endif
+             Omattot = Omattot_c%re
              !
              eodd = sum(pink(:))
              !
@@ -292,7 +296,8 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
      !
      if( do_efield ) then
          !
-         call calc_dipole(c0, h)
+         call errore('move_electrons_x', 'Implementation properly not updated for efield', 1)
+         ! call calc_dipole(c0, h)
          !
      endif
      !

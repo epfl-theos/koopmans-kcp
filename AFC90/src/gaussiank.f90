@@ -32,11 +32,12 @@ function gaussiank(sigma,x)
   real(8) :: error
   real(8), allocatable, dimension(:,:) :: z
   integer :: i,n,nt
+  integer, parameter :: dp = selected_real_kind(14,200)
   !
   interface 
     !
-    function besselk(x)
-      real(8), intent(in) :: x
+    function besselk(x_)
+      real(8), intent(in) :: x_
       real(8) :: besselk
     end function
     !
@@ -76,13 +77,13 @@ function gaussiank(sigma,x)
     end function
     !
     function pinterp(x,side,bound)
-      real(8), intent(in) :: x
+      real(8) :: x
       integer :: side,bound
       real(8) :: pinterp
     end function 
     !
     function qinterp(x,side,bound)
-      real(8), intent(in) :: x
+      real(8) :: x
       integer :: side,bound
       real(8) :: qinterp
     end function 

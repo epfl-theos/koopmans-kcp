@@ -294,11 +294,11 @@
                !
                IF(lgam) THEN !added:giovanni
                   !
-                  CALL c2psi( psis, nnrsx, c( 1, i ), c( 1, i+1 ), ngw, 2 )
+                  CALL c2psi( psis, nnrsx, c(1:ngw, i ), c(1:ngw, i+1 ), ngw, 2 )
                   CALL invfft('Wave',psis, dffts )
                   !
                   !
-                  CALL c2psi( psis2, nnrsx, cdual( 1, i ), cdual( 1, i+1 ), ngw, 2 )
+                  CALL c2psi( psis2, nnrsx, cdual( 1:ngw, i ), cdual( 1:ngw, i+1 ), ngw, 2 )
                   CALL invfft('Wave',psis2, dffts )
                   !
                   iss1 = ispin(i)
@@ -319,11 +319,11 @@
                   !
 !!!!!begin_added:giovanni
                ELSE
-                  CALL c2psi( psis, nnrsx, c( 1, i ), c( 1, i ), ngw, 0 )
+                  CALL c2psi( psis, nnrsx, c( 1:ngw, i ), c( 1:ngw, i ), ngw, 0 )
                   CALL invfft('Wave',psis, dffts )
                   !
                   !
-                  CALL c2psi( psis2, nnrsx, cdual( 1, i ), cdual( 1, i ), ngw, 0 )
+                  CALL c2psi( psis2, nnrsx, cdual( 1:ngw, i ), cdual( 1:ngw, i ), ngw, 0 )
                   CALL invfft('Wave',psis2, dffts )
                   !
                   !
@@ -343,10 +343,10 @@
                   !
                   IF(i.ne.n) then
   
-                    CALL c2psi( psis, nnrsx, c( 1, i+1 ), c( 1, i+1 ), ngw, 0 )
+                    CALL c2psi( psis, nnrsx, c( 1: ngw, i+1 ), c( 1: ngw, i+1 ), ngw, 0 )
                     CALL invfft('Wave',psis, dffts )
                     !
-                    CALL c2psi( psis2, nnrsx, cdual( 1, i+1 ), cdual( 1, i+1 ), ngw, 0 )
+                    CALL c2psi( psis2, nnrsx, cdual( 1:ngw, i+1 ), cdual( 1:ngw, i+1 ), ngw, 0 )
                     CALL invfft('Wave',psis2, dffts )
                     !
                     iss1 = ispin(i+1)
@@ -772,8 +772,8 @@
       USE smooth_grid_dimensions, ONLY: nr1sx, nr2sx, nnrsx
       USE electrons_base,     ONLY: n => nbsp, f, ispin, nspin
       USE constants,          ONLY: pi, fpi
-      USE mp,                 ONLY: mp_sum
       USE io_global,          ONLY: stdout
+      USE mp,                 ONLY: mp_sum
       USE mp_global,          ONLY: intra_image_comm, nogrp, me_image, ogrp_comm, nolist
       USE funct,              ONLY: dft_is_meta
       USE cg_module,          ONLY: tcg
@@ -946,7 +946,7 @@
                !
                IF(lgam) THEN !added:giovanni
                   !
-                  CALL c2psi( psis, nnrsx, c( 1, i ), c( 1, i+1 ), ngw, 2 )
+                  CALL c2psi( psis, nnrsx, c( 1:ngw, i ), c( 1:ngw, i+1 ), ngw, 2 )
                   CALL invfft('Wave',psis, dffts )
                   !
                   !
@@ -967,7 +967,7 @@
                   !
                ELSE
                   !
-                  CALL c2psi( psis, nnrsx, c( 1, i ), c( 1, i ), ngw, 0 )
+                  CALL c2psi( psis, nnrsx, c( 1:ngw, i ), c( 1:ngw, i ), ngw, 0 )
                   !
                   CALL invfft('Wave',psis, dffts )
                   !
@@ -985,7 +985,7 @@
                   !
                   IF(i.ne.n) then
                      !
-                     CALL c2psi( psis, nnrsx, c( 1, i+1 ), c( 1, i+1 ), ngw, 0 )
+                     CALL c2psi( psis, nnrsx, c( 1:ngw, i+1 ), c( 1:ngw, i+1 ), ngw, 0 )
                      CALL invfft('Wave',psis, dffts )
                      !
                      !
@@ -2082,7 +2082,8 @@
          !
          !     calculation of nocentro gulliver modenan-local energy
          !
-         enl = ennl( rhovan, bec )
+         call errore('rhoofr','nnl not implemented properly; commenting for now',0)
+         ! enl = ennl( rhovan, bec )
          call mp_sum(enl)
          !
       END IF
@@ -2177,7 +2178,7 @@
             !
             DO i = 1, n, 2
                !
-               CALL c2psi( psis, nnrsx, c( 1, i ), c( 1, i+1 ), ngw, 2 )
+               CALL c2psi( psis, nnrsx, c( 1:ngw, i ), c( 1:ngw, i+1 ), ngw, 2 )
 
                CALL invfft('Wave',psis, dffts )
                !
@@ -3015,8 +3016,8 @@ SUBROUTINE drhov(irb,eigrb,rhovan,rhog,rhor,drhog,drhor)
                      !
                      !  add qv(r) to v(r), in real space on the dense grid
                      !
-                     CALL box2grid( irb(1,isa), 1, qv, v )
-                     IF (nfft.EQ.2) CALL box2grid(irb(1,isa+1),2,qv,v)
+                     CALL box2grid( irb(1,isa), 1, [qv%re, qv%im], v )
+                     IF (nfft.EQ.2) CALL box2grid(irb(1,isa+1),2,[qv%re, qv%im],v)
 
   15                 isa = isa + nfft
 !
@@ -3283,8 +3284,8 @@ SUBROUTINE rhov(irb,eigrb,rhovan,rhog,rhor, lgam) !added:giovanni lgam
                !
                !  add qv(r) to v(r), in real space on the dense grid
                !
-               CALL  box2grid(irb(1,isa),1,qv,v)
-               IF (nfft.EQ.2) CALL  box2grid(irb(1,isa+1),2,qv,v)
+               CALL  box2grid(irb(1,isa),1,[qv%re, qv%im], v)
+               IF (nfft.EQ.2) CALL  box2grid(irb(1,isa+1),2,[qv%re, qv%im], v)
   15           isa=isa+nfft
 !
             END DO

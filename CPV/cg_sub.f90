@@ -53,7 +53,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    use mp, only: mp_sum, mp_bcast
    use cp_electronic_mass, ONLY: emass_cutoff
    use orthogonalize_base, ONLY: calphi
-   use cp_interfaces, ONLY: rhoofr, dforce, compute_stress, nlfl, set_x_minus1, xminus1
+   use cp_interfaces, ONLY: rhoofr, dforce, dforceb, compute_stress, nlfl, set_x_minus1, xminus1
    USE cp_main_variables, ONLY: nlax, collect_lambda, distribute_lambda, descla
    USE descriptors, ONLY: la_npc_, la_npr_, la_comm_, la_me_, la_nrl_, ldim_cyclic
    USE mp_global, ONLY: me_image
@@ -306,7 +306,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                !call perturbing_pot_nic(fixed_band, ispin(fixed_band), rhor, dvpot)
                if (.false.) then ! here for Koopmans
                   !
-                  call perturbing_pot(fixed_band, ispin(fixed_band), rhor, dvpot, uPi, lgam, finite_field_for_empty_state)
+                  call errore('runcg_uspp', 'Call to perturbing_pot commented out because of argument mismatch giving compliation errors', 1)
+                  ! call perturbing_pot(fixed_band, ispin(fixed_band), rhor, dvpot, uPi, lgam, finite_field_for_empty_state)
                   !
                end if
                !
@@ -453,7 +454,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
          !
          ! warning:giovanni not yet implemented
          !
-         call xminus1_state(gi, betae, ema0bg, becm, k_minus1, .true., ave_ene)
+         call errore('runcg_uspp', 'pre_state commented out due to compilation errors (mismatched arguments)', 1)
+         ! call xminus1_state(gi, betae, ema0bg, becm, k_minus1, .true., ave_ene)
          !
       end if
       !
@@ -1214,7 +1216,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
       !
       call calbec(1, nsp, eigr, c0, bec)
       !
-      call caldbec(ngw, nhsa, nbsp, 1, nsp, eigr, c0, dbec)
+      call caldbec(ngw, nhsa, nbsp, 1, nsp, [eigr%re, eigr%im], c0, dbec)
       call rhoofr(nfi, c0(:, :), irb, eigrb, bec, rhovan, rhor, rhog, rhos, enl, denl, ekin, dekin6)
       !
       !calculates the potential
@@ -1342,12 +1344,12 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
       if (tefield .and. (evalue .ne. 0.d0)) then
          !
          call dforceb &
-            (c0, i, betae, ipolp, bec, ctabin(1, 1, ipolp), gqq, gqqm, qmat, deeq, df)
+            (c0, i, betae, ipolp, bec, ctabin(:, :, ipolp), gqq, gqqm, qmat, deeq, df)
          !
          c2(:) = c2(:) + evalue*df(:)
          !
          call dforceb &
-            (c0, i + 1, betae, ipolp, bec, ctabin(1, 1, ipolp), gqq, gqqm, qmat, deeq, df)
+            (c0, i + 1, betae, ipolp, bec, ctabin(:, :, ipolp), gqq, gqqm, qmat, deeq, df)
          !
          c3(:) = c3(:) + evalue*df(:)
          !
@@ -1429,7 +1431,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    ! only in US-case
    !
    if (tefield .and. (evalue .ne. 0.d0)) then
-      call bforceion(fion, tfor .or. tprnfor, ipolp, qmat, bec, becdr, gqq, evalue)
+      call errore('print_out_observables', 'bforceion disabled due to argument mismatch causing compilation issues', 1)
+      ! call bforceion(fion, tfor .or. tprnfor, ipolp, qmat, bec, becdr, gqq, evalue)
    end if
    !
    if (print_real_space_density) then
@@ -1713,6 +1716,7 @@ contains
    end subroutine check_convergence_cg
 
    subroutine compute_hpsi()
+      use cp_interfaces, only: dforceb
       !
       ! faux takes into account spin multiplicity.
       !
@@ -1740,11 +1744,11 @@ contains
          !
          if (tefield .and. (evalue .ne. 0.d0)) then
             !
-            call dforceb(c0, i, betae, ipolp, bec, ctabin(1, 1, ipolp), gqq, gqqm, qmat, deeq, df)
+            call dforceb(c0, i, betae, ipolp, bec, ctabin(:, :, ipolp), gqq, gqqm, qmat, deeq, df)
             !
             c2(:) = c2(:) + evalue*df(:)
             !
-            call dforceb(c0, i + 1, betae, ipolp, bec, ctabin(1, 1, ipolp), gqq, gqqm, qmat, deeq, df)
+            call dforceb(c0, i + 1, betae, ipolp, bec, ctabin(:, :, ipolp), gqq, gqqm, qmat, deeq, df)
             !
             c3(:) = c3(:) + evalue*df(:)
             !
