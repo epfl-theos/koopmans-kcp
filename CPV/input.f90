@@ -536,6 +536,13 @@ CONTAINS
          !
       END SELECT
       !
+      ! ... For standard KCP calculations we set nstep to 1 by default
+      !
+      IF (calculation == 'cp' .and. ion_dynamics == 'none') THEN
+        nomore_ = 1
+        nstep_ = 1
+      ENDIF
+      !
       ! ... Starting/Restarting Atomic positions
       !
       SELECT CASE (TRIM(ion_positions))
@@ -878,10 +885,6 @@ CONTAINS
       END IF
 
       IF (do_wf_cmplx_) THEN !warning:giovanni not yet implemented
-!
-         IF (tfor_ .or. tprnfor_ .or. thdyn_ .or. tpre_) THEN
-            write (6, *) tfor_, tprnfor_, thdyn_, tpre_
-         END IF
 !
          IF (program_name == 'FPMD') THEN
             CALL errore(' iosys ', 'FPMD not working with complex wavefunctions', 1)

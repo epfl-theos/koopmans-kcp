@@ -93,16 +93,16 @@
               ! ...           = exp(-i G_i dot R(ia)) exp(-i (N-1) G_i dot R(ia))
 
               DO i = 1, nr1
-                ei1(  i, isa ) = ei1(  i - 1, isa ) * ctep1
-                ei1( -i, isa ) = ei1( -i + 1, isa ) * ctem1
+                ei1(i, isa) = ei1(0, isa) * ctep1 ** i
+                ei1(-i, isa) = ei1(0, isa) * ctem1 ** i
               END DO
               DO j = 1, nr2
-                ei2(  j, isa ) = ei2(  j - 1, isa ) * ctep2
-                ei2( -j, isa ) = ei2( -j + 1, isa ) * ctem2
+                ei2(j, isa) = ei2(0, isa) * ctep2 ** j
+                ei2(-j, isa) = ei2(0, isa) * ctem2 ** j
               END DO
               DO k = 1, nr3
-                ei3(  k, isa ) = ei3(  k - 1, isa ) * ctep3
-                ei3( -k, isa ) = ei3( -k + 1, isa ) * ctem3
+                ei3(k, isa) = ei3(0, isa) * ctep3 ** k
+                ei3(-k, isa) = ei3(0, isa) * ctem3 ** k
               END DO
 
           END DO

@@ -51,7 +51,7 @@
           LOGICAL :: tvanp              ! .true. if Ultrasoft
           LOGICAL :: tcoulombp          ! .true. if Coulomb 1/r potential
           LOGICAL :: nlcc               ! Non linear core corrections
-          CHARACTER(LEN=20) :: dft      ! Exch-Corr type
+          CHARACTER(LEN=25) :: dft      ! Exch-Corr type
           REAL(DP) :: zp                ! z valence
           REAL(DP) :: etotps            ! total energy
           REAL(DP) :: ecutwfc           ! suggested cut-off for wfc
