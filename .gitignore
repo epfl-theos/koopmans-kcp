@@ -12,6 +12,7 @@ make.sys
 *.x
 *.mod
 *.a
+*.i90
 bin/
 .vscode
 *__genmod.f90

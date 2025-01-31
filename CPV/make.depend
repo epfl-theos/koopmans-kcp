@@ -1513,7 +1513,6 @@ wannier.o : ../Modules/uspp.o
 wannier.o : ../Modules/wave_base.o
 wannier.o : ../include/f_defs.h
 wannier_base.o : ../Modules/kind.o
-waveinit.o : ../Modules/kind.o
 wave.o : electrons.o
 wave.o : mainvar.o
 wave.o : ../Modules/constants.o

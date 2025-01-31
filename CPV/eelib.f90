@@ -1048,9 +1048,9 @@
       !
       ! ... initializes variables
       !
-      delta1=a1(1)/dble(nr1)
-      delta2=a2(2)/dble(nr2)
-      delta3=a3(3)/dble(nr3)
+      delta1 = SQRT(a1(1)**2 + a1(2)**2 + a1(3)**2) / dble(nr1)
+      delta2 = SQRT(a2(1)**2 + a2(2)**2 + a2(3)**2) / dble(nr2)
+      delta3 = SQRT(a3(1)**2 + a3(2)**2 + a3(3)**2) / dble(nr3)
       !
       df1=0.0_dp
       df2=0.0_dp

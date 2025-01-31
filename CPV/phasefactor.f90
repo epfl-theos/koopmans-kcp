@@ -96,37 +96,26 @@
               DO i = 1, nr1
                 ei1(i, isa) = ei1(0, isa) * ctep1 ** i
                 ei1(-i, isa) = ei1(0, isa) * ctem1 ** i
-                ! ei1(  i, isa ) = ei1(  i - 1, isa ) * ctep1
-                ! ei1( -i, isa ) = ei1( -i + 1, isa ) * ctem1
               END DO
               DO j = 1, nr2
                 ei2(j, isa) = ei2(0, isa) * ctep2 ** j
                 ei2(-j, isa) = ei2(0, isa) * ctem2 ** j
-                ! ei2(  j, isa ) = ei2(  j - 1, isa ) * ctep2
-                ! ei2( -j, isa ) = ei2( -j + 1, isa ) * ctem2
               END DO
               DO k = 1, nr3
                 ei3(k, isa) = ei3(0, isa) * ctep3 ** k
                 ei3(-k, isa) = ei3(0, isa) * ctem3 ** k
-                ! ei3(  k, isa ) = ei3(  k - 1, isa ) * ctep3
-                ! ei3( -k, isa ) = ei3( -k + 1, isa ) * ctem3
               END DO
           END DO
-          write(*, *) 'ei1', ei1
-          write(*, *) 'ei2', ei2
-          write(*, *) 'ei3', ei3
 
           ngw = SIZE( eigr, 1 )
           IF( ngw > SIZE( mill, 2 ) ) THEN
             CALL errore(' phfacs ',' eigr inconsisten size ',ngw)
           END IF
 
-!DIR$ NOVECTOR
           DO ig = 1, ngw
             ig1 = mill( 1, ig )
             ig2 = mill( 2, ig )
             ig3 = mill( 3, ig )
-!DIR$ NOVECTOR
             DO i = 1, nat
               eigr( ig, i ) = ei1( ig1, i ) * ei2( ig2, i ) * ei3( ig3, i )
             END DO
@@ -180,16 +169,13 @@
       call start_clock( 'strucf' )
 
 !$omp parallel do default(shared), private(ig1,ig2,ig3,isa,is,ia)
-!DIR$ NOVECTOR
       DO ig = 1, ngm
         ig1 = mill( 1, ig ) 
         ig2 = mill( 2, ig ) 
         ig3 = mill( 3, ig )
         isa = 1
-!DIR$ NOVECTOR
         DO is = 1, nsp
           sfac( ig, is ) = CMPLX (0.0d0, 0.0d0)
-!DIR$ NOVECTOR
           DO ia = 1, na(is)
             if (ieee_is_nan(ei1( ig1, isa )%re)) call errore(' strucf ',' ei1 is NaN ',ig)
             if (ieee_is_nan(ei1( ig1, isa )%im)) call errore(' strucf ',' ei1 is NaN ',ig)
