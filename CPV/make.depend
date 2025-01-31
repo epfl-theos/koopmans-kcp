@@ -274,6 +274,7 @@ cpr.o : metadyn_base.o
 cpr.o : modules.o
 cpr.o : ortho_base.o
 cpr.o : pres_ai_mod.o
+cpr.o : print_real_space_orbital_density.o
 cpr.o : wannier.o
 cpr.o : ../Modules/autopilot.o
 cpr.o : ../Modules/cell_base.o
@@ -503,6 +504,7 @@ emptystates.o : electrons.o
 emptystates.o : mainvar.o
 emptystates.o : modules.o
 emptystates.o : ortho_base.o
+emptystates.o : print_real_space_orbital_density.o
 emptystates.o : ../Modules/cell_base.o
 emptystates.o : ../Modules/check_stop.o
 emptystates.o : ../Modules/constants.o
