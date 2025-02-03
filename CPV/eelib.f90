@@ -460,7 +460,7 @@
       end subroutine calc_tcc2d_potential
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
-      subroutine calc_tcc_energy(ecomp,vcorr_fft,rho_fft)
+      subroutine calc_tcc_energy(ecomp,vcorr_fft,rho_fft, lgam)
 !-----------------------------------------------------------------------
 !
 ! ... calculate the truncated countercharge (TCC) 
@@ -472,21 +472,19 @@
       use reciprocal_vectors, only : gstart
       use mp,                 only : mp_sum
       use mp_global,          only : intra_image_comm
-      use control_flags,      only : gamma_only, do_wf_cmplx!added:giovanni
+      use ieee_arithmetic,    only : ieee_is_nan
       !
       implicit none
       !
       real(dp),    intent(out) :: ecomp
       complex(dp), intent(in)  :: rho_fft(ngm)
       complex(dp), intent(in)  :: vcorr_fft(ngm)
+      logical,     intent(in)  :: lgam
       !
       complex(dp), allocatable :: aux(:)
       integer      :: ig
       complex(dp)  :: zh
       real(dp) :: wz
-      logical      :: lgam
-      !
-      lgam = gamma_only.and..not.do_wf_cmplx
       !
       IF(lgam) THEN
          wz=2.d0
@@ -500,6 +498,7 @@
       !
       if(gstart.ne.1) then
         aux(1)=0.5d0*omega*vcorr_fft(1)*conjg(rho_fft(1))
+        write(*, *) 'aux(1)=', aux(1)
       end if
       !
       do ig=gstart,ngm

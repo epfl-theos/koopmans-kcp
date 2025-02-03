@@ -45,7 +45,7 @@ gtable.o \
 init.o \
 init_run.o \
 inner_loop.o \
-inner_loop_cold.o \
+inner_loop_generalize.o \
 inner_loop_smear.o \
 input.o \
 io_pot_sic_xml.o \
@@ -107,7 +107,6 @@ gram_swap.o \
 odd_alpha.o \
 cg_empty_sub.o \
 wave_init_wannier.o \
-inner_loop_generalize.o \
 makov_payne.o \
 pc3nc_fixed.o \
 empty_koopmans_pp.o \

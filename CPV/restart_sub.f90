@@ -213,7 +213,7 @@ SUBROUTINE from_restart( )
    !
    CALL calbec( 1, nsp, eigr, c0, bec )
    !
-   IF ( tpre     ) CALL caldbec( ngw, nkb, nbsp, 1, nsp, eigr, c0, dbec )
+   IF ( tpre     ) CALL caldbec( ngw, nkb, nbsp, 1, nsp, eigr%re, c0, dbec )
    !
    IF ( tefield  ) CALL efield_berry_setup( eigr, tau0 )
    IF ( tefield2 ) CALL efield_berry_setup2( eigr, tau0 )

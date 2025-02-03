@@ -466,10 +466,10 @@
                !
                do iss=1,nspin
                   fcc(ix,ia+isa) = fcc(ix,ia+isa) + fac *               &
-     &                 boxdotgrid(irb(1,ia  +isa),1,qv,vxc(1,iss))
+     &                 boxdotgrid(irb(1,ia  +isa),1,[qv%re, qv%im],vxc(1,iss))
                   if (nfft.eq.2)                                         &
      &               fcc(ix,ia+1+isa) = fcc(ix,ia+1+isa) + fac *           &
-     &                    boxdotgrid(irb(1,ia+1+isa),2,qv,vxc(1,iss))
+     &                    boxdotgrid(irb(1,ia+1+isa),2,[qv%re, qv%im],vxc(1,iss))
                end do
             end do
 15          continue
@@ -557,8 +557,8 @@
 !
             call invfft('Box',qv,dfftb,isa+ia)
 !
-            call box2grid(irb(1,ia+isa),1,qv,wrk1)
-            if (nfft.eq.2) call box2grid(irb(1,ia+1+isa),2,qv,wrk1)
+            call box2grid(irb(1,ia+isa),1,[qv%re, qv%im],wrk1)
+            if (nfft.eq.2) call box2grid(irb(1,ia+1+isa),2,[qv%re,qv%im],wrk1)
 !
 15          continue
          end do

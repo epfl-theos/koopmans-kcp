@@ -30,6 +30,7 @@
  
           USE kinds,           ONLY: DP
           USE constants,       ONLY: tpi
+          use ieee_arithmetic, only: ieee_is_nan
 
           IMPLICIT NONE
 
@@ -104,7 +105,6 @@
                 ei3(k, isa) = ei3(0, isa) * ctep3 ** k
                 ei3(-k, isa) = ei3(0, isa) * ctem3 ** k
               END DO
-
           END DO
 
           ngw = SIZE( eigr, 1 )
@@ -149,6 +149,7 @@
       USE kinds,            ONLY: DP
       USE ions_base,        ONLY: nat, na, nsp
       use grid_dimensions,  only: nr1, nr2, nr3
+      use ieee_arithmetic, only: ieee_is_nan
 
       IMPLICIT NONE
 
@@ -176,9 +177,17 @@
         DO is = 1, nsp
           sfac( ig, is ) = CMPLX (0.0d0, 0.0d0)
           DO ia = 1, na(is)
+            if (ieee_is_nan(ei1( ig1, isa )%re)) call errore(' strucf ',' ei1 is NaN ',ig)
+            if (ieee_is_nan(ei1( ig1, isa )%im)) call errore(' strucf ',' ei1 is NaN ',ig)
+            if (ieee_is_nan(ei2( ig2, isa )%re)) call errore(' strucf ',' ei2 is NaN ',ig)
+            if (ieee_is_nan(ei2( ig2, isa )%im)) call errore(' strucf ',' ei2 is NaN ',ig)
+            if (ieee_is_nan(ei3( ig3, isa )%re)) call tracebackqq("ei3 is NaN")
+            if (ieee_is_nan(ei3( ig3, isa )%im)) call tracebackqq("ei3 is NaN")
             sfac( ig, is ) = sfac( ig, is ) + &
               ei1( ig1, isa ) * ei2( ig2, isa ) * ei3( ig3, isa )
             isa = isa + 1
+            if (ieee_is_nan(sfac(ig, is)%re)) call errore(' strucf ',' sfac is NaN ',ig)
+            if (ieee_is_nan(sfac(ig, is)%im)) call errore(' strucf ',' sfac is NaN ',ig)
           END DO
         END DO
       END DO

@@ -296,7 +296,7 @@ SUBROUTINE cpmain_x(tau, fion, etot)
       !
       IF (tstress) THEN
          !
-         CALL caldbec(ngw, nkb, nbsp, 1, nsp, eigr, c0, dbec)
+         CALL caldbec(ngw, nkb, nbsp, 1, nsp, [eigr%re, eigr%im], c0, dbec)
          !
       END IF
 

@@ -523,7 +523,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
          !
          IF (fixed_state) THEN
             !
-            CALL gram_swap(vkb, bec, nkb, cm, ngw, nbsp)
+            CALL gram_swap(vkb, bec, nkb, cm, ngw, nbsp, fixed_band)
             !
          ELSE
             !
@@ -583,7 +583,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
          CALL calbec(nvb + 1, nsp, eigr, cm, bec)
          !
          IF (tpre) THEN
-            CALL caldbec(ngw, nkb, nbsp, 1, nsp, eigr, cm, dbec)
+            CALL caldbec(ngw, nkb, nbsp, 1, nsp, [eigr%re, eigr%im], cm, dbec)
          END IF
          !
          IF (iprsta >= 3) CALL dotcsc(eigr, cm, ngw, nbsp, lgam)!added:giovanni lgam
@@ -735,7 +735,8 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
             call copy_twin(psihpsi(iss), lambda(iss))
          END DO
          !
-         CALL inner_loop_diag(c0, bec%rvec, psihpsi, z0t, e0)
+         call errore('cprmain', 'Disabling for now due to mismatching (psihpsi) errors; need to fix and uncomment', 1)
+         ! CALL inner_loop_diag(c0, bec%rvec, psihpsi, z0t, e0)
          !
          CALL efermi(nelt, nbsp, degauss, 1, f, ef, e0, entropy, ismear, nspin)
          !
@@ -744,7 +745,8 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
          ! recompute the proper density matrix, once z0t is given
          ! and store its diagonal components
          !
-         call calcmt_twin(f, z0t, fmat0, .false.)
+         call errore('cprmain', 'Removed calcmt_twin call because an argument mismatch was causing compliation issues; needs uncommenting and fixing', 1)
+         ! call calcmt_twin(f, z0t, fmat0, .false.)
          !
          DO iss = 1, nspin
             !

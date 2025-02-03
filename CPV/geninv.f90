@@ -102,81 +102,81 @@
 !  ----------------------------------------------
 !  ----------------------------------------------
 !  BEGIN manual
-      SUBROUTINE zgeninv(a,ld,n,mrank,cond,u,v,work,toleig,info,iopt)
-
-!  get a general inverse matrix
-!
-!  iopt = 0:   using calculated rank for pseudo inverse
-!  iopt = 1 :  rank is assumed to be n-6 for pseudo inverse
-!  iopt > 10:  scale matrix before decomposition
-!  ----------------------------------------------
-!  END manual
-!  end of declarations
-!  ----------------------------------------------
-
-      USE kinds
-      IMPLICIT NONE
-
-      INTEGER :: ld, n, mrank, info, iopt
-      REAL(DP) :: cond, toleig
-
-      COMPLEX(DP) a(ld,n),u(ld,n),v(ld,n),work(4*n)
-      REAL(DP)  :: zero=0.0d0
-      REAL(DP)  :: one=1.0d0
-
-      INTEGER :: n3, i, j, k, m 
-
-! ... scale matrix before inversion
-      IF (iopt.GE.10) THEN
-        n3=3*n
-        DO i=1,n
-          work(n3+i)=one
-          IF (abs(a(i,i)).GE.1.d-13) &
-             work(n3+i)=one/dsqrt(abs(a(i,i)))
-        END DO
-        DO i=1,n
-          DO j=1,n
-            a(i,j)=a(i,j)*work(n3+i)*work(n3+j)
-          END DO
-        END DO
-      END IF
-
-! ... get singular values
-      CALL dsvdc(a,ld,n,n,work,work(n+1),u,ld,v,ld,work(2*n+1),11,info)
-      mrank=0
-      DO i=1,n
-        IF (abs(work(i)).GT.toleig) mrank=mrank+1
-      END DO
-
-      m=mrank
-      IF (iopt.EQ.1.OR.iopt.EQ.11) m=n-6
-      cond=work(1)/work(m)
-      DO i=1,m
-        work(i)=one/work(i)
-      END DO
-
-      DO j=1,n
-        DO i=1,n
-          a(i,j)=zero
-        END DO
-        DO k=1,m
-          DO i=1,n
-            a(i,j)=a(i,j)+v(i,k)*work(k)*u(j,k)
-          END DO
-        END DO
-      END DO
-
-! ... rescale matrix after inversion
-      IF (iopt.GE.10) THEN
-        DO i=1,n
-          DO j=1,n
-            a(i,j)=a(i,j)*work(n3+i)*work(n3+j)
-          END DO
-        END DO
-      END IF
-
-      RETURN
-      END SUBROUTINE zgeninv
+!       SUBROUTINE zgeninv(a,ld,n,mrank,cond,u,v,work,toleig,info,iopt)
+! 
+! !  get a general inverse matrix
+! !
+! !  iopt = 0:   using calculated rank for pseudo inverse
+! !  iopt = 1 :  rank is assumed to be n-6 for pseudo inverse
+! !  iopt > 10:  scale matrix before decomposition
+! !  ----------------------------------------------
+! !  END manual
+! !  end of declarations
+! !  ----------------------------------------------
+! 
+!       USE kinds
+!       IMPLICIT NONE
+! 
+!       INTEGER :: ld, n, mrank, info, iopt
+!       REAL(DP) :: cond, toleig
+! 
+!       COMPLEX(DP) a(ld,n),u(ld,n),v(ld,n),work(4*n)
+!       REAL(DP)  :: zero=0.0d0
+!       REAL(DP)  :: one=1.0d0
+! 
+!       INTEGER :: n3, i, j, k, m 
+! 
+! ! ... scale matrix before inversion
+!       IF (iopt.GE.10) THEN
+!         n3=3*n
+!         DO i=1,n
+!           work(n3+i)=one
+!           IF (abs(a(i,i)).GE.1.d-13) &
+!              work(n3+i)=one/dsqrt(abs(a(i,i)))
+!         END DO
+!         DO i=1,n
+!           DO j=1,n
+!             a(i,j)=a(i,j)*work(n3+i)*work(n3+j)
+!           END DO
+!         END DO
+!       END IF
+! 
+! ! ... get singular values
+!       CALL zsvdc(a,ld,n,n,work,work(n+1),u,ld,v,ld,work(2*n+1),11,info)
+!       mrank=0
+!       DO i=1,n
+!         IF (abs(work(i)).GT.toleig) mrank=mrank+1
+!       END DO
+! 
+!       m=mrank
+!       IF (iopt.EQ.1.OR.iopt.EQ.11) m=n-6
+!       cond=work(1)/work(m)
+!       DO i=1,m
+!         work(i)=one/work(i)
+!       END DO
+! 
+!       DO j=1,n
+!         DO i=1,n
+!           a(i,j)=zero
+!         END DO
+!         DO k=1,m
+!           DO i=1,n
+!             a(i,j)=a(i,j)+v(i,k)*work(k)*u(j,k)
+!           END DO
+!         END DO
+!       END DO
+! 
+! ! ... rescale matrix after inversion
+!       IF (iopt.GE.10) THEN
+!         DO i=1,n
+!           DO j=1,n
+!             a(i,j)=a(i,j)*work(n3+i)*work(n3+j)
+!           END DO
+!         END DO
+!       END IF
+! 
+!       RETURN
+!       END SUBROUTINE zgeninv
 
 !  ----------------------------------------------
 !  ----------------------------------------------

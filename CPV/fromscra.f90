@@ -215,7 +215,7 @@ SUBROUTINE from_scratch( )
 ! ! end_added:giovanni:debug
        CALL calbec ( 1, nsp, eigr, cm, bec )
        !
-       if ( tstress ) CALL caldbec( ngw, nkb, nbsp, 1, nsp, eigr, cm, dbec ) !warning:giovanni still to be modified
+       if ( tstress ) CALL caldbec( ngw, nkb, nbsp, 1, nsp, [eigr%re, eigr%im], cm, dbec ) !warning:giovanni still to be modified
        !
        IF(non_ortho) THEN
           call compute_duals(cm,cdual,nbsp,1)
@@ -353,7 +353,7 @@ SUBROUTINE from_scratch( )
          !
          CALL calbec ( nvb+1, nsp, eigr, c0, bec)
 
-         if ( tstress ) CALL caldbec( ngw, nkb, nbsp, 1, nsp, eigr, cm, dbec )
+         if ( tstress ) CALL caldbec( ngw, nkb, nbsp, 1, nsp, [eigr%re, eigr%im], cm, dbec )
 
          if ( iprsta >= 3 ) CALL dotcsc( eigr, c0, ngw, nbsp , lgam)
          !
