@@ -36,8 +36,8 @@ function gaussiank(sigma,x)
   !
   interface 
     !
-    function besselk(x_)
-      real(8), intent(in) :: x_
+    function besselk(x)
+      real(8), intent(in) :: x
       real(8) :: besselk
     end function
     !

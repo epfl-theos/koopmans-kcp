@@ -306,7 +306,9 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                !call perturbing_pot_nic(fixed_band, ispin(fixed_band), rhor, dvpot)
                if (.false.) then ! here for Koopmans
                   !
-                  call errore('runcg_uspp', 'Call to perturbing_pot commented out because of argument mismatch giving compliation errors', 1)
+                  call errore('runcg_uspp', &
+                              'Call to perturbing_pot commented out because of argument mismatch giving compliation errors', &
+                              1)
                   ! call perturbing_pot(fixed_band, ispin(fixed_band), rhor, dvpot, uPi, lgam, finite_field_for_empty_state)
                   !
                end if
