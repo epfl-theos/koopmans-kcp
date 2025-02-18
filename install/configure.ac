@@ -65,7 +65,7 @@ AC_CONFIG_FILES([include/fft_defs.h:include/fft_defs.h.in])
 # Find fortran-to-C wrappers
 AC_F77_WRAPPERS() 
 
-AC_LANG_PUSH(Fortran 77)
+AC_LANG_PUSH(Fortran)
 F77=$f90 # use Fortran 90 actually
 FFLAGS="$test_fflags"
 LDFLAGS="$test_ldflags"
