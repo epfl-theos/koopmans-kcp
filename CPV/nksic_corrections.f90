@@ -41,7 +41,8 @@ contains
       use mp, only: mp_sum
       use mp_global, only: intra_image_comm
       use control_flags, only: gamma_only, do_wf_cmplx
-      use control_flags, only: hartree_only_sic
+      use control_flags, only: hartree_only_sic, iprsta
+      USE io_global,              ONLY : stdout
       !
       implicit none
       integer, intent(in)  :: ispin, ibnd
@@ -51,7 +52,7 @@ contains
       !
       !character(19) :: subname='nksic_correction_pz'
       integer       :: ig
-      real(dp)      :: ehele, fact
+      real(dp)      :: ehele, fact, etmp
       !
       complex(dp), allocatable :: rhogaux(:, :)
       complex(dp), allocatable :: vhaux(:)
@@ -63,6 +64,7 @@ contains
       real(dp), allocatable :: haux(:, :, :)
       logical :: lgam
       real(dp) :: dexc_dummy(3, 3)
+      real(dp) :: Exc_ni
       !
       !==================
       ! main body
@@ -218,6 +220,18 @@ contains
       ! energy correction terms
       !
 !$$
+      ! NsC >>>
+      IF (iprsta.GT. 1) THEN 
+         etmp = sum(vxc(1:nnrx, ispin)*orb_rhor(1:nnrx))
+         Exc_ni=etxc
+         call mp_sum(Exc_ni, intra_image_comm)
+         call mp_sum(etmp, intra_image_comm)
+         WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i EHxc[n_i]", 2i5, 4f20.12)') &
+                 ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2, &
+                 (shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+         ! NsC <<<
+      ENDIF
+      !
       pink = fact*(-etxc - ehele)
 !$$
 !      pink = fact * ( -ehele )
@@ -475,9 +489,9 @@ contains
             Exc_ni=etxc_
             call mp_sum(Exc_ni, intra_image_comm)
             call mp_sum(etmp, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i     ", 2i5, 4f20.12)') &
+            WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i EHxc[n_i]", 2i5, 4f20.12)') &
                     ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2, &
-                    -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+                    (shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
             ! NsC <<<
          ENDIF
          !
@@ -496,9 +510,9 @@ contains
             Exc_ni=etxc_
             call mp_sum(Exc_ni, intra_image_comm)
             call mp_sum(etmp, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i     ", 2i5, 4f20.12)') &
+            WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i EHxc[n_i]", 2i5, 4f20.12)') &
                     ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2, &
-                    -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+                    (shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
             ! NsC <<<
          ENDIF
          !
@@ -894,7 +908,7 @@ contains
                call mp_sum(Exc_N, intra_image_comm)
             call mp_sum(Exc_Nm1, intra_image_comm)
             call mp_sum(etmp, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[N] Exc[N-1] \int vxc[N]*n_i", 2i5, 5f20.12)') &
+            WRITE(stdout,'(3X, "ibnd ispin SH Exc[N] Exc[N-1] \int vxc[N]*n_i dKI_diag", 2i5, 5f20.12)') &
                     ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2, &
                    -shart/hartree_si*2*electronvolt_si+(Exc_N-Exc_Nm1-etmp)*fact*2
             ! NsC <<<
@@ -917,7 +931,7 @@ contains
             call mp_sum(etmp, intra_image_comm)
             call mp_sum(Exc_N, intra_image_comm)
             call mp_sum(Exc_Nm1, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[N] Exc[N+1] \int vxc[N]*n_i", 2i5, 5f20.12)') &
+            WRITE(stdout,'(3X, "ibnd ispin SH Exc[N] Exc[N+1] \int vxc[N]*n_i dKI_diag", 2i5, 5f20.12)') &
                     ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2, &
                     shart/hartree_si*2*electronvolt_si+(-Exc_N+Exc_Nm1-etmp)*fact*2
             ! NsC <<

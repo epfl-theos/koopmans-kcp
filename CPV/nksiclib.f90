@@ -135,7 +135,7 @@
       ! loop over bands (2 ffts at the same time)
       !
       !
-      IF (iprsta .GT. 1 .AND. (do_nki .or. do_nkipz) ) WRITE(stdout, '(/,3X, "nksic potential decomposition in eV")')
+      IF (iprsta .GT. 1 ) WRITE(stdout, '(/,3X, "nksic potential decomposition in Ry")')
       do j = 1, nbsp, 2
          !
          ! compute orbital densities
