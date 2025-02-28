@@ -44,7 +44,7 @@
       use nksic_corrections, only: nksic_correction_nki, nksic_correction_nkipz, &
                                    nksic_correction_pz
       use ions_base, only: nat
-      use control_flags, only: gamma_only, do_wf_cmplx
+      use control_flags, only: gamma_only, do_wf_cmplx, iprsta
       use uspp_param, only: nhm
       use cp_interfaces, only: nksic_get_orbitalrho
       use input_parameters, only: draw_pot, pot_number, odd_nkscalfact  !added:linh draw vsic potentials
@@ -135,6 +135,7 @@
       ! loop over bands (2 ffts at the same time)
       !
       !
+      IF (iprsta .GT. 1 .AND. (do_nki .or. do_nkipz) ) WRITE(stdout, '(/,3X, "nksic potential decomposition in eV")')
       do j = 1, nbsp, 2
          !
          ! compute orbital densities
