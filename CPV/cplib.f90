@@ -4700,7 +4700,7 @@ subroutine nksic_init
       if (.not. found) CALL errore(subname, 'no compatible orbital-dependent scheme specified', 1)
       !
       l_group_minimization = l_group_minimization_
-      WRITE(*,*) "NICOLA set groups" , l_group_minimization
+      WRITE(stdout,*) "NICOLA set groups" , l_group_minimization
       ngroups = 1 
       IF (l_group_minimization) THEN 
          ngroups = 0 
@@ -4709,17 +4709,18 @@ subroutine nksic_init
          ENDDO
          ALLOCATE ( group_dimensions(ngroups) )
          group_dimensions(1:ngroups) = group_dimensions_(1:ngroups)
-         WRITE(*,*) "NICOLA", group_dimensions(:)
+         WRITE(stdout,*) "NICOLA ngroups = ", ngroups
+         WRITE(stdout,*) "NICOLA group_dimensions = ", group_dimensions(:)
          !
          ALLOCATE ( istart_group(ngroups), iend_group(ngroups)  )
          istart_group(1) = 1
          DO i = 1, ngroups-1
-           iend_group(i) = istart_group(i) + group_dimensions(i)
+           iend_group(i) = istart_group(i) + group_dimensions(i)-1
            istart_group(i+1) = iend_group(i)+1
-           WRITE(*,*) "NICOLA istart iend group i=", istart_group(i), iend_group(i) 
+           WRITE(stdout,*) "NICOLA istart iend group i=", istart_group(i), iend_group(i) 
          ENDDO
-         iend_group(ngroups) = istart_group(ngroups) + group_dimensions(ngroups)
-         WRITE(*,*) "NICOLA istart iend group ngroups", istart_group(ngroups), iend_group(ngroups) 
+         iend_group(ngroups) = istart_group(ngroups) + group_dimensions(ngroups)-1
+         WRITE(stdout,*) "NICOLA istart iend group ngroups", istart_group(ngroups), iend_group(ngroups) 
       ENDIF 
       !
    END IF
