@@ -1,0 +1,4 @@
+export BIN_DIR="/home/nicola/CODES/koopmans/bin"
+export PSEUDO_DIR="/home/nicola/CODES/koopmans/src/koopmans/pseudopotentials/sg15_v1.2/pbe/"
+export PARA_PREFIX="mpirun -np 4"
+export PARA_POSTFIX="-nk 1"
