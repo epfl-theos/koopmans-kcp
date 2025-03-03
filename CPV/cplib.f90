@@ -4699,7 +4699,8 @@ subroutine nksic_init
       !
       if (.not. found) CALL errore(subname, 'no compatible orbital-dependent scheme specified', 1)
       !
-      WRITE(*,*) "NICOLA set groups" 
+      l_group_minimization = l_group_minimization_
+      WRITE(*,*) "NICOLA set groups" , l_group_minimization
       ngroups = 1 
       IF (l_group_minimization) THEN 
          ngroups = 0 
