@@ -1925,14 +1925,13 @@ subroutine pc2(a,beca,b,becb, lgam)
       complex(DP), allocatable:: scar_c(:)
       !
       call start_clock('pc3')
-
-      allocate(scar_c(n))
-
+      allocate(scar_c(group_dimension))
+      
       bold(:,:)=b(:,:)
 
-      do j=1,n
+      do j=1,group_dimension
          !
-         do i=1,n
+         do i=1,group_dimension
             !
             sca_c=CMPLX(0.0d0,0.d0)
             !
@@ -1979,7 +1978,7 @@ subroutine pc2(a,beca,b,becb, lgam)
 
          call mp_sum( scar_c, intra_image_comm )
 
-         do i=1,n
+         do i=1,group_dimension
             !
             if(ispin(i) == ispin(j)) then
                !
