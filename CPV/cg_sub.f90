@@ -107,7 +107,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    real(dp)    :: enb, enbi
    complex(dp) :: gamma_c  !warning_giovanni, is it real anyway?
    complex(dp), allocatable :: c2(:), c3(:), c2_bare(:), c3_bare(:)
-   complex(dp), allocatable :: hpsi(:, :), hpsi0(:, :), gi(:, :), hi(:, :), gi_bare(:, :)
+   complex(dp), allocatable :: hpsi(:, :), hpsi0(:, :), gi(:, :), hi(:, :), gi_bare(:, :), hpsi_(:,:)
    type(twin_matrix) :: s_minus1!(:,:)    !factors for inverting US S matrix
    type(twin_matrix) :: k_minus1!(:,:)    !factors for inverting US preconditioning matrix
    !
@@ -410,22 +410,32 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                !
             end if
             !
+            !WRITE(*,*) "NICOLA hpsi(1,1) START =", hpsi(1,1)
             IF (l_group_minimization) THEN 
+              ALLOCATE (hpsi_ (ngw, nbsp) )
+              hpsi_ = hpsi 
               WRITE(stdout, '(5X "GROUP MINIMIZATION")')
               ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
               CALL pcdaga2(c0, phi, hpsi, lgam)
+              !WRITE(*,*) "NICOLA hpsi(1,1) after pcdaga2 =", hpsi(1,1)
               !
               DO igroup = 1, ngroups
                  ! we compute and add the ODD contribution to the gradient group by group
                  ! if ngroups= 1 this reduces to the original implementation (pcdaga2 + pc3nc_group = pc3nc)
                  CALL pc3nc_group(c0(:,istart_group(igroup):iend_group(igroup)), & 
-                         hpsi(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup)) 
+                         hpsi_(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup)) 
+                 !WRITE(*,*) "NICOLA hpsi_(1,1) after pc3nc_group =", hpsi_(1,1)
+                 hpsi(:, istart_group(igroup):iend_group(igroup)) = hpsi(:, istart_group(igroup):iend_group(igroup)) + &
+                         hpsi_(:, istart_group(igroup):iend_group(igroup))
+                 !WRITE(*,*) "NICOLA hpsi(1,1) FINAL =", hpsi(1,1)
                  !
               ENDDO
+              DEALLOCATE (hpsi_)
               !
             ELSE
               !! This can be removed once we understand ngroups =1 is actually doing the same 
-              call pc3nc(c0, hpsi, lgam) ! nsC ORIGINAL IMPLEMENTATION 
+              call pc3nc(c0, hpsi, lgam) ! NsC ORIGINAL IMPLEMENTATION 
+              !WRITE(*,*) "NICOLA hpsi(1,1) FINAL =", hpsi(1,1)
               !
             ENDIF
             !

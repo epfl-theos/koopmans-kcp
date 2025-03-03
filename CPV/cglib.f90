@@ -1902,14 +1902,14 @@ subroutine pc2(a,beca,b,becb, lgam)
 !    this subroutine applies the modified Pc operator
 !    a input :unperturbed wavefunctions
 !    b input :first order wavefunctions
-!    b output:b_i = bi + \sum_j |a_j>(<a_j|b_i> - <b_j|a_i>)/2
+!    b output:b_i = \sum_j |a_j>(<a_j|b_i> - <b_j|a_i>)/2
 
       use kinds
       use mp_global, only: intra_image_comm
       use gvecw, only: ngw
       use reciprocal_vectors, only: ng0 => gstart
       use mp, only: mp_sum
-      use electrons_base, only: n => nbsp, ispin
+      use electrons_base, only: nbsp, ispin
 
       implicit none
 
@@ -1986,7 +1986,8 @@ subroutine pc2(a,beca,b,becb, lgam)
                !
                do ig=1,ngw
                   !    
-                  b(ig,i)=b(ig,i)+sca_c*a(ig,j)
+                  !b(ig,i)=b(ig,i)+sca_c*a(ig,j)
+                  b(ig,i) = sca_c*a(ig,j)
                   !
                enddo
                ! this to prevent numerical errors
