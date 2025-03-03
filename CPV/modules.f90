@@ -405,7 +405,11 @@ module nksic
   integer :: innerloop_until
   real(DP) :: innerloop_cg_ratio
 !$$
-
+   ! NsC group minimization
+   INTEGER, ALLOCATABLE :: group_dimensions(:)
+   LOGICAL :: l_group_minimization 
+   INTEGER :: ngroups
+   INTEGER, ALLOCATABLE :: istart_group(:), iend_group(:)
 contains
   !
   subroutine allocate_nksic_empty(nnrx, ngm, n_emps, nat, nhm)
