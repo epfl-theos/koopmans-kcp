@@ -4571,7 +4571,9 @@ subroutine nksic_init
                     do_wref, do_wxd, fref, rhobarfact, &
                     vanishing_rho_w, &
                     nknmax, do_spinsym, f_cutoff, &
-                    nkscalfact, nksic_memusage, allocate_nksic, odd_alpha
+                    nkscalfact, nksic_memusage, allocate_nksic, odd_alpha, &
+                    l_group_minimization, group_dimensions, ngroups, istart_group, iend_group
+                   
 !$$
    use nksic, only: do_innerloop, do_innerloop_empty, do_innerloop_cg, &
                     innerloop_dd_nstep, &
@@ -4596,7 +4598,9 @@ subroutine nksic_init
                                nknmax_ => nknmax, &
                                f_cutoff_ => f_cutoff, &
                                do_orbdep_ => do_orbdep, &
-                               l_comp_cmplxfctn_index_ => l_comp_cmplxfctn_index
+                               l_comp_cmplxfctn_index_ => l_comp_cmplxfctn_index, &
+                               l_group_minimization_ => l_group_minimization, & 
+                               group_dimensions_ => group_dimensions 
 !$$
    use input_parameters, only: do_innerloop_ => do_innerloop, &
                                do_innerloop_empty_ => do_innerloop_empty, &
@@ -4694,6 +4698,28 @@ subroutine nksic_init
       if (do_nk .or. do_pz .or. do_nki .or. do_nkpz .or. do_nkipz .or. do_hybrid) found = .true.
       !
       if (.not. found) CALL errore(subname, 'no compatible orbital-dependent scheme specified', 1)
+      !
+      WRITE(*,*) "NICOLA set groups" 
+      ngroups = 1 
+      IF (l_group_minimization) THEN 
+         ngroups = 0 
+         DO i = 1, 100
+            IF ( group_dimensions_(i) .gt. 0 ) ngroups = ngroups + 1
+         ENDDO
+         ALLOCATE ( group_dimensions(ngroups) )
+         group_dimensions(1:ngroups) = group_dimensions_(1:ngroups)
+         WRITE(*,*) "NICOLA", group_dimensions(:)
+         !
+         ALLOCATE ( istart_group(ngroups), iend_group(ngroups)  )
+         istart_group(1) = 1
+         DO i = 1, ngroups-1
+           iend_group(i) = istart_group(i) + group_dimensions(i)
+           istart_group(i+1) = iend_group(i)+1
+           WRITE(*,*) "NICOLA istart iend group i=", istart_group(i), iend_group(i) 
+         ENDDO
+         iend_group(ngroups) = istart_group(ngroups) + group_dimensions(ngroups)
+         WRITE(*,*) "NICOLA istart iend group ngroups", istart_group(ngroups), iend_group(ngroups) 
+      ENDIF 
       !
    END IF
    !

@@ -597,6 +597,11 @@ MODULE input_parameters
         LOGICAL :: finite_field_introduced = .FALSE.
         LOGICAL :: finite_field_for_empty_state = .FALSE.
         !
+        !NsC Group minimization
+        LOGICAL :: l_group_minimization = .FALSE.
+        INTEGER :: group_dimensions(100)
+        !
+        !
         !
 !=-----BEGIN nksic input variables
         NAMELIST / nksic /  draw_pot, pot_number,                             & !added:linh draw vsic potentials 
@@ -617,9 +622,9 @@ MODULE input_parameters
              iprint_manifold_overlap, innerloop_until, innerloop_atleast,     &
              hartree_only_sic, aux_empty_nbnd,                            &
              !
-             finite_field_introduced, finite_field_for_empty_state, l_comp_cmplxfctn_index
+             finite_field_introduced, finite_field_for_empty_state, l_comp_cmplxfctn_index, &
              !
-!             lgroup !NsC 
+             l_group_minimization, group_dimensions !NsC 
 
 !=----END nksic input variables
 !

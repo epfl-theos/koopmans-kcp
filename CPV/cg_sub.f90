@@ -61,8 +61,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    use nksic, only: do_orbdep, do_innerloop, do_innerloop_cg, &
                     innerloop_init_n, innerloop_cg_ratio, &
                     vsicpsi, vsic, wtot, fsic, deeq_sic, f_cutoff, &
-                    pink, do_wxd, do_bare_eigs, innerloop_until, &
-                    odd_alpha
+                    pink, do_wxd, do_bare_eigs, innerloop_until, odd_alpha, & 
+                    l_group_minimization, group_dimensions, ngroups, istart_group, iend_group
    use hfmod, only: do_hf, vxxpsi, exx
    use twin_types !added:giovanni
    use cp_main_variables, only: becstart
@@ -73,7 +73,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    use control_flags, only: iprint_manifold_overlap, iprint_spreads
    use input_parameters, only: fixed_state, fixed_band, odd_nkscalfact, do_outerloop, &
                                finite_field_introduced, finite_field_for_empty_state, &
-                               print_real_space_density 
+                               print_real_space_density
    use print_real_space_orbital_density, only: print_orbr
    !
    implicit none
@@ -151,6 +151,8 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
    real(dp) :: exxdiv, mp1
    !
    real(dp), external :: exx_divergence
+   !
+   integer :: igroup
    !
    !
    call do_allocation_initialization()
@@ -397,17 +399,42 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
             !
             if (fixed_state) then
                !
-               call pc3nc_fixed(c0, hpsi, lgam)
+               ! Find the search direction (before orthogonalization) that would lead to 
+               ! hpsi=0 for the fixed band after the orthogonalization (in pc3nc) is performed
+               ! This is needed as
+               If (.NOT. l_group_minimization) THEN
+                  call pc3nc_fixed(c0, hpsi, lgam)
+               else
+                  CALL errore ('cg_sub', 'fixed_state and group_minimization not implemented yet',1) 
+               endif 
                !
             end if
             !
-            call pc3nc(c0, hpsi, lgam)
+            IF (l_group_minimization) THEN 
+              WRITE(stdout, '(5X "GROUP MINIMIZATION")')
+              ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
+              CALL pcdaga2(c0, phi, hpsi, lgam)
+              !
+              DO igroup = 1, ngroups
+                 ! we compute and add the ODD contribution to the gradient group by group
+                 ! if ngroups= 1 this reduces to the original implementation (pcdaga2 + pc3nc_group = pc3nc)
+                 CALL pc3nc_group(c0(:,istart_group(igroup):iend_group(igroup)), & 
+                         hpsi(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup)) 
+                 !
+              ENDDO
+              !
+            ELSE
+              !! This can be removed once we understand ngroups =1 is actually doing the same 
+              call pc3nc(c0, hpsi, lgam) ! nsC ORIGINAL IMPLEMENTATION 
+              !
+            ENDIF
             !
-         else
+          ELSE
             !
+            IF (l_group_minimization) CALL errore ('cg_sub', 'USPP and group_minimization not implemented',1)
             call pc3us(c0, bec, hpsi, becm, lgam)
             !
-         end if
+         ENDIF
          !
       end if
       !
@@ -1836,7 +1863,11 @@ contains
          !
          if (fixed_state) then
             !
-            call pc3nc_fixed(wfc0, wfc, lgam)
+            IF ( .NOT. l_group_minimization) THEN
+               call pc3nc_fixed(wfc0, wfc, lgam)
+            else
+               CALL errore ('cg_sub', 'fixed_state and group_minimization not implemented yet',1)
+            endif
             !
          end if
          !
@@ -1844,10 +1875,25 @@ contains
          !
          if (.not. okvan) then
             !
-            call pc3nc(wfc0, wfc, lgam)
+            IF (l_group_minimization) THEN 
+               ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
+               CALL pcdaga2(wfc0, bec0, wfc, lgam)
+               !
+               DO igroup = 1, ngroups
+                  !we compute the ODD contribution to the gradient group by group
+                  ! if Ngroup = 1 this reduces to the original implementation (pcdaga2 + pc3nc_group = pc3nc)
+                  CALL pc3nc_group(wfc0(:,istart_group(igroup):iend_group(igroup)), &
+                          wfc(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup))
+                  !
+               ENDDO
+               !
+            ELSE
+               call pc3nc(wfc0, wfc, lgam) ! ORIGINAL IMPLEMENTATION
+            ENDIF
             !
          else
             !
+            IF (l_group_minimization) CALL errore ('cg_sub', 'USPP and group_minimization not implemented',1)
             call pc3us(wfc0, bec0, wfc, becwfc, lgam)
             !
          end if

@@ -320,6 +320,9 @@ CONTAINS
       finite_field_introduced = .FALSE.
       finite_field_for_empty_state = .FALSE.
       !
+      l_group_minimization = .false.
+      group_dimensions(:) = -1
+      !
       RETURN
 
    END SUBROUTINE
@@ -1019,6 +1022,8 @@ CONTAINS
       CALL mp_bcast(iprint_spreads, ionode_id)
       CALL mp_bcast(iprint_manifold_overlap, ionode_id)
       CALL mp_bcast(hartree_only_sic, ionode_id)
+      CALL mp_bcast(group_dimensions, ionode_id)
+      CALL mp_bcast(l_group_minimization, ionode_id)
       CALL mp_bcast(finite_field_introduced, ionode_id)
       CALL mp_bcast(finite_field_for_empty_state, ionode_id)
       !
@@ -1677,6 +1682,10 @@ CONTAINS
          END IF
          !
       END IF
+      !
+      IF (l_group_minimization) THEN 
+         WRITE(*,*) "NICOLA", SUM(group_dimensions(:))
+      ENDIF 
       !
       RETURN
 
