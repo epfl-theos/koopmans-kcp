@@ -172,7 +172,7 @@ cat > kipz.cpi <<EOF
    innerloop_nmax   = 100
    do_innerloop_empty = .false.
    l_group_minimization = .true.
-   group_dimensions(1) = 8
+   group_dimensions(1) = 4
 /
 
 ATOMIC_SPECIES
