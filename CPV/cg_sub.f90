@@ -1877,7 +1877,7 @@ contains
             !
             IF (l_group_minimization) THEN 
                ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
-               CALL pcdaga2(wfc0, bec0, wfc, lgam)
+               CALL pcdaga2(wfc0, phi, wfc, lgam)
                !
                DO igroup = 1, ngroups
                   !we compute the ODD contribution to the gradient group by group
