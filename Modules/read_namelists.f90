@@ -1683,10 +1683,6 @@ CONTAINS
          !
       END IF
       !
-      IF (l_group_minimization) THEN 
-         WRITE(*,*) "NICOLA", SUM(group_dimensions(:))
-      ENDIF 
-      !
       RETURN
 
    END SUBROUTINE nksic_checkin
