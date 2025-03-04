@@ -417,14 +417,12 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
               WRITE(stdout, '(5X "GROUP MINIMIZATION")')
               ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
               CALL pcdaga2(c0, phi, hpsi, lgam)
-              !WRITE(*,*) "NICOLA hpsi(1,1) after pcdaga2 =", hpsi(1,1)
               !
               DO igroup = 1, ngroups
                  ! we compute and add the ODD contribution to the gradient group by group
                  ! if ngroups= 1 this reduces to the original implementation (pcdaga2 + pc3nc_group = pc3nc)
                  CALL pc3nc_group(c0(:,istart_group(igroup):iend_group(igroup)), & 
                          hpsi_(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup)) 
-                 !WRITE(*,*) "NICOLA hpsi_(1,1) after pc3nc_group =", hpsi_(1,1)
                  hpsi(:, istart_group(igroup):iend_group(igroup)) = hpsi(:, istart_group(igroup):iend_group(igroup)) + &
                          hpsi_(:, istart_group(igroup):iend_group(igroup))
                  !WRITE(*,*) "NICOLA hpsi(1,1) FINAL =", hpsi(1,1)
@@ -1856,6 +1854,8 @@ contains
       !
       type(twin_matrix) :: becwfc, bec0
       complex(DP) :: wfc(:, :), wfc0(:, :)
+      complex(DP), allocatable :: wfc_(:, :)
+      
       !
       if (switch .or. (.not. do_orbdep)) then
          !
@@ -1886,6 +1886,8 @@ contains
          if (.not. okvan) then
             !
             IF (l_group_minimization) THEN 
+               ALLOCATE (wfc_(ngw, nbsp))
+               wfc_ = wfc
                ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
                CALL pcdaga2(wfc0, phi, wfc, lgam)
                !
@@ -1893,9 +1895,12 @@ contains
                   !we compute the ODD contribution to the gradient group by group
                   ! if Ngroup = 1 this reduces to the original implementation (pcdaga2 + pc3nc_group = pc3nc)
                   CALL pc3nc_group(wfc0(:,istart_group(igroup):iend_group(igroup)), &
-                          wfc(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup))
+                          wfc_(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup))
+                  wfc(:, istart_group(igroup):iend_group(igroup)) = wfc(:, istart_group(igroup):iend_group(igroup)) + &
+                         wfc_(:, istart_group(igroup):iend_group(igroup))
                   !
                ENDDO
+               DEALLOCATE (wfc_)
                !
             ELSE
                call pc3nc(wfc0, wfc, lgam) ! ORIGINAL IMPLEMENTATION
