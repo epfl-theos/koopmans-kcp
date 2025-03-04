@@ -1854,7 +1854,7 @@ subroutine pc2(a,beca,b,becb, lgam)
                   !
                endif
                !
-	            scar_c(i) = sca_c
+	       scar_c(i) = sca_c
                !
             endif
             !
@@ -1923,12 +1923,14 @@ subroutine pc2(a,beca,b,becb, lgam)
 !       real(dp) sca
       complex(DP) :: sca_c
       complex(DP), allocatable:: scar_c(:)
+      complex(dp) :: res(ngw,group_dimension)
       !
       call start_clock('pc3')
       allocate(scar_c(group_dimension))
       
       bold(:,:)=b(:,:)
-
+      !
+      res(:,:) = CMPLX(0.D0,0.D0)
       do j=1,group_dimension
          !
          do i=1,group_dimension
@@ -1946,7 +1948,8 @@ subroutine pc2(a,beca,b,becb, lgam)
                do  ig=1,ngw           !loop on g vectors
                   !
                   ! (<a_j|b_i> - <b_j|a_i>
-                  sca_c = sca_c + CONJG(a(ig,j))*bold(ig,i) - (a(ig,i))*CONJG(bold(ig,j))
+                  sca_c = sca_c + CONJG(a(ig,j))*bold(ig,i) 
+                  sca_c = sca_c - CONJG(bold(ig,j))*a(ig,i)
                   !
                enddo
                !sca = sca*2.0d0  !2. for real weavefunctions
@@ -1977,7 +1980,7 @@ subroutine pc2(a,beca,b,becb, lgam)
          enddo
 
          call mp_sum( scar_c, intra_image_comm )
-
+         
          do i=1,group_dimension
             !
             if(ispin(i) == ispin(j)) then
@@ -1986,14 +1989,13 @@ subroutine pc2(a,beca,b,becb, lgam)
                !
                do ig=1,ngw
                   !    
-                  !b(ig,i)=b(ig,i)+sca_c*a(ig,j)
-                  b(ig,i) = sca_c*a(ig,j)
+                  res(ig,i)=res(ig,i)+sca_c*a(ig,j)
                   !
                enddo
                ! this to prevent numerical errors
                if(lgam) then
                   ! 
-                  if (ng0.eq.2) b(1,i) = CMPLX(DBLE(b(1,i)),0.0d0)
+                  if (ng0.eq.2) res(1,i) = CMPLX(DBLE(res(1,i)),0.0d0)
                   !
                endif
                !
@@ -2003,6 +2005,7 @@ subroutine pc2(a,beca,b,becb, lgam)
          !
       enddo
       !
+      b=res
       deallocate(scar_c)
       call stop_clock('pc3')
       return
