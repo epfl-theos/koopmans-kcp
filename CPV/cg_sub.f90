@@ -414,7 +414,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
             IF (l_group_minimization) THEN 
               ALLOCATE (hpsi_ (ngw, nbsp) )
               hpsi_ = hpsi 
-              WRITE(stdout, '(5X "GROUP MINIMIZATION")')
               ! Compute the "standard" orthogonlized gradient (Pc|hspi> for all the states) 
               CALL pcdaga2(c0, phi, hpsi, lgam)
               !
