@@ -144,7 +144,7 @@ cat > kipz.cpi <<EOF
 &ELECTRONS
    conv_thr         = 1.8000000000000002e-08
    ortho_para       = 1
-   maxiter          = 10
+   maxiter          = 100
    electron_dynamics = "cg"
    passop           = 2.0
    do_outerloop     = .true.
