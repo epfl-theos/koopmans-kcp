@@ -11,3 +11,7 @@ input_args = ('charge-density.dat'), ('real_space_orb_density.occ.0.00001.dat')
 [categories]
 kcp_all = kcp_*??
 bin2xml_all = bin2xml*
+
+[kcp_group_minimization/]
+program = KCP
+inputs_args = ('argon.dft.in'), ('argon.kipz.in')
