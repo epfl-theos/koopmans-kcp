@@ -4618,7 +4618,7 @@ subroutine nksic_init
                                kfact_ => kfact
 !$$
    USE io_global, ONLY: meta_ionode, stdout
-   use electrons_base, ONLY: nspin, nbspx
+   use electrons_base, ONLY: nspin, nbspx, nbsp
    use gvecw, ONLY: ngw
    use gvecp, only: ngm
    use grid_dimensions, ONLY: nnrx
@@ -4710,6 +4710,7 @@ subroutine nksic_init
          ALLOCATE ( group_dimensions(ngroups) )
          group_dimensions(1:ngroups) = group_dimensions_(1:ngroups)
          WRITE(stdout,'(5X, "# of different groups =", I5)') ngroups
+         WRITE(stdout,'(5X, "# of bands (nbsp, nbspx)     =", 2I5)') nbsp, nbspx
          !
          ALLOCATE ( istart_group(ngroups), iend_group(ngroups)  )
          istart_group(1) = 1
