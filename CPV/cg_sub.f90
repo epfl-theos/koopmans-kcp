@@ -410,7 +410,6 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                !
             end if
             !
-            !WRITE(*,*) "NICOLA hpsi(1,1) START =", hpsi(1,1)
             IF (l_group_minimization) THEN 
               ALLOCATE (hpsi_ (ngw, nbsp) )
               hpsi_ = hpsi 
@@ -424,15 +423,15 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
                          hpsi_(:, istart_group(igroup):iend_group(igroup)), lgam, group_dimensions(igroup)) 
                  hpsi(:, istart_group(igroup):iend_group(igroup)) = hpsi(:, istart_group(igroup):iend_group(igroup)) + &
                          hpsi_(:, istart_group(igroup):iend_group(igroup))
-                 !WRITE(*,*) "NICOLA hpsi(1,1) FINAL =", hpsi(1,1)
                  !
               ENDDO
               DEALLOCATE (hpsi_)
               !
             ELSE
-              !! This can be removed once we understand ngroups =1 is actually doing the same 
-              call pc3nc(c0, hpsi, lgam) ! NsC ORIGINAL IMPLEMENTATION 
-              !WRITE(*,*) "NICOLA hpsi(1,1) FINAL =", hpsi(1,1)
+              !! ORIGNAL IMPLEMENTATION
+              !! This can (should?) be removed once we are sure that Group_minimization
+              !! with  ngroups =1 is actually doing the same 
+              call pc3nc(c0, hpsi, lgam) 
               !
             ENDIF
             !
