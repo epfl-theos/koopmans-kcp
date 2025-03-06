@@ -1663,6 +1663,8 @@ CONTAINS
       IF (esic_conv_thr < 0.0_DP) &
          CALL errore(sub_name, ' esic_conv_thr out of range ', 1)
 !$$
+      IF (l_group_minimization .AND. do_innerloop) &
+             CALL errore(sub_name, ' Group minimization and innerloop not implemented yet ', 1)
       IF (LEN_TRIM(which_orbdep) > 0) THEN
          !
          DO i = 1, SIZE(which_orbdep_allowed)
