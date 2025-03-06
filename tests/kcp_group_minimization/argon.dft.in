@@ -44,17 +44,6 @@
 &EE
    which_compensation = "tcc"
 /
-&NKSIC
-   do_innerloop     = .false.
-   innerloop_cg_nreset = 20
-   innerloop_cg_nsd = 2
-   innerloop_init_n = 3
-   hartree_only_sic = .false.
-   esic_conv_thr    = 1.8000000000000002e-08
-   do_innerloop_cg  = .true.
-   innerloop_nmax   = 100
-   do_innerloop_empty = .false.
-/
 
 ATOMIC_SPECIES
 Ar 1.000 Ar_ONCV_PBE-1.2.upf
