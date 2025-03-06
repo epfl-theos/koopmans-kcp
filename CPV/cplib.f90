@@ -4618,7 +4618,7 @@ subroutine nksic_init
                                kfact_ => kfact
 !$$
    USE io_global, ONLY: meta_ionode, stdout
-   use electrons_base, ONLY: nspin, nbspx, nbsp
+   use electrons_base, ONLY: nspin, nbspx, nbsp, ispin
    use gvecw, ONLY: ngw
    use gvecp, only: ngm
    use grid_dimensions, ONLY: nnrx
@@ -4630,6 +4630,7 @@ subroutine nksic_init
    integer       :: i
    character(10) :: subname = 'nksic_init'
    character(1), external :: lowercase
+   integer :: totdim
 
    !
    ! overwriten by which_orbdep, if not empty
@@ -4700,27 +4701,50 @@ subroutine nksic_init
       if (.not. found) CALL errore(subname, 'no compatible orbital-dependent scheme specified', 1)
       !
       l_group_minimization = l_group_minimization_
+      !
       ngroups = 1 
       IF (l_group_minimization) THEN 
+         !
          WRITE(stdout,'(3X, "GROUP MINIIMZATION info", L5)') 
-         ngroups = 0 
+         ngroups = 0; totdim = 0
+         !
          DO i = 1, 100
-            IF ( group_dimensions_(i) .gt. 0 ) ngroups = ngroups + 1
+            IF ( group_dimensions_(i) .gt. 0 ) THEN 
+                    ngroups = ngroups + 1
+                    totdim = totdim+group_dimensions_(i)
+            ENDIF
          ENDDO
+         !
          ALLOCATE ( group_dimensions(ngroups) )
          group_dimensions(1:ngroups) = group_dimensions_(1:ngroups)
+         !
          WRITE(stdout,'(5X, "# of different groups =", I5)') ngroups
          WRITE(stdout,'(5X, "# of bands (nbsp, nbspx)     =", 2I5)') nbsp, nbspx
+         WRITE(stdout,'(5X, "# bands in the groups        =", 2I5)') totdim
+         !
+         ! The sum of the group dimensions must match with the total number of electronic states
+         IF (totdim /= nbsp) CALL errore(subname, 'total group dimension inconsistent with the number of electronic states. &
+                 Check group_dimensions', totdim)
          !
          ALLOCATE ( istart_group(ngroups), iend_group(ngroups)  )
          istart_group(1) = 1
+         !
          DO i = 1, ngroups-1
+           !
            iend_group(i) = istart_group(i) + group_dimensions(i)-1
+           ! The groups must not mix different spin channels
+           IF (ispin(istart_group(i)) /=  ispin(iend_group(i))) &
+                   CALL errore(subname, 'Group mixes spin up and donw. Check group_dimensions', i)
            istart_group(i+1) = iend_group(i)+1
            WRITE(stdout,'(5X, "Group ID = ", I5, 3X, "Group DIM =", I5, 3X, "istart = ", I5, 3X, "iend = ", I5)') & 
                    i, group_dimensions(i), istart_group(i), iend_group(i) 
+           !
          ENDDO
          iend_group(ngroups) = istart_group(ngroups) + group_dimensions(ngroups)-1
+         !
+         ! The groups must not mix different spin channels
+         IF (ispin(istart_group(ngroups)) /=  ispin(iend_group(ngroups))) &
+                 CALL errore(subname, 'Group mixes spin up and donw. Check group_dimensions', ngroups)
          WRITE(stdout,'(5X, "Group ID = ", I5, 3X, "Group DIM =", I5, 3X, "istart = ", I5, 3X, "iend = ", I5)') & 
                  i, group_dimensions(ngroups), istart_group(ngroups), iend_group(ngroups) 
       ENDIF 
