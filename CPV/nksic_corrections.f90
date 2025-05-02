@@ -41,7 +41,8 @@ contains
       use mp, only: mp_sum
       use mp_global, only: intra_image_comm
       use control_flags, only: gamma_only, do_wf_cmplx
-      use control_flags, only: hartree_only_sic
+      use control_flags, only: hartree_only_sic, iprsta
+      USE io_global,              ONLY : stdout
       !
       implicit none
       integer, intent(in)  :: ispin, ibnd
@@ -51,7 +52,7 @@ contains
       !
       !character(19) :: subname='nksic_correction_pz'
       integer       :: ig
-      real(dp)      :: ehele, fact
+      real(dp)      :: ehele, fact, etmp
       !
       complex(dp), allocatable :: rhogaux(:, :)
       complex(dp), allocatable :: vhaux(:)
@@ -63,6 +64,7 @@ contains
       real(dp), allocatable :: haux(:, :, :)
       logical :: lgam
       real(dp) :: dexc_dummy(3, 3)
+      real(dp) :: Exc_ni
       !
       !==================
       ! main body
@@ -218,6 +220,18 @@ contains
       ! energy correction terms
       !
 !$$
+      ! NsC >>>
+      IF (iprsta.GT. 1) THEN 
+         etmp = sum(vxc(1:nnrx, ispin)*orb_rhor(1:nnrx))
+         Exc_ni=etxc
+         call mp_sum(Exc_ni, intra_image_comm)
+         call mp_sum(etmp, intra_image_comm)
+         WRITE(stdout , '(3x, "PZ corr const term, ibnd, ispin, sh[n_i], Exc[n_i], int{v_xc[n_i] n_i}", 2I5, 3F15.8)') & 
+                 ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2
+         WRITE(stdout,'(3X, "Delta PZ", 2F15.8)') -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+         ! NsC <<<
+      ENDIF
+      !
       pink = fact*(-etxc - ehele)
 !$$
 !      pink = fact * ( -ehele )
@@ -282,7 +296,8 @@ contains
       use funct, only: dft_is_gradient
       use mp, only: mp_sum
       use mp_global, only: intra_image_comm
-      use control_flags, only: gamma_only, do_wf_cmplx, hartree_only_sic
+      use control_flags, only: gamma_only, do_wf_cmplx, hartree_only_sic, iprsta
+      USE io_global,              ONLY : stdout
       !
       implicit none
       integer, intent(in)  :: ispin, ibnd
@@ -308,6 +323,7 @@ contains
       real(dp) :: icoeff
       real(dp) :: dexc_dummy(3, 3)
       logical :: is_empty_
+      real(dp) :: Exc_ni
       !
       !==================
       ! main body
@@ -408,12 +424,6 @@ contains
       !
       call mp_sum(shart, intra_image_comm)
       !
-      ! NsC >>>
-      etmp = 0.D0
-      etmp = sum(vsic_realspace(1:nnrx)*orb_rhor(1:nnrx))
-      etmp = etmp*fact*hartree_si/electronvolt_si
-      call mp_sum(etmp, intra_image_comm)
-      ! NsC <<<
       ! partial cleanup
       !
       deallocate (vtmp)
@@ -474,6 +484,17 @@ contains
          !
          pink = -f*(etxc_ + ehele)
          !
+         ! NsC >>>
+         IF (iprsta.GT. 1) THEN 
+            Exc_ni=etxc_
+            call mp_sum(Exc_ni, intra_image_comm)
+            call mp_sum(etmp, intra_image_comm)
+            WRITE(stdout , '(3x, "PZ corr const term, ibnd, ispin, sh[n_i], Exc[n_i], int{v_xc[n_i] n_i}", 2I5, 3F15.8)') & 
+                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2
+            WRITE(stdout,'(3X, "Delta PZ", 2F15.8)') -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+            ! NsC <<<
+         ENDIF
+         !
       ELSE
          !
          etmp = sum(vxc_(1:nnrx, ispin)*orb_rhor(1:nnrx))
@@ -484,6 +505,16 @@ contains
          call mp_sum(w2cst, intra_image_comm)
          !
          pink = -(etxc_ + ehele)
+         ! NsC >>>
+         IF (iprsta.GT.1) THEN 
+            Exc_ni=etxc_
+            call mp_sum(Exc_ni, intra_image_comm)
+            call mp_sum(etmp, intra_image_comm)
+            WRITE(stdout , '(3x, "PZ corr const term, ibnd, ispin, sh[n_i], Exc[n_i], int{v_xc[n_i] n_i}", 2I5, 3F15.8)') & 
+                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2
+            WRITE(stdout,'(3X, "Delta PZ", 2F15.8)') -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+            ! NsC <<<
+         ENDIF
          !
       END IF
       !
@@ -493,12 +524,6 @@ contains
       !
       vsic_realspace(1:nnrx) = vsic_realspace(1:nnrx) - vxc_(1:nnrx, ispin) + w2cst
       !
-      ! NsC >>>
-      etmp = 0.D0
-      etmp = sum(vsic_realspace(1:nnrx)*orb_rhor(1:nnrx))
-      etmp = etmp*fact*hartree_si/electronvolt_si
-      call mp_sum(etmp, intra_image_comm)
-      ! NsC <<<
       !
       pink = pink*nkscalfact
       vsic_realspace = vsic_realspace*nkscalfact
@@ -552,7 +577,8 @@ contains
       use mp, only: mp_sum
       use mp_global, only: intra_image_comm
       use electrons_base, only: nspin
-      use control_flags, only: gamma_only, do_wf_cmplx
+      use control_flags, only: gamma_only, do_wf_cmplx, iprsta
+      USE io_global,              ONLY : stdout
       !
       implicit none
       integer, intent(in)  :: ispin, ibnd
@@ -591,6 +617,7 @@ contains
       real(dp), allocatable :: vsic_realspace(:)
       real(dp), allocatable :: wxdsic_realspace(:, :)
       complex(dp), allocatable :: psi(:)
+      real(dp) :: Exc_N, Exc_Nm1
       !
       !==================
       ! main body
@@ -717,12 +744,6 @@ contains
          !
       END IF
       !
-      ! NsC >>>
-      etmp = 0.D0
-      etmp = sum(vsic_realspace(1:nnrx)*orb_rhor(1:nnrx))
-      etmp = etmp*fact*hartree_si/electronvolt_si
-      call mp_sum(etmp, intra_image_comm)
-      ! NsC <<<
       !
       deallocate (vtmp)
       deallocate (vcorr)
@@ -881,6 +902,17 @@ contains
          call mp_sum(w2cst, intra_image_comm)
          !
          pink = (1.0_dp - f)*etxc0 - etxc + f*etxcref + ehele
+         ! NsC >>>
+         IF (iprsta.GT.1) THEN 
+            Exc_N=etxc; Exc_Nm1=etxc0
+               call mp_sum(Exc_N, intra_image_comm)
+            call mp_sum(Exc_Nm1, intra_image_comm)
+            call mp_sum(etmp, intra_image_comm)
+           WRITE(stdout, '(3x, "KI corr const term, ibdn, ispin, sh[n_i], Exc[n], Exc[n-n_i], int{v_xc[n] n_i} ", 2I5, 4F14.8)') &
+                   ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2
+           WRITE(stdout,'(3X, "Delta KI", 2F15.8)')  -shart/hartree_si*2*electronvolt_si+(Exc_N-Exc_Nm1-etmp)*fact*2
+            ! NsC <<<
+         ENDIF
          !
       ELSE
          !
@@ -893,6 +925,17 @@ contains
          etmp = sum(vxc(1:nnrx, ispin)*rhoele(1:nnrx, ispin))
          !
          pink = etxcref - etxc0 - etmp + ehele
+         ! NsC >>>
+         IF(iprsta.GT.1) THEN
+            Exc_N=etxc; Exc_Nm1=etxcref
+            call mp_sum(etmp, intra_image_comm)
+            call mp_sum(Exc_N, intra_image_comm)
+            call mp_sum(Exc_Nm1, intra_image_comm)
+            WRITE(stdout, '(3x, "KI corr const term, ibnd, ispin, sh[n_i], Exc[n], Exc[n+n_i], int{v_xc[n] n_i} ", 2I5, 4F14.8)') &
+                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2
+            WRITE(stdout,'(3X, "Delta KI", 2F15.8)') shart/hartree_si*2*electronvolt_si+(-Exc_N+Exc_Nm1-etmp)*fact*2
+            ! NsC <<
+         ENDIF
          !
       END IF
       !
