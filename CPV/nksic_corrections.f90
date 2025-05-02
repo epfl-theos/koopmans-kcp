@@ -226,9 +226,9 @@ contains
          Exc_ni=etxc
          call mp_sum(Exc_ni, intra_image_comm)
          call mp_sum(etmp, intra_image_comm)
-         WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i EHxc[n_i]", 2i5, 4f20.12)') &
-                 ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2, &
-                 (shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+         WRITE(stdout , '(3x, "PZ corr const term, ibnd, ispin, sh[n_i], Exc[n_i], int{v_xc[n_i] n_i}", 2I5, 3F15.8)') & 
+                 ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2
+         WRITE(stdout,'(3X, "Delta PZ", 2F15.8)') -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
          ! NsC <<<
       ENDIF
       !
@@ -489,9 +489,9 @@ contains
             Exc_ni=etxc_
             call mp_sum(Exc_ni, intra_image_comm)
             call mp_sum(etmp, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i EHxc[n_i]", 2i5, 4f20.12)') &
-                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2, &
-                    (shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+            WRITE(stdout , '(3x, "PZ corr const term, ibnd, ispin, sh[n_i], Exc[n_i], int{v_xc[n_i] n_i}", 2I5, 3F15.8)') & 
+                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2
+            WRITE(stdout,'(3X, "Delta PZ", 2F15.8)') -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
             ! NsC <<<
          ENDIF
          !
@@ -510,9 +510,9 @@ contains
             Exc_ni=etxc_
             call mp_sum(Exc_ni, intra_image_comm)
             call mp_sum(etmp, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[n_i] \int vxc[n_i]*n_i EHxc[n_i]", 2i5, 4f20.12)') &
-                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2, &
-                    (shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
+            WRITE(stdout , '(3x, "PZ corr const term, ibnd, ispin, sh[n_i], Exc[n_i], int{v_xc[n_i] n_i}", 2I5, 3F15.8)') & 
+                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_ni*fact*2 ,etmp*fact*2
+            WRITE(stdout,'(3X, "Delta PZ", 2F15.8)') -(shart/hartree_si*2*electronvolt_si + Exc_ni*fact*2)
             ! NsC <<<
          ENDIF
          !
@@ -908,9 +908,9 @@ contains
                call mp_sum(Exc_N, intra_image_comm)
             call mp_sum(Exc_Nm1, intra_image_comm)
             call mp_sum(etmp, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[N] Exc[N-1] \int vxc[N]*n_i dKI_diag", 2i5, 5f20.12)') &
-                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2, &
-                   -shart/hartree_si*2*electronvolt_si+(Exc_N-Exc_Nm1-etmp)*fact*2
+           WRITE(stdout, '(3x, "KI corr const term, ibdn, ispin, sh[n_i], Exc[n], Exc[n-n_i], int{v_xc[n] n_i} ", 2I5, 4F14.8)') &
+                   ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2
+           WRITE(stdout,'(3X, "Delta KI", 2F15.8)')  -shart/hartree_si*2*electronvolt_si+(Exc_N-Exc_Nm1-etmp)*fact*2
             ! NsC <<<
          ENDIF
          !
@@ -931,9 +931,9 @@ contains
             call mp_sum(etmp, intra_image_comm)
             call mp_sum(Exc_N, intra_image_comm)
             call mp_sum(Exc_Nm1, intra_image_comm)
-            WRITE(stdout,'(3X, "ibnd ispin SH Exc[N] Exc[N+1] \int vxc[N]*n_i dKI_diag", 2i5, 5f20.12)') &
-                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2, &
-                    shart/hartree_si*2*electronvolt_si+(-Exc_N+Exc_Nm1-etmp)*fact*2
+            WRITE(stdout, '(3x, "KI corr const term, ibnd, ispin, sh[n_i], Exc[n], Exc[n+n_i], int{v_xc[n] n_i} ", 2I5, 4F14.8)') &
+                    ibnd, ispin, shart/hartree_si*2*electronvolt_si ,Exc_N*fact*2 ,Exc_Nm1*fact*2 ,etmp*fact*2
+            WRITE(stdout,'(3X, "Delta KI", 2F15.8)') shart/hartree_si*2*electronvolt_si+(-Exc_N+Exc_Nm1-etmp)*fact*2
             ! NsC <<
          ENDIF
          !
