@@ -88,16 +88,17 @@ compute_dipole.o #added by giovanni, from trunk version July 2012
 
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT := $(shell git rev-parse HEAD)
-$(shell rm -fr version.h)
 
-all : $(MODULES)
+all : version.h $(MODULES)
 
 clean :
 	- /bin/rm -f *.o *.d *.i *~ *.F90 *.mod *.L
+clean_version :
+	@rm -f version.h
 
 version.o : version.h
 
-version.h :
+version.h : clean_version
 	@echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
 		> version.h
 	@echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"$(GIT_BRANCH)"'" >> version.h
