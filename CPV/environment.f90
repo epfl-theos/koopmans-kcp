@@ -136,6 +136,7 @@
         SUBROUTINE opening_date_and_time( version_str )
 
           USE io_global, ONLY: stdout, meta_ionode
+          USE global_version
 
           CHARACTER(LEN=*), INTENT(IN) :: version_str
           CHARACTER(LEN=9)  :: cdate, ctime
@@ -150,6 +151,8 @@
           IF( meta_ionode ) THEN
             WRITE( stdout,3331) 
             WRITE( stdout,3332) version_str
+            WRITE( stdout,'(/,5X, "Git Branch: ", A)') TRIM(git_branch) 
+            WRITE( stdout,'(  5X, "Git Commit: ", A, /)') TRIM(git_commit) 
             WRITE( stdout,3331) 
             WRITE( stdout,3334) time_str
           END IF

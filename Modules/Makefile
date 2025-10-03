@@ -85,6 +85,11 @@ read_cards.o \
 read_oddalpha_file.o \
 compute_dipole.o #added by giovanni, from trunk version July 2012 
 
+
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+GIT_COMMIT := $(shell git rev-parse HEAD)
+$(shell rm -fr version.h)
+
 all : $(MODULES)
 
 clean :
@@ -93,7 +98,9 @@ clean :
 version.o : version.h
 
 version.h :
-	echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
+	@echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
 		> version.h
+	@echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"$(GIT_BRANCH)"'" >> version.h
+	@echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"$(GIT_COMMIT)"'" >> version.h
 
 include make.depend
