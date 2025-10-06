@@ -85,9 +85,7 @@ read_cards.o \
 read_oddalpha_file.o \
 compute_dipole.o #added by giovanni, from trunk version July 2012 
 
-
-GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-GIT_COMMIT := $(shell git rev-parse HEAD)
+IS_GIT_REPO := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 
 all : version.h $(MODULES)
 
@@ -101,7 +99,9 @@ version.o : version.h
 version.h : clean_version
 	@echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
 		> version.h
-	@echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"$(GIT_BRANCH)"'" >> version.h
-	@echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"$(GIT_COMMIT)"'" >> version.h
+	@if [ $(IS_GIT_REPO) = "true" ]; then \
+		echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"`git rev-parse --abbrev-ref HEAD`"'" >> version.h;\
+		echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"`git rev-parse HEAD`"'" >> version.h;\
+	fi
 
 include make.depend
