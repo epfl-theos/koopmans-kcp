@@ -162,8 +162,8 @@
         & ,5X,'using norm-conserving and ultrasoft Vanderbilt pseudopotentials',//&
         & ,5X,'Version: ',A60,/&
         & ,5X,'Authors: Alfredo Pasquarello, Kari Laasonen, Andrea Trave, Roberto Car,',/&
-        & ,5X,'  Paolo Giannozzi, Nicola Marzari, Carlo Cavazzoni, Guido Chiarotti,',/&
-        & ,5X,'  Sandro Scandolo, Paolo Focher, Gerardo Ballabio, and others',/)
+        & ,5X,'         Paolo Giannozzi, Nicola Marzari, Carlo Cavazzoni, Guido Chiarotti,',/&
+        & ,5X,'         Sandro Scandolo, Paolo Focher, Gerardo Ballabio, and others',/)
 
  3334     FORMAT(/,3X,A60,/)
           RETURN
