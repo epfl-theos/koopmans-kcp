@@ -102,6 +102,10 @@ version.h : clean_version
 	@if [ $(IS_GIT_REPO) = "true" ]; then \
 		echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"`git rev-parse --abbrev-ref HEAD`"'" >> version.h;\
 		echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"`git rev-parse HEAD`"'" >> version.h;\
+	else \
+		echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"not a git repo"'" >> version.h;\
+		echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"not a git repo"'" >> version.h;\
 	fi
+
 
 include make.depend
