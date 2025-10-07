@@ -99,7 +99,7 @@ version.o : version.h
 version.h : clean_version
 	@echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
 		> version.h
-	@if [ $(IS_GIT_REPO) = "true" ]; then \
+	@if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then \
 		echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"`git rev-parse --abbrev-ref HEAD`"'" >> version.h;\
 		echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"`git rev-parse HEAD`"'" >> version.h;\
 	else \
