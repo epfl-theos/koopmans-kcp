@@ -85,15 +85,27 @@ read_cards.o \
 read_oddalpha_file.o \
 compute_dipole.o #added by giovanni, from trunk version July 2012 
 
-all : $(MODULES)
+IS_GIT_REPO := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
+
+all : version.h $(MODULES)
 
 clean :
 	- /bin/rm -f *.o *.d *.i *~ *.F90 *.mod *.L
+clean_version :
+	@rm -f version.h
 
 version.o : version.h
 
-version.h :
-	echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
+version.h : clean_version
+	@echo "CHARACTER(LEN=70), PARAMETER :: version_date = '"`date`"'" \
 		> version.h
+	@if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then \
+		echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"`git rev-parse --abbrev-ref HEAD`"'" >> version.h;\
+		echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"`git rev-parse HEAD`"'" >> version.h;\
+	else \
+		echo "CHARACTER(LEN=70), PARAMETER :: git_branch = '"not a git repo"'" >> version.h;\
+		echo "CHARACTER(LEN=70), PARAMETER :: git_commit = '"not a git repo"'" >> version.h;\
+	fi
+
 
 include make.depend

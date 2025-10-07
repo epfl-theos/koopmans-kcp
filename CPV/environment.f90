@@ -136,6 +136,7 @@
         SUBROUTINE opening_date_and_time( version_str )
 
           USE io_global, ONLY: stdout, meta_ionode
+          USE global_version
 
           CHARACTER(LEN=*), INTENT(IN) :: version_str
           CHARACTER(LEN=9)  :: cdate, ctime
@@ -150,6 +151,8 @@
           IF( meta_ionode ) THEN
             WRITE( stdout,3331) 
             WRITE( stdout,3332) version_str
+            WRITE( stdout,'(  5X, "Git Branch: ", A)') TRIM(git_branch) 
+            WRITE( stdout,'(  5X, "Git Commit: ", A, /)') TRIM(git_commit) 
             WRITE( stdout,3331) 
             WRITE( stdout,3334) time_str
           END IF
@@ -157,10 +160,10 @@
  3331     FORMAT('=',78('-'),'=')
  3332     FORMAT( /, 5X,'CP: variable-cell Car-Parrinello molecular dynamics',/&
         & ,5X,'using norm-conserving and ultrasoft Vanderbilt pseudopotentials',//&
-        & ,5X,'Version: ',A60,/&
-        & ,5X,'Authors: Alfredo Pasquarello, Kari Laasonen, Andrea Trave, Roberto Car,',/&
-        & ,5X,'  Paolo Giannozzi, Nicola Marzari, Carlo Cavazzoni, Guido Chiarotti,',/&
-        & ,5X,'  Sandro Scandolo, Paolo Focher, Gerardo Ballabio, and others',/)
+        & ,5X,'Version:    ',A60,/&
+        & ,5X,'Authors:    Alfredo Pasquarello, Kari Laasonen, Andrea Trave, Roberto Car,',/&
+        & ,5X,'            Paolo Giannozzi, Nicola Marzari, Carlo Cavazzoni, Guido Chiarotti,',/&
+        & ,5X,'            Sandro Scandolo, Paolo Focher, Gerardo Ballabio, and others')
 
  3334     FORMAT(/,3X,A60,/)
           RETURN
