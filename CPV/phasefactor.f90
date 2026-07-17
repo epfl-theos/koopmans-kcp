@@ -181,8 +181,8 @@
             if (ieee_is_nan(ei1( ig1, isa )%im)) call errore(' strucf ',' ei1 is NaN ',ig)
             if (ieee_is_nan(ei2( ig2, isa )%re)) call errore(' strucf ',' ei2 is NaN ',ig)
             if (ieee_is_nan(ei2( ig2, isa )%im)) call errore(' strucf ',' ei2 is NaN ',ig)
-            if (ieee_is_nan(ei3( ig3, isa )%re)) call tracebackqq("ei3 is NaN")
-            if (ieee_is_nan(ei3( ig3, isa )%im)) call tracebackqq("ei3 is NaN")
+            if (ieee_is_nan(ei3( ig3, isa )%re)) call errore(' strucf ',' ei3 is NaN ',ig)
+            if (ieee_is_nan(ei3( ig3, isa )%im)) call errore(' strucf ',' ei3 is NaN ',ig)
             sfac( ig, is ) = sfac( ig, is ) + &
               ei1( ig1, isa ) * ei2( ig2, isa ) * ei3( ig3, isa )
             isa = isa + 1

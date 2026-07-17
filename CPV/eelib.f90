@@ -498,7 +498,6 @@
       !
       if(gstart.ne.1) then
         aux(1)=0.5d0*omega*vcorr_fft(1)*conjg(rho_fft(1))
-        write(*, *) 'aux(1)=', aux(1)
       end if
       !
       do ig=gstart,ngm

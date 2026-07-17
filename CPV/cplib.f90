@@ -3991,9 +3991,6 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
 
    DO is = 1, nsp
 !$omp do
-      write(*, *) 'rhotmp(1)=', rhotmp(1)
-      write(*, *) 'sfac(ig, is)=', sfac(1, is)
-      write(*, *) 'rhops(ig, is)=', rhops(1, is)
       DO ig = 1, ngs
          rhotmp(ig) = rhotmp(ig) + sfac(ig, is)*rhops(ig, is) !JUST-FOR-NOW
          !rhotmp(ig)=rhotmp(ig)
@@ -4072,12 +4069,8 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
    !
    if (do_comp) then
       !
-      write(*, *) 'vcorr_fft(1)=', vcorr_fft(1)
-      write(*, *) 'rhotmp(1)=', rhotmp(1)
       call calc_compensation_potential(vcorr_fft, rhotmp, .false.)
       !
-      write(*, *) 'vcorr_fft(1)=', vcorr_fft(1)
-      write(*, *) 'rhotmp(1)=', rhotmp(1)
       call calc_tcc_energy(ecomp, vcorr_fft, rhotmp, lgam)
       if (ieee_is_nan(ecomp)) call errore('vofrho','ecomp is NaN', 1)
       !
