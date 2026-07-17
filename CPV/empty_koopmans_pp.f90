@@ -177,8 +177,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
          !
          odd_alpha(:) =  0.0_DP
          !
-         call errore('empty_koopmans_pp', 'odd_alpha_routine not implemented; need to uncomment and update the following line', 1)
-         ! CALL odd_alpha_routine(c0_emp, n_emps, n_empx, lgam, .true.)
+         CALL odd_alpha_routine(n_empx, .true.)
          !
          odd_nkscalfact = .true. 
          !

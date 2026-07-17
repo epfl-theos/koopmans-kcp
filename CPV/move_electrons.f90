@@ -148,8 +148,7 @@ SUBROUTINE move_electrons_x( nfi, tfirst, tlast, b1, b2, b3, fion, &
          ! rotates the wavefunctions c0 and the overlaps bec
          ! (the occupation matrix f_ij becomes diagonal f_i)
          !
-         call errore('move_electrons_x', 'Implementation properly not updated for twin_matrix', 1)
-         ! CALL rotate( z0t, c0, bec, c0diag, becdiag, .false. )
+         CALL rotate_twin( z0t, c0, bec, c0diag, becdiag, .false. )
          !
          IF(non_ortho) THEN
             call compute_duals(c0diag,cdual,nbsp,1)

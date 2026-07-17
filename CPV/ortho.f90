@@ -752,8 +752,7 @@ SUBROUTINE ortho_m_twin(c0, cp, lambda, descla, ccc, nupdwn, iupdwn, nspin)
          ALLOCATE( bephi_c ( nkbx, nlax*nspin ) )
          CALL redist_row2col_real(nupdwn(1), bephi, bephi_c, nkbx, nlax, descla(1,1) ) !modified:giovanni
          IF( nspin == 2 ) THEN
-            call errore('ortho_cp_real','Removing this code due to compuiler complaints; to uncomment and fix',1)
-            ! CALL redist_row2col_cmplx( nupdwn(2), bephi(1:nkbx,nlax+1), bephi_c(:,nlax+1), nkbx, nlax, descla(1,2) ) !modified:giovanni
+            CALL redist_row2col_real( nupdwn(2), bephi(1,nlax+1), bephi_c(1,nlax+1), nkbx, nlax, descla(1,2) ) !modified:giovanni
          END IF
       END IF
       !

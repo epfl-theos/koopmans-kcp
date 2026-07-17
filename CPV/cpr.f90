@@ -745,8 +745,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
          ! recompute the proper density matrix, once z0t is given
          ! and store its diagonal components
          !
-         call errore('cprmain', 'Removed calcmt_twin call because an argument mismatch was causing compliation issues; needs uncommenting and fixing', 1)
-         ! call calcmt_twin(f, z0t, fmat0, .false.)
+         call calcmt_twin(f, z0t, fmat0, .false.)
          !
          DO iss = 1, nspin
             !

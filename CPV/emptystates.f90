@@ -468,8 +468,7 @@
                   !
                   odd_alpha(:) = 0.0_DP
                   !
-                  call errore('empty_cp_twin_x', 'The following call was outdated; code needs to be updated to run this', 1)
-                  ! CALL odd_alpha_routine(c0_emp, nbsp_emp, nbspx_emp, lgam, .true.)
+                  CALL odd_alpha_routine(nbspx_emp, .true.)
                   !
 
                ELSE
