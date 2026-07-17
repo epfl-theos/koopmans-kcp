@@ -3016,8 +3016,8 @@ SUBROUTINE drhov(irb,eigrb,rhovan,rhog,rhor,drhog,drhor)
                      !
                      !  add qv(r) to v(r), in real space on the dense grid
                      !
-                     CALL box2grid( irb(1,isa), 1, [qv%re, qv%im], v )
-                     IF (nfft.EQ.2) CALL box2grid(irb(1,isa+1),2,[qv%re, qv%im],v)
+                     CALL box2grid( irb(1,isa), 1, qv, v )
+                     IF (nfft.EQ.2) CALL box2grid(irb(1,isa+1),2,qv,v)
 
   15                 isa = isa + nfft
 !
@@ -3284,8 +3284,8 @@ SUBROUTINE rhov(irb,eigrb,rhovan,rhog,rhor, lgam) !added:giovanni lgam
                !
                !  add qv(r) to v(r), in real space on the dense grid
                !
-               CALL  box2grid(irb(1,isa),1,[qv%re, qv%im], v)
-               IF (nfft.EQ.2) CALL  box2grid(irb(1,isa+1),2,[qv%re, qv%im], v)
+               CALL  box2grid(irb(1,isa),1,qv, v)
+               IF (nfft.EQ.2) CALL  box2grid(irb(1,isa+1),2,qv, v)
   15           isa=isa+nfft
 !
             END DO

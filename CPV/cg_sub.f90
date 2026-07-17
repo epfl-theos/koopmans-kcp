@@ -1218,7 +1218,7 @@ subroutine runcg_uspp(nfi, tfirst, tlast, eigr, bec, irb, eigrb, &
       !
       call calbec(1, nsp, eigr, c0, bec)
       !
-      call caldbec(ngw, nhsa, nbsp, 1, nsp, [eigr%re, eigr%im], c0, dbec)
+      call caldbec(ngw, nhsa, nbsp, 1, nsp, eigr, c0, dbec)
       call rhoofr(nfi, c0(:, :), irb, eigrb, bec, rhovan, rhor, rhog, rhos, enl, denl, ekin, dekin6)
       !
       !calculates the potential

@@ -2559,13 +2559,13 @@ SUBROUTINE newd(vr, irb, eigrb, rhovan, fion)
 !
                DO iss = 1, nspin
                   deeq(iv, jv, isa, iss) = fac*                        &
-  &                    boxdotgrid(irb(1, isa), 1, [qv%re, qv%im], vr(1, iss))
+  &                    boxdotgrid(irb(1, isa), 1, qv, vr(1, iss))
                   IF (iv .NE. jv)                                      &
   &                    deeq(jv, iv, isa, iss) = deeq(iv, jv, isa, iss)
 !
                   IF (nfft .EQ. 2) THEN
                      deeq(iv, jv, isa + 1, iss) = fac*                    &
-  &                       boxdotgrid(irb(1, isa + 1), 2, [qv%re, qv%im], vr(1, iss))
+  &                       boxdotgrid(irb(1, isa + 1), 2, qv, vr(1, iss))
                      IF (iv .NE. jv)                                   &
   &                       deeq(jv, iv, isa + 1, iss) = deeq(iv, jv, isa + 1, iss)
                   END IF
@@ -2653,10 +2653,10 @@ SUBROUTINE newd(vr, irb, eigrb, rhovan, fion)
                CALL invfft('Box', qv, dfftb, isa)
 !
                fvan(ik, ia, is) =                                      &
-  &                    boxdotgrid(irb(1, isa), 1, [qv%re, qv%im], vr(1, iss))
+  &                    boxdotgrid(irb(1, isa), 1, qv, vr(1, iss))
 !
                IF (nfft .EQ. 2) fvan(ik, ia + 1, is) =                     &
-  &                    boxdotgrid(irb(1, isa + 1), 2, [qv%re, qv%im], vr(1, iss))
+  &                    boxdotgrid(irb(1, isa + 1), 2, qv, vr(1, iss))
             END DO
 20          isa = isa + nfft
          END DO
@@ -2715,8 +2715,8 @@ SUBROUTINE newd(vr, irb, eigrb, rhovan, fion)
                CALL invfft('Box', qv, dfftb, isa)
 !
                fvan(ik, ia, is) =                                      &
-  &                    boxdotgrid(irb(1, isa), isup, [qv%re, qv%im], vr(1, isup)) + &
-  &                    boxdotgrid(irb(1, isa), isdw, [qv%re, qv%im], vr(1, isdw))
+  &                    boxdotgrid(irb(1, isa), isup, qv, vr(1, isup)) + &
+  &                    boxdotgrid(irb(1, isa), isdw, qv, vr(1, isdw))
             END DO
 25          isa = isa + 1
          END DO
@@ -5136,7 +5136,7 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
             alpha = alpha + 1
             do ipol = 1, 3
                call dndtau_real(alpha_a, alpha_s, becwfc, spsi, bp, dbp, wdb,      &
-     &                    offset, [c%re, c%im], [wfc%re, wfc%im], [eigr%re, eigr%im], [betae%re, betae%im], proj, ipol, dns)
+     &                    offset, c, wfc, eigr, betae, proj, ipol, dns)
                iat = 0
                do is = 1, nsp
                   do ia = 1, na(is)
@@ -5410,7 +5410,7 @@ subroutine new_ns_twin(c, eigr, betae, hpsi, hpsi_con, forceh, lgam)
             do ipol = 1, 3
                IF (lgam) THEN
                   call dndtau_real(alpha_a, alpha_s, becwfc%rvec, spsi, bp%rvec, dbp%rvec, wdb%rvec,      &
-     &                    offset, [c%re, c%im], [wfc%re, wfc%im], [eigr%re, eigr%im], [betae%re, betae%im], proj%rvec, ipol, dns)
+     &                    offset, c, wfc, eigr, betae, proj%rvec, ipol, dns)
                ELSE
                   call dndtau_cmplx(alpha_a, alpha_s, becwfc%cvec, spsi, bp%cvec, dbp%cvec, wdb%cvec,      &
      &                    offset, c, wfc, eigr, betae, proj%cvec, ipol, dns_c)
@@ -5698,9 +5698,9 @@ subroutine dndtau_real(alpha_a, alpha_s, becwfc, spsi, bp, dbp, wdb,         &
 ! input
    integer, intent(in) :: offset(nsp, nat)
    integer, intent(in) :: alpha_a, alpha_s, ipol
-   real(DP), intent(in) :: wfc(2, ngw, n_atomic_wfc), c(2, ngw, nx),  &
-  &                            eigr(2, ngw, nat), betae(2, ngw, nhsa),    &
-  &                            becwfc(nhsa, n_atomic_wfc),            &
+   complex(DP), intent(in) :: wfc(ngw, n_atomic_wfc), c(ngw, nx),  &
+  &                            eigr(ngw, nat), betae(ngw, nhsa)
+   real(DP), intent(in) :: becwfc(nhsa, n_atomic_wfc),            &
   &                            bp(nhsa, n), dbp(nhsa, n, 3), wdb(nhsa, n_atomic_wfc, 3)
    real(DP), intent(in) :: proj(n, n_atomic_wfc)
    complex(DP), intent(in) :: spsi(ngw, n)
@@ -5717,7 +5717,7 @@ subroutine dndtau_real(alpha_a, alpha_s, becwfc, spsi, bp, dbp, wdb,         &
 !
    dns(:, :, :, :) = 0.d0
 !
-   call dprojdtau_real(cmplx(c(1,:,:), c(2,:,:), kind=dp), wfc, becwfc, spsi, bp, dbp, wdb, cmplx(eigr(1,:,:), eigr(2,:,:), kind=dp), alpha_a,     &
+   call dprojdtau_real(c, wfc, becwfc, spsi, bp, dbp, wdb, eigr, alpha_a,     &
 &                   alpha_s, ipol, offset(alpha_s, alpha_a), dproj)
 !
 ! compute the derivative of occupation numbers (the quantities dn(m1,m2))
@@ -5862,11 +5862,11 @@ subroutine dprojdtau_real(c, wfc, becwfc, spsi, bp, dbp, wdb, eigr, alpha_a,    
 ! input: the component of displacement
 ! input: the offset of the wfcs of the atom "alpha_a,alpha_s"
    complex(DP), intent(in) :: spsi(ngw, n),                     &
- &                  c(ngw, nx), eigr(ngw, nat)
+ &                  c(ngw, nx), eigr(ngw, nat),                 &
+ &                  wfc(ngw, n_atomic_wfc)
 ! input: the atomic wfc
 ! input: S|evc>
    real(DP), intent(in) ::becwfc(nhsa, n_atomic_wfc),            &
- &                            wfc(2, ngw, n_atomic_wfc),              &
  &            bp(nhsa, n), dbp(nhsa, n, 3), wdb(nhsa, n_atomic_wfc, 3)
    real(DP), intent(out) :: dproj(n, n_atomic_wfc)
 ! output: the derivative of the projection
@@ -5904,8 +5904,8 @@ subroutine dprojdtau_real(c, wfc, becwfc, spsi, bp, dbp, wdb, eigr, alpha_a,    
          gk(ig) = gx(ipol, ig)*tpiba
 !
          do m1 = 1, ldim
-            dwfc(ig, m1) = cmplx(gk(ig)*wfc(2, ig, offset + m1),      &
-&                  -1*gk(ig)*wfc(1, ig, offset + m1))
+            dwfc(ig, m1) = cmplx(gk(ig)*aimag(wfc(ig, offset + m1)),      &
+&                  -1*gk(ig)*dble(wfc(ig, offset + m1)))
          end do
       end do
 !
