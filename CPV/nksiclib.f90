@@ -2774,6 +2774,7 @@
 ! ... prints out esic by varying the wavefunction along a search direction.
 !     (Ultrasoft pseudopotential case is not implemented.)
 !
+      use control_flags, only: gamma_only, do_wf_cmplx
       use kinds, only: dp
       use grid_dimensions, only: nnrx
       use gvecp, only: ngm
@@ -2783,6 +2784,7 @@
                                 iupdwn, nupdwn
       use uspp, only: nkb
       use wavefunctions_module, only: c0
+      use twin_types, only: twin_matrix, init_twin, allocate_twin
       !
       implicit none
       !
@@ -2796,7 +2798,7 @@
       ! local variables
       !
       real(dp) :: esic
-      real(dp)                 :: bec1(nkb, nbsp)
+      type(twin_matrix)        :: bec1
       real(dp)                 :: Omat1tot(nbspx, nbspx)
       complex(dp)              :: vsic1(ngm, nbspx)
       complex(dp), allocatable :: Umat(:, :)
@@ -2810,6 +2812,7 @@
       real(dp), allocatable    :: vsicah(:, :)
       real(dp)                 :: vsicah2sum, deigrms
       integer                  :: nfile
+      logical                  :: lgam
 
       !
       ! variables for test calculations - along gradient line direction
@@ -2819,6 +2822,10 @@
       ! main body
       !
       CALL start_clock('nk_rot_test')
+
+      lgam = gamma_only .and. .not. do_wf_cmplx
+      call init_twin(bec1, lgam)
+      call allocate_twin(bec1, nkb, nbsp, lgam)
 
       Umatbig(:, :) = (0.d0, 0.d0)
       Heigbig(:) = 0.d0
@@ -2831,7 +2838,7 @@
          allocate (vsicah(nupdwn(isp), nupdwn(isp)))
 
          call nksic_getvsicah(isp, vsicah, vsicah2sum)
-         call nksic_getHeigU(isp, vsicah, Heig, Umat)
+         call nksic_getHeigU(isp, cmplx(vsicah, kind=dp), Heig, Umat)
 
          Umatbig(iupdwn(isp):iupdwn(isp) - 1 + nupdwn(isp), iupdwn(isp):iupdwn(isp) - 1 + nupdwn(isp)) = Umat(:, :)
          Heigbig(iupdwn(isp):iupdwn(isp) - 1 + nupdwn(isp)) = Heig(:)
@@ -2863,8 +2870,8 @@
             dalpha = 0.d0
          end if
 
-         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, Omat1tot, &
-                               bec1, vsic1, pink1, esic)
+         call nksic_getOmattot(dalpha, Heigbig, Umatbig, c0, wfc_ctmp, cmplx(Omat1tot, kind=dp), &
+                               bec1, vsic1, pink1, esic, lgam)
 
          if (ionode) write (nfile, '(5F24.13,2I10)') dalpha/3.141592*dmaxeig, dmaxeig, etot, esic, deigrms, ninner, nouter
 
@@ -4252,10 +4259,10 @@
       !
       ! in/out vars
       !
-      integer, intent(in)  :: isp
-      real(dp)     :: Heig(nupdwn(isp))
-      complex(dp)  :: Umat(nupdwn(isp), nupdwn(isp))
-      complex(dp)     :: vsicah(nupdwn(isp), nupdwn(isp))
+      integer, intent(in)      :: isp
+      real(dp), intent(out)    :: Heig(nupdwn(isp))
+      complex(dp), intent(out) :: Umat(nupdwn(isp), nupdwn(isp))
+      complex(dp), intent(in)  :: vsicah(nupdwn(isp), nupdwn(isp))
 
       !
       ! local variables
@@ -4325,7 +4332,7 @@
       overlap(:, :) = 0.d0
 
       do nbnd1 = 1, nbspx
-         CALL c2psi(psi1, nnrx, c0(:, nbnd1), (0.d0, 0.d0), ngw, 1)
+         CALL c2psi(psi1, nnrx, c0(:, nbnd1), [(0.d0, 0.d0)], ngw, 1)
          CALL invfft('Dense', psi1, dfftp)
 
          ! Converting vsic potential of nbnd1 to real space
@@ -4338,7 +4345,7 @@
                vsicahtmp = -vsicah(nbnd2, nbnd1)
                overlaptmp = overlap(nbnd2, nbnd1)
             else
-               CALL c2psi(psi2, nnrx, c0(:, nbnd2), (0.d0, 0.d0), ngw, 1)
+               CALL c2psi(psi2, nnrx, c0(:, nbnd2), [(0.d0, 0.d0)], ngw, 1)
                CALL invfft('Dense', psi2, dfftp)
 
                ! Converting vsic potential of nbnd2 to real space
@@ -4443,7 +4450,7 @@
          !
          j1 = iupdwn(isp) - 1 + nbnd1
          !
-         CALL c2psi(psi1, nnrx, c0(:, j1), (0.d0, 0.d0), ngw, 1)
+         CALL c2psi(psi1, nnrx, c0(:, j1), [(0.d0, 0.d0)], ngw, 1)
          CALL invfft('Dense', psi1, dfftp)
          !
          ! Converting vsic potential of j1 to real space
@@ -4455,7 +4462,7 @@
             !
             j2 = iupdwn(isp) - 1 + nbnd2
             !
-            CALL c2psi(psi2, nnrx, c0(:, j2), (0.0d0, 0.0d0), ngw, 1)
+            CALL c2psi(psi2, nnrx, c0(:, j2), [(0.0d0, 0.0d0)], ngw, 1)
             CALL invfft('Dense', psi2, dfftp)
             !
             ! Converting vsic potential of j2 to real space
@@ -5391,7 +5398,7 @@
          !
          do isp = 1, nspin
             !
-            call nksic_get_taukin_pz(1.d0, nspin, isp, rhor(1, isp), tauw, 1)
+            call nksic_get_taukin_pz(1.d0, nspin, isp, rhor(1, isp), tauw, 1, 1)
             !
          end do
          !
@@ -5448,7 +5455,7 @@
             IF (do_pz_renorm) THEN
                !
                call nksic_get_taukin_pz(focc, nspin, ispin(i), orb_rhor(:, jj), &
-                                        taukin, ibnd)
+                                        taukin, ibnd, 1)
                !
             END IF
             !

@@ -221,6 +221,7 @@ CONTAINS
   SUBROUTINE dforce_efield (bec,i,cm,c2,c3,rhos)
     USE uspp, ONLY: betae => vkb, deeq
     USE gvecw, ONLY: ngw
+    use cp_interfaces, only: dforceb
     IMPLICIT NONE
     complex(DP), intent(out) :: c2(:), c3(:)
     complex(DP), intent(in) :: cm(:,:)
@@ -228,11 +229,11 @@ CONTAINS
     real(DP) :: bec(:,:)
     integer :: i
     integer :: ig
-    call dforceb (cm, i, betae, ipolp, bec ,ctabin(1,1,ipolp), gqq, gqqm, qmat, deeq, df)
+    call dforceb (cm, i, betae, ipolp, bec ,ctabin(:,:,ipolp), gqq, gqqm, qmat, deeq, df)
     do ig=1,ngw
       c2(ig)=c2(ig)+evalue*df(ig)
     enddo
-    call dforceb (cm, i+1, betae, ipolp, bec ,ctabin(1,1,ipolp), gqq, gqqm, qmat, deeq, df)
+    call dforceb (cm, i+1, betae, ipolp, bec ,ctabin(:,:,ipolp), gqq, gqqm, qmat, deeq, df)
     do ig=1,ngw
       c3(ig)=c3(ig)+evalue*df(ig)
     enddo
@@ -358,6 +359,7 @@ CONTAINS
   SUBROUTINE dforce_efield2 (bec,i,cm,c2,c3,rhos)
     USE uspp, ONLY: betae => vkb, deeq
     USE gvecw, ONLY: ngw
+    use cp_interfaces, only: dforceb
     IMPLICIT NONE
     complex(DP), intent(out) :: c2(:), c3(:)
     complex(DP), intent(in) :: cm(:,:)
@@ -365,11 +367,11 @@ CONTAINS
     real(DP) :: bec(:,:)
     integer :: i
     integer :: ig
-    call dforceb (cm, i, betae, ipolp2, bec ,ctabin2(1,1,ipolp2), gqq2, gqqm2, qmat2, deeq, df)
+    call dforceb (cm, i, betae, ipolp2, bec ,ctabin2(:,:,ipolp2), gqq2, gqqm2, qmat2, deeq, df)
     do ig=1,ngw
       c2(ig)=c2(ig)+evalue2*df(ig)
     enddo
-    call dforceb (cm, i+1, betae, ipolp2, bec ,ctabin2(1,1,ipolp2), gqq2, gqqm2, qmat2, deeq, df)
+    call dforceb (cm, i+1, betae, ipolp2, bec ,ctabin2(:,:,ipolp2), gqq2, gqqm2, qmat2, deeq, df)
     do ig=1,ngw
       c3(ig)=c3(ig)+evalue2*df(ig)
     enddo

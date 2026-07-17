@@ -810,6 +810,8 @@ MODULE wannier_subroutines
     CALL start_clock('wf_close_opt')
     !
     ! ... More Wannier Function Options
+    bec_tmp(:,:) = 0.0
+    bec_tmp(:,:) = bec%rvec(:,:)
     !
     IF ( calwf == 4 ) THEN
        !
@@ -817,8 +819,6 @@ MODULE wannier_subroutines
        !
        ! ... workaround for wf to work (we do not have win type in there...)  
        !
-       bec_tmp(:,:) = 0.0
-       bec_tmp(:,:) = bec%rvec(:,:)
        ! 
        !CALL wf( calwf, c0, bec, eigrb, irb, &
        !         b1, b2, b3, utwf, what1, wfc, jwf, ibrav )
@@ -854,12 +854,14 @@ MODULE wannier_subroutines
        !
        jwf = 1
        !
-       CALL wf( calwf, c0, bec, eigrb, irb, &
+       CALL wf( calwf, c0, bec_tmp, eigrb, irb, &
                 b1, b2, b3, utwf, what1, wfc, jwf, ibrav )
        !
        CALL stop_clock('wf_close_opt')
        !
     END IF
+    !
+    bec%rvec(:,:) = bec_tmp(:,:)
     !
     RETURN
     !

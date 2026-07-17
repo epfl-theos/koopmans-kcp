@@ -244,12 +244,12 @@
                   IF (.not.lambda(iss)%iscmplx) THEN
                      !
                      write(6,*) "sizlambda", size(lambda(iss)%rvec,1), lambda(iss)%xdim
-                     CALL qe_pdsyevd( .false., n, desc(1,iss), lambda(iss)%rvec(1,1), SIZE(lambda(iss)%rvec,1), wr )
+                     CALL qe_pdsyevd( .false., n, desc(:,iss), lambda(iss)%rvec, SIZE(lambda(iss)%rvec,1), wr )
                      !
                   ELSE
                      !
                      write(6,*) "sizlambda", size(lambda(iss)%cvec,1), lambda(iss)%xdim
-                     CALL qe_pzheevd( .false., n, desc(1,iss), lambda(iss)%cvec(1,1), SIZE(lambda(iss)%cvec,1), wr )
+                     CALL qe_pzheevd( .false., n, desc(:,iss), lambda(iss)%cvec, SIZE(lambda(iss)%cvec,1), wr )
                      !
                   ENDIF
                   !   
@@ -463,12 +463,12 @@
                   IF (.not.lambda(iss)%iscmplx) THEN
                      !
                      write(6,*) "sizlambda", size(lambda(iss)%rvec,1), lambda(iss)%xdim
-                     CALL qe_pdsyevd( .false., n, desc(1,iss), lambda(iss)%rvec(1,1), SIZE(lambda(iss)%rvec,1), wr )
+                     CALL qe_pdsyevd( .false., n, desc(:,iss), lambda(iss)%rvec, SIZE(lambda(iss)%rvec,1), wr )
                      ! 
                   ELSE
                      ! 
                      write(6,*) "sizlambda", size(lambda(iss)%cvec,1), lambda(iss)%xdim
-                     CALL qe_pzheevd( .false., n, desc(1,iss), lambda(iss)%cvec(1,1), SIZE(lambda(iss)%cvec,1), wr )
+                     CALL qe_pzheevd( .false., n, desc(:,iss), lambda(iss)%cvec, SIZE(lambda(iss)%cvec,1), wr )
                      !
                   ENDIF
                   !

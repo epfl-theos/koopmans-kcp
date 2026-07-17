@@ -1610,13 +1610,13 @@ SUBROUTINE caldbec( ngw, nkb, n, nspmn, nspmx, eigr, c, dbec ) !warning:giovanni
   integer,      intent(in)  :: ngw, nkb, n
   integer,      intent(in)  :: nspmn, nspmx
   complex(DP), intent(in)  :: c(ngw,n)
-  real(DP),    intent(in)  :: eigr(2,ngw,nat)
+  complex(DP), intent(in)  :: eigr(ngw,nat)
   real(DP),    intent(out) :: dbec( nkb, 2*nlam, 3, 3 )
   !
   real(DP), allocatable :: wrk2(:,:,:), dwrk(:,:)
   !
   integer   :: ig, is, iv, ia, l, ixr, ixi, inl, i, j, ii, isa, nanh, iw, iss, nr, ir, istart, nss
-  real(DP) :: signre, signim, arg
+  real(DP) :: signre, signim, arg, eigr_ri(2)
   !
   !
   !
@@ -1661,14 +1661,16 @@ SUBROUTINE caldbec( ngw, nkb, n, nspmn, nspmx, eigr, c, dbec ) !warning:giovanni
               do ia=1,na(is)
                  if (gstart == 2) then
                     !     q = 0   component (with weight 1.0)
-                    wrk2(1,1,ia)= signre*dbeta(1,iv,is,i,j)*eigr(ixr,1,ia+isa)
-                    wrk2(2,1,ia)= signim*dbeta(1,iv,is,i,j)*eigr(ixi,1,ia+isa)
+                    eigr_ri = [ DBLE(eigr(1,ia+isa)), AIMAG(eigr(1,ia+isa)) ]
+                    wrk2(1,1,ia)= signre*dbeta(1,iv,is,i,j)*eigr_ri(ixr)
+                    wrk2(2,1,ia)= signim*dbeta(1,iv,is,i,j)*eigr_ri(ixi)
                  end if
                  !     q > 0   components (with weight 2.0)
                  do ig = gstart, ngw
                     arg = 2.0d0*dbeta(ig,iv,is,i,j)
-                    wrk2(1,ig,ia) = signre*arg*eigr(ixr,ig,ia+isa)
-                    wrk2(2,ig,ia) = signim*arg*eigr(ixi,ig,ia+isa)
+                    eigr_ri = [ DBLE(eigr(ig,ia+isa)), AIMAG(eigr(ig,ia+isa)) ]
+                    wrk2(1,ig,ia) = signre*arg*eigr_ri(ixr)
+                    wrk2(2,ig,ia) = signim*arg*eigr_ri(ixi)
                  end do
               end do
               inl=(iv-1)*na(is)+1
