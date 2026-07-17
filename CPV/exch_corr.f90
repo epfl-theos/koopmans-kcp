@@ -258,7 +258,7 @@
         IF( SIZE( vpot, 1 ) /= nnrx ) &
            CALL errore(" exch_corr_energy ", " inconsistent size for vpot ", 1 )
         !
-        CALL exch_corr_wrapper( nnrx, nspin, grho(1:nnrx,3,:), rhoetr(1:nnrx,:), exc, vpot(1:nnrx,:), v2xc(1:nnrx,:,:) )
+        CALL exch_corr_wrapper( nnrx, nspin, grho(1:nnrx,:,:), rhoetr(1:nnrx,:), exc, vpot(1:nnrx,:), v2xc(1:nnrx,:,:) )
         !
         IF( dft_is_gradient() ) THEN
           ! ... vpot additional term for gradient correction

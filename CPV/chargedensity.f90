@@ -2082,7 +2082,7 @@
          !
          !     calculation of nocentro gulliver modenan-local energy
          !
-         call errore('rhoofr','nnl not implemented properly; commenting for now',0)
+         call errore('rhoofr','nnl not implemented properly; commenting for now',1)
          ! enl = ennl( rhovan, bec )
          call mp_sum(enl)
          !
