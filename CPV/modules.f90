@@ -641,6 +641,8 @@ contains
   allocate(gcorr2d_fft(nnrx))
   allocate(vcorr(nnrx))
   allocate(vcorr_fft(ngm))
+  vcorr = 0.0_dp
+  vcorr_fft = (0.0_dp, 0.0_dp)
   end subroutine
   !
   subroutine deallocate_ee
