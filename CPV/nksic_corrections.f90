@@ -84,6 +84,7 @@ contains
       allocate (rhogaux(ngm, 2))
       allocate (vtmp(ngm))
       allocate (vcorr(ngm))
+      vcorr = (0.0_dp, 0.0_dp)
       allocate (vhaux(nnrx))
       allocate(vsic_realspace(nnrx), source=0.0_dp)
       !
@@ -343,6 +344,7 @@ contains
       allocate (rhogaux(ngm, 2))
       allocate (vtmp(ngm))
       allocate (vcorr(ngm))
+      vcorr = (0.0_dp, 0.0_dp)
       allocate (vxc_(nnrx, 2))
       allocate (vhaux(nnrx))
       !
@@ -626,6 +628,7 @@ contains
       allocate (vtmp(ngm))
       allocate (orb_rhog(ngm, 1))
       allocate (vcorr(ngm))
+      vcorr = (0.0_dp, 0.0_dp)
       allocate (vhaux(nnrx))
       !
       rhoele = 0.0d0

@@ -62,6 +62,7 @@
       ALLOCATE ( vhaux(nnrx) )
       ALLOCATE ( vtmp(ngm) )
       ALLOCATE ( vcorr(ngm) )
+      vcorr = (0.0_DP, 0.0_DP)
       !
       IF (okvan) call errore('perturbing_pot','USPP not implemented yet',1)
       !
