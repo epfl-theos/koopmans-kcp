@@ -77,7 +77,12 @@ MODULES = \
 ../Modules/wrappers.o \
 ../Modules/compute_dipole.o
 
-all: merge_evc.x bin2xml.x
+all: merge_evc.x bin2xml.x n2npm1.x
+
+
+n2npm1.x: n2npm1.o 
+	$(LD) $(LDFLAGS) -o $@ n2npm1.o ../iotk/src/libiotk.a 
+		- ( cd ../bin ; ln -fs ../PP/$@ . )
 
 bin2xml.x: bin2xml.o
 	$(LD) $(LDFLAGS) -o $@ bin2xml.o $(MODULES) $(LIBOBJS) $(LIBS)
