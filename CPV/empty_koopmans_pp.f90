@@ -13,7 +13,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
       !
       ! Performs the minimization on the empty state subspace keeping the
       ! occupied manyfold fixed. A proper orthogonalization of the two
-      ! manyfolds is performed. 
+      ! manifolds is performed. 
       !
       USE kinds,                ONLY : DP
       USE constants,            ONLY : autoev
@@ -177,7 +177,7 @@ SUBROUTINE empty_koopmans_pp (n_emps_evc, ispin_evc, evc)
          !
          odd_alpha(:) =  0.0_DP
          !
-         CALL odd_alpha_routine(c0_emp, n_emps, n_empx, lgam, .true.)
+         CALL odd_alpha_routine(n_empx, .true.)
          !
          odd_nkscalfact = .true. 
          !

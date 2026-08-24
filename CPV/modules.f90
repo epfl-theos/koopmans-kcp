@@ -473,7 +473,7 @@ contains
       else if ( do_nki .or. do_nkipz) then
           allocate( wxdsic(nnrx,2) )
       endif
-      if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz) then
+      if ( do_nk .or. do_nkpz .or. do_nki .or. do_nkipz .or. do_pz) then
           allocate(wtot(ngm,2))
           wtot=0.0_dp
       endif

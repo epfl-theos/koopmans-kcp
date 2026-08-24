@@ -15,3 +15,5 @@ make.sys
 *.i90
 bin/
 .vscode
+*__genmod.f90
+*.optrpt

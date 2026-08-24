@@ -852,6 +852,7 @@ CONTAINS
       INTEGER  :: QI, KL, INFO
       INTEGER  :: IL(N+1)
       INTEGER  :: OW(N+1)
+      INTEGER  :: MBUF(1)
       REAL(DP) :: WORK(2*N)
       REAL(DP) :: dvar(6)
 
@@ -1020,7 +1021,9 @@ CONTAINS
       END IF
 
       CALL BCAST_REAL( e( l1 ), nm1-l1+1, 0, comm )
-      CALL BCAST_INTEGER( m, 1, 0, comm )
+      MBUF(1) = M
+      CALL BCAST_INTEGER( MBUF, 1, 0, comm )
+      M = MBUF(1)
 
 
       L = L1
@@ -1076,7 +1079,9 @@ CONTAINS
 
          END IF
 
-         CALL BCAST_INTEGER( m, 1, 0, comm )
+         MBUF(1) = M
+         CALL BCAST_INTEGER( MBUF, 1, 0, comm )
+         M = MBUF(1)
 
          IF( M.LT.LEND )  E( M ) = RZERO
          P = D( L )
@@ -1212,7 +1217,9 @@ CONTAINS
 
          END IF
 
-         CALL BCAST_INTEGER( m, 1, 0, comm )
+         MBUF(1) = M
+         CALL BCAST_INTEGER( MBUF, 1, 0, comm )
+         M = MBUF(1)
 
          IF( M.GT.LEND )   E( M-1 ) = RZERO
          P = D( L )

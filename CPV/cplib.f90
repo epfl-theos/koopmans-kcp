@@ -105,7 +105,7 @@ END SUBROUTINE atomic_wfc
 !
 
 !-----------------------------------------------------------------------
-FUNCTION n_atom_wfc_x()
+FUNCTION n_atom_wfc()
 !----------------------------------------------------------------------------
    !
    ! ... Find max number of bands needed
@@ -116,10 +116,10 @@ FUNCTION n_atom_wfc_x()
    !
    IMPLICIT NONE
    !
-   INTEGER  :: n_atom_wfc_x
+   INTEGER  :: n_atom_wfc
    INTEGER  :: is, n
    !
-   n_atom_wfc_x = 0
+   n_atom_wfc = 0
    !
    DO is = 1, nsp
       !
@@ -127,7 +127,7 @@ FUNCTION n_atom_wfc_x()
          !
          IF (upf(is)%oc(n) >= 0.D0) THEN
             !
-            n_atom_wfc_x = n_atom_wfc_x + na(is)*(2*upf(is)%lchi(n) + 1)
+            n_atom_wfc = n_atom_wfc + na(is)*(2*upf(is)%lchi(n) + 1)
             !
          END IF
          !
@@ -3812,6 +3812,7 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
                        vcorr_fft, ecomp
    USE efield_mod, ONLY: do_efield, efieldpotg
    USE io_global, ONLY: stdout
+   use ieee_arithmetic, only: ieee_is_nan
    IMPLICIT NONE
 !
    LOGICAL :: tlast, tfirst
@@ -4071,6 +4072,7 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
       call calc_compensation_potential(vcorr_fft, rhotmp, .false.)
       !
       call calc_tcc_energy(ecomp, vcorr_fft, rhotmp, lgam)
+      if (ieee_is_nan(ecomp)) call errore('vofrho','ecomp is NaN', 1)
       !
       aux = 0.0_dp
 
@@ -4149,6 +4151,7 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
       call writetofile(rhotot, nnr, 'rhototx.dat', dfftp, 'ax')
       !
       vtemp = vtemp + vcorr_fft
+      if (ieee_is_nan(ecomp)) call errore('vofrho','ecomp is NaN', 1)
       eh = eh + ecomp/omega
       !
    end if
@@ -4377,13 +4380,26 @@ SUBROUTINE vofrho(nfi, rhor, rhog, rhos, rhoc, tfirst, tlast,           &
 
    ebac = 0.0d0
    !
+   if (ieee_is_nan(eh)) call errore('vofrho','eh is NaN', 1)
+   if (ieee_is_nan(esr)) call errore('vofrho','esr is NaN', 1)
+   if (ieee_is_nan(eself)) call errore('vofrho','eself is NaN', 1)
+   if (ieee_is_nan(omega)) call errore('vofrho','omega is NaN', 1)
    eht = eh*omega + esr - eself
+
    !
    eextfor = 0.0_DP
    IF (textfor) eextfor = compute_eextfor(tau0)
    !
    !     etot is the total energy ; ekin, enl were calculated in rhoofr
    !
+   if (ieee_is_nan(ekin)) call errore('vofrho','ekin is NaN', 1)
+   if (ieee_is_nan(eht)) call errore('vofrho','eht is NaN', 1)
+   if (ieee_is_nan(epseu)) call errore('vofrho','epseu is NaN', 1)
+   if (ieee_is_nan(enl)) call errore('vofrho','enl is NaN', 1)
+   if (ieee_is_nan(exc)) call errore('vofrho','exc is NaN', 1)
+   if (ieee_is_nan(ebac)) call errore('vofrho','ebac is NaN', 1)
+   if (ieee_is_nan(e_hubbard)) call errore('vofrho','e_hubbard is NaN', 1)
+   if (ieee_is_nan(eextfor)) call errore('vofrho','eextfor is NaN', 1)
    etot = ekin + eht + epseu + enl + exc + ebac + e_hubbard + eextfor
    !
    !     extra contributions
@@ -4949,7 +4965,7 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
    ! It also calculates the contribution of the Hubbard Hamiltonian to the
    ! electronic potential and to the forces acting on ions.
    !
-   use control_flags, ONLY: tfor, tprnfor
+   use control_flags, ONLY: tfor, tprnfor, gamma_only, do_wf_cmplx
    use kinds, ONLY: DP
    use ions_base, only: na, nat, nsp
    use gvecw, only: ngw
@@ -4980,6 +4996,9 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
    integer iv, jv, inl, jnl, alpha, alpha_a, alpha_s, ipol
    integer, allocatable ::  offset(:, :)
    complex(DP) :: tempsi
+   logical :: lgam
+
+   lgam = gamma_only .and. .not. do_wf_cmplx
    allocate (wfc(ngw, n_atomic_wfc))
    allocate (ftemp1(ldmx))
    allocate (ftemp2(ldmx))
@@ -5100,8 +5119,9 @@ subroutine new_ns_real(c, eigr, betae, hpsi, hpsi_con, forceh)
 !
       call nlsm1(n, 1, nsp, eigr, c, bp)
       call s_wfc(n, bp, betae, c, spsi)
-      call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp)
-      call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb)
+      call errore('new_ns_real', 'not implemented for twin_matrix; to use this uncomment following code and fix', 1)
+      ! call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp, lgam)
+      ! call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb, lgam)
 !
       alpha = 0
       do alpha_s = 1, nsp
@@ -5373,8 +5393,8 @@ subroutine new_ns_twin(c, eigr, betae, hpsi, hpsi_con, forceh, lgam)
 !
       call nlsm1(n, 1, nsp, eigr, c, bp, 1, lgam)
       call s_wfc(n, bp, betae, c, spsi, lgam)
-      call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp)
-      call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb)
+      call nlsm2_repl(ngw, nhsa, n, eigr, c, dbp, lgam)
+      call nlsm2_repl(ngw, nhsa, n_atomic_wfc, eigr, wfc, wdb, lgam)
 !
       alpha = 0
       do alpha_s = 1, nsp
@@ -5671,9 +5691,9 @@ subroutine dndtau_real(alpha_a, alpha_s, becwfc, spsi, bp, dbp, wdb,         &
 ! input
    integer, intent(in) :: offset(nsp, nat)
    integer, intent(in) :: alpha_a, alpha_s, ipol
-   real(DP), intent(in) :: wfc(2, ngw, n_atomic_wfc), c(2, ngw, nx),  &
-  &                            eigr(2, ngw, nat), betae(2, ngw, nhsa),    &
-  &                            becwfc(nhsa, n_atomic_wfc),            &
+   complex(DP), intent(in) :: wfc(ngw, n_atomic_wfc), c(ngw, nx),  &
+  &                            eigr(ngw, nat), betae(ngw, nhsa)
+   real(DP), intent(in) :: becwfc(nhsa, n_atomic_wfc),            &
   &                            bp(nhsa, n), dbp(nhsa, n, 3), wdb(nhsa, n_atomic_wfc, 3)
    real(DP), intent(in) :: proj(n, n_atomic_wfc)
    complex(DP), intent(in) :: spsi(ngw, n)
@@ -5835,11 +5855,11 @@ subroutine dprojdtau_real(c, wfc, becwfc, spsi, bp, dbp, wdb, eigr, alpha_a,    
 ! input: the component of displacement
 ! input: the offset of the wfcs of the atom "alpha_a,alpha_s"
    complex(DP), intent(in) :: spsi(ngw, n),                     &
- &                  c(ngw, nx), eigr(ngw, nat)
+ &                  c(ngw, nx), eigr(ngw, nat),                 &
+ &                  wfc(ngw, n_atomic_wfc)
 ! input: the atomic wfc
 ! input: S|evc>
    real(DP), intent(in) ::becwfc(nhsa, n_atomic_wfc),            &
- &                            wfc(2, ngw, n_atomic_wfc),              &
  &            bp(nhsa, n), dbp(nhsa, n, 3), wdb(nhsa, n_atomic_wfc, 3)
    real(DP), intent(out) :: dproj(n, n_atomic_wfc)
 ! output: the derivative of the projection
@@ -5877,8 +5897,8 @@ subroutine dprojdtau_real(c, wfc, becwfc, spsi, bp, dbp, wdb, eigr, alpha_a,    
          gk(ig) = gx(ipol, ig)*tpiba
 !
          do m1 = 1, ldim
-            dwfc(ig, m1) = cmplx(gk(ig)*wfc(2, ig, offset + m1),      &
-&                  -1*gk(ig)*wfc(1, ig, offset + m1))
+            dwfc(ig, m1) = cmplx(gk(ig)*aimag(wfc(ig, offset + m1)),      &
+&                  -1*gk(ig)*dble(wfc(ig, offset + m1)))
          end do
       end do
 !

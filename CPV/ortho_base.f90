@@ -1109,7 +1109,7 @@ END SUBROUTINE diagonalize_parallel_cmplx
       ! ...   Transform x0 back to the original basis
 
       CALL sqr_zmm_cannon( 'N', 'N', nss, c_one, u, ldx, xloc, nx0, c_zero, tmp1, ldx, desc)
-      CALL sqr_mm_cannon( 'N', 'C', nss, c_one, u, ldx, tmp1, ldx, c_zero, xloc, nx0, desc)
+      CALL sqr_zmm_cannon( 'N', 'C', nss, c_one, u, ldx, tmp1, ldx, c_zero, xloc, nx0, desc)
 
       DEALLOCATE( tmp1, tmp2, x1, sigd )
 

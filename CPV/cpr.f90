@@ -523,7 +523,7 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
          !
          IF (fixed_state) THEN
             !
-            CALL gram_swap(vkb, bec, nkb, cm, ngw, nbsp)
+            CALL gram_swap(vkb, bec, nkb, cm, ngw, nbsp, fixed_band)
             !
          ELSE
             !
@@ -735,7 +735,8 @@ SUBROUTINE cprmain(tau_out, fion_out, etot_out)
             call copy_twin(psihpsi(iss), lambda(iss))
          END DO
          !
-         CALL inner_loop_diag(c0, bec%rvec, psihpsi, z0t, e0)
+         call errore('cprmain', 'Disabling for now due to mismatching (psihpsi) errors; need to fix and uncomment', 1)
+         ! CALL inner_loop_diag(c0, bec%rvec, psihpsi, z0t, e0)
          !
          CALL efermi(nelt, nbsp, degauss, 1, f, ef, e0, entropy, ismear, nspin)
          !

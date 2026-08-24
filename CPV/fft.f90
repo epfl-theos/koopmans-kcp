@@ -487,7 +487,7 @@
 
       IMPLICIT NONE
       INTEGER, INTENT(in):: nfft, irb(3)
-      REAL(8), INTENT(in):: qv(2,nnrb)
+      COMPLEX(8), INTENT(in):: qv(nnrb)
       COMPLEX(8), INTENT(inout):: vr(nnr)
 !
       INTEGER ir1, ir2, ir3, ir, ibig1, ibig2, ibig3, ibig
@@ -516,7 +516,11 @@
      &                 CALL errore('box2grid','ibig1 wrong',ibig1)
                   ibig=ibig1+(ibig2-1)*nr1x+(ibig3-1)*nr1x*nr2x
                   ir=ir1+(ir2-1)*nr1bx+(ir3-1)*nr1bx*nr2bx
-                  vr(ibig) = vr(ibig)+qv(nfft,ir)
+                  IF(nfft.EQ.1) THEN
+                     vr(ibig) = vr(ibig)+DBLE(qv(ir))
+                  ELSE
+                     vr(ibig) = vr(ibig)+AIMAG(qv(ir))
+                  END IF
                END DO
             END DO
          END IF
@@ -598,7 +602,8 @@
       USE mp_global, ONLY: me_image
       IMPLICIT NONE
       INTEGER, INTENT(in):: nfft, irb(3)
-      REAL(8), INTENT(in):: qv(2,nnrb), vr(nnr)
+      COMPLEX(8), INTENT(in):: qv(nnrb)
+      REAL(8), INTENT(in):: vr(nnr)
 !
       INTEGER ir1, ir2, ir3, ir, ibig1, ibig2, ibig3, ibig
       INTEGER me
@@ -623,7 +628,11 @@
                   ibig1=1+MOD(ibig1-1,nr1)
                   ibig=ibig1 + (ibig2-1)*nr1x + (ibig3-1)*nr1x*nr2x
                   ir  =ir1 + (ir2-1)*nr1bx + (ir3-1)*nr1bx*nr2bx
-                  boxdotgrid = boxdotgrid + qv(nfft,ir)*vr(ibig)
+                  IF(nfft.EQ.1) THEN
+                     boxdotgrid = boxdotgrid + DBLE(qv(ir))*vr(ibig)
+                  ELSE
+                     boxdotgrid = boxdotgrid + AIMAG(qv(ir))*vr(ibig)
+                  END IF
                END DO
             END DO
          ENDIF

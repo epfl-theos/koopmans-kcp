@@ -174,12 +174,12 @@ CONTAINS
             iupdwn_emp(1) = 1
          END IF
 
-         IF (nupdwn_emp(1) < 0) CALL errore(' electrons ', ' cannot have a negative number of empty bands')
+         IF (nupdwn_emp(1) < 0) CALL errore(' electrons ', ' cannot have a negative number of empty bands', 1)
 
          IF (nspin == 2) THEN
             nupdwn_emp(2) = nbnd - nupdwn(2)
             iupdwn_emp(2) = nupdwn_emp(1) + 1
-            IF (nupdwn_emp(2) < 0) CALL errore(' electrons ', ' cannot have a negative number of empty bands')
+            IF (nupdwn_emp(2) < 0) CALL errore(' electrons ', ' cannot have a negative number of empty bands', 1)
          END IF
          !
       ELSE

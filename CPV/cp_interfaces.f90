@@ -17,6 +17,7 @@
    PUBLIC :: bessel2
    PUBLIC :: bessel3
    PUBLIC :: dforce
+   PUBLIC :: dforceb
 
    PUBLIC :: pseudopotential_indexes
    PUBLIC :: compute_dvan
@@ -109,8 +110,6 @@
    PUBLIC :: force_loc
    PUBLIC :: self_vofhar
    PUBLIC :: localisation
-   !
-   PUBLIC :: n_atom_wfc
    !
    PUBLIC :: set_eitot
    PUBLIC :: set_evtot
@@ -1785,12 +1784,6 @@
    END INTERFACE
 
 
-   INTERFACE n_atom_wfc
-      FUNCTION n_atom_wfc_x()
-         INTEGER n_atom_wfc_x
-      END FUNCTION
-   END INTERFACE
-
    INTERFACE set_eitot
       SUBROUTINE set_eitot_x( eitot )
          USE kinds, ONLY: DP
@@ -2095,6 +2088,49 @@
         LOGICAL, INTENT(IN) :: emp
       END SUBROUTINE
    END INTERFACE
+   interface dforceb
+      subroutine dforceb_array(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
+         use electrons_base, only : nx => nbspx, n => nbsp, nspin
+         use gvecw, only : ngw
+         use ions_base, only : nat, nas => nax, na, nsp
+         use kinds, only: dp
+         use twin_types, only: twin_matrix
+         use uspp, only : nhsa => nkb
+         use uspp_param, only : nhm
+
+         complex(dp) :: c0(ngw, n)
+         complex(dp) :: betae(ngw,nhsa)
+         complex(dp) :: df(ngw)
+         complex(dp) :: gqq(nhm,nhm,nas,nsp)
+         complex(dp) :: gqqm(nhm,nhm,nas,nsp)
+         complex(dp) :: qmat(nx,nx)
+         real(dp)    :: dq2(nat,nhm,nhm,nspin)
+         real(dp)    :: gmes
+         integer     :: i, ipol, ctabin(ngw,2)
+         real(dp)    :: bec0(nhsa, n)
+      end subroutine
+
+      subroutine dforceb_twin(c0, i, betae, ipol, bec0, ctabin, gqq, gqqm, qmat, dq2, df)
+         use electrons_base, only : nx => nbspx, n => nbsp, nspin
+         use gvecw, only : ngw
+         use ions_base, only : nat, nas => nax, na, nsp
+         use kinds, only: dp
+         use twin_types, only: twin_matrix
+         use uspp, only : nhsa => nkb
+         use uspp_param, only : nhm
+
+         complex(dp) :: c0(ngw, n)
+         complex(dp) :: betae(ngw,nhsa)
+         complex(dp) :: df(ngw)
+         complex(dp) :: gqq(nhm,nhm,nas,nsp)
+         complex(dp) :: gqqm(nhm,nhm,nas,nsp)
+         complex(dp) :: qmat(nx,nx)
+         real(dp)    :: dq2(nat,nhm,nhm,nspin)
+         real(dp)    :: gmes
+         integer     :: i, ipol, ctabin(ngw,2)
+         type(twin_matrix), intent(in) :: bec0
+      end subroutine
+   end interface
 
 !=----------------------------------------------------------------------------=!
    END MODULE
